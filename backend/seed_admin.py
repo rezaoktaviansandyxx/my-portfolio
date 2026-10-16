@@ -6,7 +6,7 @@ from app.models.user import User
 
 db = SessionLocal()
 username = os.getenv("ADMIN_USERNAME", "admin")
-email = os.getenv("ADMIN_EMAIL", "admin@example.com")
+email = os.getenv("ADMIN_EMAIL", "admin@test.com")
 password = os.getenv("ADMIN_PASSWORD", "changeme123")
 existing = (
     db.query(User)
