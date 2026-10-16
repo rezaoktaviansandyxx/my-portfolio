@@ -1,5 +1,6 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 from app.core.database import get_db
+from app.core.security import get_password_hash
 from app.models.experience import Experience
 from app.models.message import Message
 from app.models.project import Project, ProjectMedia
@@ -20,9 +21,18 @@ from app.schemas.project import (
 )
 from app.schemas.skill import SkillCreate, SkillResponse, SkillUpdate
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/admin", tags=["Admin - CRUD"])
+
+
+class AdminUserCreate(BaseModel):
+  username: str = Field(pattern=r"^[a-z0-9_]{3,30}$")
+  email: EmailStr
+  password: str = Field(min_length=8, max_length=128)
+  full_name: str = Field(min_length=2, max_length=100)
+  role: Literal["admin", "user"] = "user"
 
 
 @router.post(
@@ -303,6 +313,38 @@ def delete_message(
 
 
 # --- Moderasi users ---
+@router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def admin_create_user(
+    payload: AdminUserCreate,
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+  existing = (
+      db.query(User)
+      .filter((User.username == payload.username) | (User.email == payload.email))
+      .first()
+  )
+  if existing:
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Username atau email sudah dipakai",
+    )
+  u = User(
+      username=payload.username,
+      email=payload.email,
+      hashed_password=get_password_hash(payload.password),
+      full_name=payload.full_name,
+      role=payload.role,
+      profile_slug=None,
+      is_published=False,
+      is_active=True,
+  )
+  db.add(u)
+  db.commit()
+  db.refresh(u)
+  return u
+
+
 @router.get("/users", response_model=List[UserResponse])
 def admin_list_users(
     db: Session = Depends(get_db), _=Depends(get_current_admin)
