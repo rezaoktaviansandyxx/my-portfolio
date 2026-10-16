@@ -32,12 +32,14 @@ def upgrade() -> None:
     for tbl in ["projects", "skills", "experiences"]:
       conn.execute(sa.text(f"UPDATE {tbl} SET owner_id=:i WHERE owner_id IS NULL").bindparams(i=admin_id))
     conn.execute(sa.text("UPDATE messages SET recipient_id=:i WHERE recipient_id IS NULL").bindparams(i=admin_id))
-  # not-null + index + unique per owner
+  # not-null + index + fk + unique per owner
   for tbl in ["projects", "skills", "experiences"]:
     op.alter_column(tbl, "owner_id", nullable=False)
     op.create_index(f"ix_{tbl}_owner", tbl, ["owner_id"])
+    op.create_foreign_key(f"fk_{tbl}_owner", tbl, "users", ["owner_id"], ["id"], ondelete="CASCADE")
   op.alter_column("messages", "recipient_id", nullable=False)
   op.create_index("ix_messages_recipient", "messages", ["recipient_id"])
+  op.create_foreign_key("fk_messages_recipient", "messages", "users", ["recipient_id"], ["id"], ondelete="CASCADE")
   # spec: slug unik per owner, bukan global — lepas unique global lama dari 001
   if conn.dialect.name == "postgresql":
     op.execute("ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_slug_key")
@@ -46,9 +48,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
   op.drop_constraint("uq_project_owner_slug", "projects", type_="unique")
+  op.drop_constraint("fk_messages_recipient", "messages", type_="foreignkey")
   op.drop_index("ix_messages_recipient", "messages")
   op.drop_column("messages", "recipient_id")
   for tbl in ["projects", "skills", "experiences"]:
+    op.drop_constraint(f"fk_{tbl}_owner", tbl, type_="foreignkey")
     op.drop_index(f"ix_{tbl}_owner", tbl)
     op.drop_column(tbl, "owner_id")
   op.drop_index("ix_users_profile_slug", "users")
