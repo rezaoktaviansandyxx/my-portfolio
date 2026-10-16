@@ -60,7 +60,32 @@ class AuthService {
     return UserModel.fromJson(res.data as Map<String, dynamic>);
   }
 
+  Future<void> register({
+    required String username,
+    required String email,
+    required String password,
+    String? fullName,
+  }) async {
+    await _dio.post(
+      '/auth/register',
+      data: {
+        'username': username.trim(),
+        'email': email.trim(),
+        'password': password,
+        if (fullName != null && fullName.trim().isNotEmpty)
+          'full_name': fullName.trim(),
+      },
+    );
+  }
+
   Future<void> logout() async {
+    // Panggil API resmi agar server bisa mencatat/audit logout.
+    // JWT stateless: kalaupun gagal/offline, token lokal tetap dihapus.
+    try {
+      await _dio.post('/auth/logout');
+    } catch (_) {
+      // best-effort, abaikan agar logout lokal selalu berhasil
+    }
     _applyToken(null);
     await _persist(null);
   }

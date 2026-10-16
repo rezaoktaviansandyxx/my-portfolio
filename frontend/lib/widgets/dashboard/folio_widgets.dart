@@ -256,40 +256,53 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final narrow = MediaQuery.sizeOf(context).width < 640;
+    final action = ElevatedButton.icon(
+      onPressed: onAction,
+      icon: const Icon(Icons.add, size: 18),
+      label: Text(actionLabel),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: FolioColors.primary,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(
+            horizontal: 18, vertical: 14),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14)),
+      ),
+    );
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(eyebrow,
+            style: const TextStyle(
+                color: FolioColors.primary,
+                fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(title,
+            style: TextStyle(
+                fontSize: narrow ? 24 : 30,
+                fontWeight: FontWeight.w800)),
+        const SizedBox(height: 4),
+        Text(subtitle,
+            style: const TextStyle(color: FolioColors.muted)),
+      ],
+    );
+    if (narrow) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          text,
+          const SizedBox(height: 12),
+          action,
+        ],
+      );
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(eyebrow,
-                  style: const TextStyle(
-                      color: FolioColors.primary,
-                      fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              Text(subtitle,
-                  style: const TextStyle(color: FolioColors.muted)),
-            ],
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: onAction,
-          icon: const Icon(Icons.add, size: 18),
-          label: Text(actionLabel),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: FolioColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(
-                horizontal: 18, vertical: 14),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
-          ),
-        ),
+        Expanded(child: text),
+        const SizedBox(width: 16),
+        action,
       ],
     );
   }

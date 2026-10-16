@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
 
 class SidebarItem {
@@ -9,14 +11,12 @@ class SidebarItem {
   const SidebarItem({required this.icon, required this.label, this.badge});
 }
 
-class DashboardShell extends StatelessWidget {
+class DashboardShell extends ConsumerWidget {
   final int selectedIndex;
   final List<SidebarItem> menu;
   final ValueChanged<int> onSelect;
   final String displayName;
   final String displayRole;
-  final bool isAdminView;
-  final bool isAdmin;
   final int unreadCount;
   final Widget child;
   final String searchHint;
@@ -28,8 +28,6 @@ class DashboardShell extends StatelessWidget {
     required this.onSelect,
     required this.displayName,
     required this.displayRole,
-    required this.isAdminView,
-    required this.isAdmin,
     required this.unreadCount,
     required this.child,
     this.searchHint = 'Cari proyek, pengguna...',
@@ -42,20 +40,33 @@ class DashboardShell extends StatelessWidget {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  Future<void> _doLogout(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(authNotifierProvider.notifier).logout();
+    } finally {
+      if (context.mounted) {
+        context.go('/login');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logout berhasil')),
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final wide = MediaQuery.sizeOf(context).width >= 960;
     return Scaffold(
       backgroundColor: FolioColors.bg,
-      drawer: wide ? null : Drawer(child: _sidebar(context, true)),
+      drawer: wide ? null : Drawer(child: _sidebar(context, ref, true)),
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (wide) SizedBox(width: 272, child: _sidebar(context, false)),
+          if (wide) SizedBox(width: 272, child: _sidebar(context, ref, false)),
           Expanded(
             child: Column(
               children: [
-                _topbar(context, wide),
+                _topbar(context, ref, wide),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
@@ -75,7 +86,7 @@ class DashboardShell extends StatelessWidget {
     );
   }
 
-  Widget _sidebar(BuildContext context, bool inDrawer) {
+  Widget _sidebar(BuildContext context, WidgetRef ref, bool inDrawer) {
     return Container(
       color: Colors.white,
       child: SafeArea(
@@ -151,6 +162,11 @@ class DashboardShell extends StatelessWidget {
                           ? FolioColors.primarySoft
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
+                      border: active
+                          ? Border.all(
+                              color: FolioColors.primary
+                                  .withValues(alpha: 0.25))
+                          : null,
                     ),
                     child: Row(
                       children: [
@@ -196,7 +212,23 @@ class DashboardShell extends StatelessWidget {
             }),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: OutlinedButton.icon(
+                onPressed: () => _doLogout(context, ref),
+                icon: const Icon(Icons.logout_rounded, size: 18),
+                label: const Text('Logout'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFB42318),
+                  side: const BorderSide(color: Color(0xFFF0C6C2)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -204,21 +236,17 @@ class DashboardShell extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: FolioColors.border),
                 ),
-                child: Column(
+                child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Bangun personal brand',
+                    Text('Bangun personal brand',
                         style: TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    const Text(
+                    SizedBox(height: 4),
+                    Text(
                       'Lihat panduan membuat portofolio yang menarik.',
                       style:
                           TextStyle(color: FolioColors.muted, fontSize: 12),
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                        onPressed: () {},
-                        child: const Text('Baca panduan →')),
                   ],
                 ),
               ),
@@ -229,16 +257,22 @@ class DashboardShell extends StatelessWidget {
     );
   }
 
-  Widget _topbar(BuildContext context, bool wide) {
+  Widget _topbar(BuildContext context, WidgetRef ref, bool wide) {
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border:
+            Border(bottom: BorderSide(color: FolioColors.border)),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           if (!wide)
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+            Builder(
+              builder: (ctx) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+              ),
             ),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 340),
@@ -250,28 +284,11 @@ class DashboardShell extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          if (isAdmin)
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F2F7),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _seg(context, 'Admin', isAdminView,
-                      () => context.go('/admin')),
-                  _seg(context, 'User', !isAdminView,
-                      () => context.go('/dashboard')),
-                ],
-              ),
-            ),
-          const SizedBox(width: 12),
           Stack(
             children: [
               IconButton(
                 onPressed: () {},
+                tooltip: 'Notifikasi',
                 icon: const Icon(Icons.notifications_outlined),
                 style: IconButton.styleFrom(
                   backgroundColor: const Color(0xFFF6F7FB),
@@ -304,6 +321,7 @@ class DashboardShell extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
                   radius: 16,
@@ -319,9 +337,15 @@ class DashboardShell extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(displayName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 13)),
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(maxWidth: 140),
+                      child: Text(displayName,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13)),
+                    ),
                     Text(displayRole,
                         style: const TextStyle(
                             color: FolioColors.muted, fontSize: 11)),
@@ -329,47 +353,35 @@ class DashboardShell extends StatelessWidget {
                 ),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+                  tooltip: 'Akun',
                   onSelected: (v) {
                     if (v == 'public') context.go('/');
-                    if (v == 'logout') context.go('/login');
+                    if (v == 'logout') _doLogout(context, ref);
                   },
                   itemBuilder: (_) => const [
                     PopupMenuItem(
-                        value: 'public', child: Text('Lihat situs publik')),
-                    PopupMenuItem(value: 'logout', child: Text('Logout')),
+                        value: 'public',
+                        child: Row(children: [
+                          Icon(Icons.public, size: 16),
+                          SizedBox(width: 8),
+                          Text('Lihat situs publik')
+                        ])),
+                    PopupMenuItem(
+                        value: 'logout',
+                        child: Row(children: [
+                          Icon(Icons.logout,
+                              size: 16, color: Color(0xFFB42318)),
+                          SizedBox(width: 8),
+                          Text('Logout',
+                              style: TextStyle(
+                                  color: Color(0xFFB42318)))
+                        ])),
                   ],
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _seg(
-      BuildContext context, String label, bool active, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-        decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(9),
-          boxShadow: active
-              ? [
-                  const BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 8,
-                      offset: Offset(0, 2))
-                ]
-              : null,
-        ),
-        child: Text(label,
-            style: TextStyle(
-                color: active ? FolioColors.primary : FolioColors.muted,
-                fontWeight: FontWeight.w700)),
       ),
     );
   }

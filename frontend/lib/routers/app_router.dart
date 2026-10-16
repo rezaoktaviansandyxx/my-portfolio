@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/widgets/profile_screen.dart';
 import 'package:frontend/widgets/login_screen.dart';
+import 'package:frontend/widgets/auth/register_screen.dart';
 import 'package:frontend/widgets/user/user_dashboard.dart';
 import 'package:frontend/widgets/admin/admin_dashboard.dart';
 
@@ -42,7 +43,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (!isAdmin) return '/dashboard';
         return null;
       }
-      if (path == '/login') {
+      if (path == '/login' || path == '/register') {
         if (!isAuth) return null;
         return isAdmin ? '/admin' : '/dashboard';
       }
@@ -63,6 +64,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (_, __) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (_, __) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/dashboard',

@@ -6,6 +6,7 @@ import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/dashboard/dashboard_shell.dart';
 import 'package:frontend/widgets/dashboard/folio_widgets.dart';
+import 'package:frontend/widgets/dashboard/skeleton.dart';
 
 class UserDashboard extends ConsumerStatefulWidget {
   const UserDashboard({super.key});
@@ -25,10 +26,12 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
     final messages = ref.watch(myMessagesProvider);
 
     final name =
-        profile.asData?.value.fullName ?? auth.user?.username ?? 'Alya';
+        profile.asData?.value.fullName ?? auth.user?.username ?? 'Kreator';
     final first = name.trim().split(RegExp(r'\s+')).first;
-    final msgCount = messages.asData?.value.length ?? 3;
-    final projCount = projects.asData?.value.length ?? 6;
+    final msgCount = messages.asData?.value.length ?? 0;
+    final projCount = projects.asData?.value.length ?? 0;
+    final loadingBadges =
+        profile.isLoading || projects.isLoading || messages.isLoading;
 
     return DashboardShell(
       selectedIndex: tab,
@@ -39,20 +42,18 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         SidebarItem(
             icon: Icons.work_outline,
             label: 'Proyek',
-            badge: '$projCount'),
+            badge: loadingBadges ? '…' : '$projCount'),
         const SidebarItem(
             icon: Icons.school_outlined, label: 'Skill & Pengalaman'),
         SidebarItem(
             icon: Icons.mail_outline,
             label: 'Pesan',
-            badge: '$msgCount'),
+            badge: loadingBadges ? '…' : '$msgCount'),
       ],
       displayName: profile.asData?.value.fullName ??
           auth.user?.username ??
-          'Alya Rahmani',
-      displayRole: profile.asData?.value.headline ?? 'Product Designer',
-      isAdminView: false,
-      isAdmin: auth.isAdmin,
+          'Kreator',
+      displayRole: profile.asData?.value.headline ?? 'Kreator Portofolio',
       unreadCount: msgCount,
       child: RefreshIndicator(
         onRefresh: () async {
@@ -208,7 +209,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             );
           },
           loading: () =>
-              const LinearProgressIndicator(),
+              const ProfileCardSkeleton(),
           error: (e, _) => Text('Profil: $e'),
         ),
       ),
@@ -226,60 +227,17 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       child: projects.when(
         data: (list) {
           if (list.isEmpty) {
-            return Column(
-              children: _demoProjects().map((p) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: FolioColors.border),
-                      borderRadius: BorderRadius.circular(14)),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                            color: const Color(0xFFEEF0F6),
-                            borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.image_outlined,
-                            color: FolioColors.muted),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Text(p['t']!,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700)),
-                            Text(p['c']!,
-                                style: const TextStyle(
-                                    color: FolioColors.muted,
-                                    fontSize: 12)),
-                            const SizedBox(height: 4),
-                            Text(
-                                '👁 ${p['v']}   •   ${p['a']}',
-                                style: const TextStyle(
-                                    color: FolioColors.muted,
-                                    fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right,
-                          color: FolioColors.muted),
-                    ],
-                  ),
-                );
-              }).toList(),
+            return const EmptyCard(
+              title: 'Belum ada proyek',
+              subtitle:
+                  'Tambahkan proyek pertamamu agar portofolio tampil menarik.',
             );
           }
           return Column(
             children: list.take(3).map((p) {
               final cat = (p.skills?.isNotEmpty == true)
                   ? p.skills!.first.name
-                  : (p.status ?? 'Product Design');
+                  : (p.status ?? 'Proyek');
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(12),
@@ -326,38 +284,28 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             }).toList(),
           );
         },
-        loading: () => const LinearProgressIndicator(),
-        error: (e, _) => Text('Error: $e'),
+        loading: () => const ListSkeleton(rows: 3),
+        error: (e, _) => ErrorCard(
+          message: 'Gagal memuat proyek: $e',
+          onRetry: () => ref.invalidate(myProjectsProvider),
+        ),
       ),
     );
   }
 
-  List<Map<String, String>> _demoProjects() => const [
-        {
-          't': 'Nara Banking App',
-          'c': 'UI/UX Design',
-          'v': '1.2K',
-          'a': '2 hari lalu'
-        },
-        {
-          't': 'Kelana Travel',
-          'c': 'Web Design',
-          'v': '864',
-          'a': '5 hari lalu'
-        },
-        {
-          't': 'Luma Design System',
-          'c': 'Product Design',
-          'v': '642',
-          'a': '1 minggu lalu'
-        },
-      ];
-
   Widget _miniStats() {
     final projects = ref.watch(myProjectsProvider);
     final messages = ref.watch(myMessagesProvider);
-    final pc = projects.asData?.value.length ?? 6;
-    final mc = messages.asData?.value.length ?? 24;
+    if (projects.isLoading || messages.isLoading) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: SkeletonBox(width: double.infinity, height: 48),
+        ),
+      );
+    }
+    final pc = projects.asData?.value.length ?? 0;
+    final mc = messages.asData?.value.length ?? 0;
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 18),
@@ -395,6 +343,10 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
     final exps = ref.watch(myExperiencesProvider);
     int pct = 20;
     final u = profile.asData?.value;
+    final isLoading = profile.isLoading ||
+        skills.isLoading ||
+        projects.isLoading ||
+        exps.isLoading;
     if (u != null) {
       if ((u.fullName ?? '').isNotEmpty) pct += 15;
       if ((u.headline ?? '').isNotEmpty) pct += 10;
@@ -404,8 +356,10 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       if ((exps.asData?.value.length ?? 0) > 0) pct += 10;
       if ((u.resumeUrl ?? '').isNotEmpty) pct += 5;
       pct = pct.clamp(5, 100);
+    } else if (isLoading) {
+      return const ListSkeleton(rows: 4);
     } else {
-      pct = 85;
+      pct = 20;
     }
     return SectionCard(
       title: 'Kelengkapan profil',
@@ -427,9 +381,9 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           const SizedBox(height: 12),
           _check('Informasi profil', (u?.fullName ?? '').isNotEmpty),
           _check('Proyek pilihan',
-              (projects.asData?.value.length ?? 1) > 0),
+              (projects.asData?.value.length ?? 0) > 0),
           _check('Skill & keahlian',
-              (skills.asData?.value.length ?? 1) > 0),
+              (skills.asData?.value.length ?? 0) > 0),
           _check('Pengalaman kerja',
               (exps.asData?.value.length ?? 0) > 0),
           ListTile(
@@ -472,26 +426,27 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             color: const Color(0xFFFFE9D6),
             borderRadius: BorderRadius.circular(8)),
         child: Text(
-            '${messages.asData?.value.length ?? 3} baru',
+            messages.isLoading
+                ? '…'
+                : '${messages.asData?.value.length ?? 0} baru',
             style: const TextStyle(
                 fontWeight: FontWeight.w700, fontSize: 12)),
       ),
       child: messages.when(
         data: (list) {
-          final items = list.isEmpty
-              ? _demoMessages()
-                  .map((e) => {
-                        'sender_name': e['sender_name']!,
-                        'content': e['content']!,
-                        'time': e['time']!,
-                      })
-                  .toList()
-              : list.take(3).map((e) => {
-                    'sender_name':
-                        (e['sender_name']?.toString() ?? 'Anonim'),
-                    'content': (e['content']?.toString() ?? ''),
-                    'time': (e['time']?.toString() ?? 'baru'),
-                  }).toList();
+          if (list.isEmpty) {
+            return const EmptyCard(
+              title: 'Belum ada pesan',
+              subtitle:
+                  'Pesan dari pengunjung portofoliomu akan tampil di sini.',
+            );
+          }
+          final items = list.take(3).map((e) => {
+                'sender_name':
+                    (e['sender_name']?.toString() ?? 'Anonim'),
+                'content': (e['content']?.toString() ?? ''),
+                'time': (e['time']?.toString() ?? 'baru'),
+              }).toList();
           return Column(
             children: items.map((m) {
               final name = m['sender_name']!;
@@ -532,29 +487,14 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             }).toList(),
           );
         },
-        loading: () => const LinearProgressIndicator(),
-        error: (e, _) => Text('Error: $e'),
+        loading: () => const ListSkeleton(rows: 3),
+        error: (e, _) => ErrorCard(
+          message: 'Gagal memuat pesan: $e',
+          onRetry: () => ref.invalidate(myMessagesProvider),
+        ),
       ),
     );
   }
-
-  List<Map<String, String>> _demoMessages() => const [
-        {
-          'sender_name': 'Dimas Saputra',
-          'content': 'Tertarik bekerja sama untuk proyek...',
-          'time': '10m'
-        },
-        {
-          'sender_name': 'Sarah Wijaya',
-          'content': 'Halo Alya, saya melihat proyek Nara...',
-          'time': '2j'
-        },
-        {
-          'sender_name': 'Kevin Studio',
-          'content': 'Apakah kamu tersedia bulan depan?',
-          'time': '1h'
-        },
-      ];
 
   Widget _profileTab() {
     final profile = ref.watch(myProfileProvider);
@@ -584,7 +524,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           child: profile.when(
             data: (u) => Text(
                 'slug: ${u.profileSlug ?? '-'} • ${u.isPublished ? 'PUBLISHED' : 'DRAFT'}'),
-            loading: () => const LinearProgressIndicator(),
+            loading: () => const ListSkeleton(rows: 3),
             error: (e, _) => Text('$e'),
           ),
         ),
@@ -608,29 +548,41 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         SectionCard(
           title: 'Daftar proyek',
           child: projects.when(
-            data: (list) => Column(
-              children: list
-                  .map((p) => ListTile(
-                        leading: const Icon(
-                            Icons.image_outlined),
-                        title: Text(p.title),
-                        subtitle: Text(p.status ?? ''),
-                        trailing: IconButton(
-                          icon: const Icon(
-                              Icons.delete_outline),
-                          onPressed: () async {
-                            await ref
-                                .read(apiServiceProvider)
-                                .deleteMyProject(p.id);
-                            ref.invalidate(
-                                myProjectsProvider);
-                          },
-                        ),
-                      ))
-                  .toList(),
+            data: (list) {
+              if (list.isEmpty) {
+                return const EmptyCard(
+                  title: 'Belum ada proyek',
+                  subtitle: 'Proyek akan tampil di sini.',
+                );
+              }
+              return Column(
+                children: list
+                    .map((p) => ListTile(
+                          leading: const Icon(
+                              Icons.image_outlined),
+                          title: Text(p.title),
+                          subtitle: Text(p.status ?? ''),
+                          trailing: IconButton(
+                            icon: const Icon(
+                                Icons.delete_outline),
+                            onPressed: () async {
+                              await ref
+                                  .read(apiServiceProvider)
+                                  .deleteMyProject(p.id);
+                              ref.invalidate(
+                                  myProjectsProvider);
+                            },
+                          ),
+                        ))
+                    .toList(),
+              );
+            },
+            loading: () => const ListSkeleton(rows: 3),
+            error: (e, _) => ErrorCard(
+              message: 'Gagal memuat proyek: $e',
+              onRetry: () =>
+                  ref.invalidate(myProjectsProvider),
             ),
-            loading: () => const LinearProgressIndicator(),
-            error: (e, _) => Text('Error: $e'),
           ),
         ),
       ],
@@ -651,39 +603,62 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             label: const Text('Tambah'),
           ),
           child: skills.when(
-            data: (list) => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: list
-                  .map((s) => Chip(
-                        label: Text(s.name),
-                        onDeleted: () async {
-                          await ref
-                              .read(apiServiceProvider)
-                              .deleteMySkill(s.id);
-                          ref.invalidate(mySkillsProvider);
-                        },
-                      ))
-                  .toList(),
+            data: (list) {
+              if (list.isEmpty) {
+                return const EmptyCard(
+                  title: 'Belum ada skill',
+                  subtitle: 'Tambahkan skill pertamamu.',
+                );
+              }
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: list
+                    .map((s) => Chip(
+                          label: Text(s.name),
+                          onDeleted: () async {
+                            await ref
+                                .read(apiServiceProvider)
+                                .deleteMySkill(s.id);
+                            ref.invalidate(mySkillsProvider);
+                          },
+                        ))
+                    .toList(),
+              );
+            },
+            loading: () => const ListSkeleton(rows: 3),
+            error: (e, _) => ErrorCard(
+              message: 'Gagal memuat skill: $e',
+              onRetry: () => ref.invalidate(mySkillsProvider),
             ),
-            loading: () => const LinearProgressIndicator(),
-            error: (e, _) => Text('Error: $e'),
           ),
         ),
         const SizedBox(height: 14),
         SectionCard(
           title: 'Pengalaman kerja',
           child: exps.when(
-            data: (list) => Column(
-              children: list
-                  .map((e) => ListTile(
-                        title: Text(e.role),
-                        subtitle: Text(e.company),
-                      ))
-                  .toList(),
+            data: (list) {
+              if (list.isEmpty) {
+                return const EmptyCard(
+                  title: 'Belum ada pengalaman',
+                  subtitle: 'Pengalaman kerja akan tampil di sini.',
+                );
+              }
+              return Column(
+                children: list
+                    .map((e) => ListTile(
+                          title: Text(e.role),
+                          subtitle: Text(e.company),
+                        ))
+                    .toList(),
+              );
+            },
+            loading: () => const ListSkeleton(rows: 3),
+            error: (e, _) => ErrorCard(
+              message: 'Gagal memuat pengalaman: $e',
+              onRetry: () =>
+                  ref.invalidate(myExperiencesProvider),
             ),
-            loading: () => const LinearProgressIndicator(),
-            error: (e, _) => Text('Error: $e'),
           ),
         ),
       ],
@@ -696,18 +671,29 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       title: 'Pesan masuk',
       subtitle: 'Dari pengunjung portofoliomu',
       child: messages.when(
-        data: (list) => Column(
-          children: list
-              .map((m) => ListTile(
-                    title: Text(
-                        m['sender_name']?.toString() ?? 'Anonim'),
-                    subtitle:
-                        Text(m['content']?.toString() ?? ''),
-                  ))
-              .toList(),
+        data: (list) {
+          if (list.isEmpty) {
+            return const EmptyCard(
+              title: 'Belum ada pesan',
+              subtitle: 'Pesan akan tampil di sini.',
+            );
+          }
+          return Column(
+            children: list
+                .map((m) => ListTile(
+                      title: Text(
+                          m['sender_name']?.toString() ?? 'Anonim'),
+                      subtitle:
+                          Text(m['content']?.toString() ?? ''),
+                    ))
+                .toList(),
+          );
+        },
+        loading: () => const ListSkeleton(rows: 4),
+        error: (e, _) => ErrorCard(
+          message: 'Gagal memuat pesan: $e',
+          onRetry: () => ref.invalidate(myMessagesProvider),
         ),
-        loading: () => const LinearProgressIndicator(),
-        error: (e, _) => Text('Error: $e'),
       ),
     );
   }

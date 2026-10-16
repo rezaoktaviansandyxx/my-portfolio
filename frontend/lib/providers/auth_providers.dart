@@ -68,6 +68,31 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  Future<void> register({
+    required String username,
+    required String email,
+    required String password,
+    String? fullName,
+  }) async {
+    final service = ref.read(authServiceProvider);
+    state = state.copyWith(isLoading: true);
+    try {
+      await service.register(
+        username: username,
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
+      // Langsung login setelah register agar UX mulus.
+      final token = await service.login(username, password);
+      final user = await service.me();
+      state = AuthState(token: token, user: user, isLoading: false);
+    } catch (e) {
+      state = const AuthState(isLoading: false);
+      rethrow;
+    }
+  }
+
   Future<void> logout() async {
     final service = ref.read(authServiceProvider);
     await service.logout();
