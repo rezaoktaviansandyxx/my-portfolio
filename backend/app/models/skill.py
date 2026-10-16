@@ -1,6 +1,6 @@
 from app.core.database import Base
 from app.models.project import project_skills
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 
@@ -8,6 +8,7 @@ class Skill(Base):
   __tablename__ = "skills"
 
   id = Column(Integer, primary_key=True, index=True)
+  owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
   name = Column(String(60), unique=True, nullable=False)
   category = Column(
       String(50), nullable=False, index=True

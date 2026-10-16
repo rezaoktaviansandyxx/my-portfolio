@@ -1,5 +1,5 @@
 from app.core.database import Base
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -30,10 +30,12 @@ project_skills = Table(
 
 class Project(Base):
   __tablename__ = "projects"
+  __table_args__ = (UniqueConstraint("owner_id", "slug", name="uq_project_owner_slug"),)
 
   id = Column(Integer, primary_key=True, index=True)
+  owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
   title = Column(String(150), nullable=False)
-  slug = Column(String(160), unique=True, index=True, nullable=False)
+  slug = Column(String(160), index=True, nullable=False)
   summary = Column(Text, nullable=False)
   problem_statement = Column(Text, nullable=True)
   solution = Column(Text, nullable=True)
@@ -61,6 +63,7 @@ class Project(Base):
   skills = relationship(
       "Skill", secondary=project_skills, back_populates="projects"
   )
+  owner = relationship("User")
 
 
 class ProjectMedia(Base):

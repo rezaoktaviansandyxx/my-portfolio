@@ -1,5 +1,5 @@
 from app.core.database import Base
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
 
 
@@ -7,6 +7,7 @@ class Message(Base):
   __tablename__ = "messages"
 
   id = Column(Integer, primary_key=True, index=True)
+  recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
   sender_name = Column(String(100), nullable=False)
   sender_email = Column(String(100), nullable=False)
   subject = Column(String(200), nullable=False)

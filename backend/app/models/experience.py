@@ -1,5 +1,5 @@
 from app.core.database import Base
-from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
 
 
@@ -7,6 +7,7 @@ class Experience(Base):
   __tablename__ = "experiences"
 
   id = Column(Integer, primary_key=True, index=True)
+  owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
   role = Column(String(100), nullable=False)
   company = Column(String(100), nullable=False)
   location = Column(String(100), nullable=True)
