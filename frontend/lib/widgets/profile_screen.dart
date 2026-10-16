@@ -1,22 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
+import 'package:frontend/models/user_model.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/widgets/contact_section.dart';
 import 'package:frontend/widgets/dashboard/skeleton.dart';
 
 /// Halaman publik:
 /// "/" -> portofolio default (slug 'admin'), "/u/:slug" -> portofolio kreator.
 /// Bisa dibuka tanpa login. Kalau pemilik sudah login, tombol kanan atas
 /// mengarah ke dashboard masing-masing.
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final String slug;
 
   const ProfileScreen({super.key, required this.slug});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final _scrollController = ScrollController();
+  final _contactKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToContact() {
+    final ctx = _contactKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('URL tidak valid')));
+      return;
+    }
+    final ok = await launcher.launchUrl(
+      uri,
+      mode: launcher.LaunchMode.externalApplication,
+    );
+    if (!ok && mounted) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tidak bisa membuka URL, disalin ke clipboard'),
+        ),
+      );
+    }
+  }
+
+  /// Bedakan 404 (slug tidak publish/asing) vs gagal jaringan/server.
+  String _profileErrorMessage(Object error) {
+    final msg = error.toString().toLowerCase();
+    if (msg.contains('404') ||
+        msg.contains('tidak ditemukan') ||
+        msg.contains('not found')) {
+      return 'Profil "${widget.slug}" tidak ditemukan atau belum dipublish.';
+    }
+    return 'Gagal terhubung ke server. Periksa koneksi lalu coba lagi.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final slug = widget.slug;
     final profileAsync = ref.watch(userProfileProvider(slug));
     final auth = ref.watch(authNotifierProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
@@ -35,13 +100,19 @@ class ProfileScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(9),
               ),
               alignment: Alignment.center,
-              child: const Text('F',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w800)),
+              child: const Text(
+                'F',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
             const SizedBox(width: 8),
-            const Text('FolioSpace',
-                style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text(
+              'FolioSpace',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
           ],
         ),
         actions: [
@@ -70,8 +141,7 @@ class ProfileScreen extends ConsumerWidget {
                 onPressed: () =>
                     context.go(auth.isAdmin ? '/admin' : '/dashboard'),
                 icon: const Icon(Icons.dashboard_outlined, size: 16),
-                label:
-                    Text(auth.isAdmin ? 'Admin' : 'Dashboard'),
+                label: Text(auth.isAdmin ? 'Admin' : 'Dashboard'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: FolioColors.primary,
                   foregroundColor: Colors.white,
@@ -84,18 +154,17 @@ class ProfileScreen extends ConsumerWidget {
         data: (user) {
           final name = user.fullName ?? user.username;
           final skillsAsync = ref.watch(userSkillsProvider(slug));
-          final projectsAsync =
-              ref.watch(userProjectsProvider(slug));
+          final projectsAsync = ref.watch(userProjectsProvider(slug));
+          final experiencesAsync = ref.watch(userExperiencesProvider(slug));
           return SingleChildScrollView(
+            controller: _scrollController,
             child: Center(
               child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: 1020),
+                constraints: const BoxConstraints(maxWidth: 1020),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Card(
                         child: Padding(
@@ -106,8 +175,8 @@ class ProfileScreen extends ConsumerWidget {
                                     _avatar(user.avatarUrl, 56),
                                     const SizedBox(width: 24),
                                     Expanded(
-                                        child: _heroText(
-                                            context, user, name)),
+                                      child: _heroText(context, user, name),
+                                    ),
                                     const SizedBox(width: 24),
                                     _heroCta(context, user),
                                   ],
@@ -117,8 +186,11 @@ class ProfileScreen extends ConsumerWidget {
                                     _avatar(user.avatarUrl, 56),
                                     const SizedBox(height: 16),
                                     _heroText(
-                                        context, user, name,
-                                        centered: true),
+                                      context,
+                                      user,
+                                      name,
+                                      centered: true,
+                                    ),
                                     const SizedBox(height: 16),
                                     _heroCta(context, user),
                                   ],
@@ -128,8 +200,7 @@ class ProfileScreen extends ConsumerWidget {
                       const SizedBox(height: 14),
                       Card(
                         child: Padding(
-                          padding:
-                              const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           child: skillsAsync.when(
                             data: (skills) {
                               if (skills.isEmpty) {
@@ -140,33 +211,31 @@ class ProfileScreen extends ConsumerWidget {
                                 );
                               }
                               return Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Keahlian',
-                                      style: TextStyle(
-                                          fontWeight:
-                                              FontWeight.w800,
-                                          fontSize: 16)),
+                                  const Text(
+                                    'Keahlian',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                   const SizedBox(height: 12),
                                   Wrap(
                                     spacing: 8,
                                     runSpacing: 8,
                                     children: skills
-                                        .map((s) => Chip(
-                                            label:
-                                                Text(s.name)))
+                                        .map((s) => Chip(label: Text(s.name)))
                                         .toList(),
                                   ),
                                 ],
                               );
                             },
-                            loading: () =>
-                                const ListSkeleton(rows: 2),
+                            loading: () => const ListSkeleton(rows: 2),
                             error: (e, _) => ErrorCard(
                               message: 'Gagal memuat skill: $e',
-                              onRetry: () => ref.invalidate(
-                                  userSkillsProvider(slug)),
+                              onRetry: () =>
+                                  ref.invalidate(userSkillsProvider(slug)),
                             ),
                           ),
                         ),
@@ -174,8 +243,80 @@ class ProfileScreen extends ConsumerWidget {
                       const SizedBox(height: 14),
                       Card(
                         child: Padding(
-                          padding:
-                              const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
+                          child: experiencesAsync.when(
+                            data: (experiences) {
+                              if (experiences.isEmpty) {
+                                return const EmptyCard(
+                                  title: 'Belum ada pengalaman',
+                                  subtitle:
+                                      'Riwayat kerja kreator akan tampil di sini.',
+                                );
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Pengalaman',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...experiences.take(20).map((e) {
+                                    final range = _dateRange(
+                                      e.startDate,
+                                      e.endDate,
+                                      e.isCurrent,
+                                    );
+                                    return ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      leading: const CircleAvatar(
+                                        child: Icon(Icons.business_outlined),
+                                      ),
+                                      title: Text(
+                                        '${e.role} • ${e.company}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            range,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          if ((e.description ?? '').isNotEmpty)
+                                            Text(
+                                              e.description!,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                            loading: () => const ListSkeleton(rows: 3),
+                            error: (e, _) => ErrorCard(
+                              message: 'Gagal memuat pengalaman: $e',
+                              onRetry: () =>
+                                  ref.invalidate(userExperiencesProvider(slug)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
                           child: projectsAsync.when(
                             data: (projects) {
                               if (projects.isEmpty) {
@@ -186,54 +327,84 @@ class ProfileScreen extends ConsumerWidget {
                                 );
                               }
                               return Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Proyek pilihan',
-                                      style: TextStyle(
-                                          fontWeight:
-                                              FontWeight.w800,
-                                          fontSize: 16)),
+                                  const Text(
+                                    'Proyek pilihan',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                   const SizedBox(height: 12),
-                                  ...projects.take(10).map((p) =>
-                                      ListTile(
-                                        contentPadding:
-                                            EdgeInsets.zero,
-                                        leading: p.coverImageUrl !=
-                                                null
-                                            ? CircleAvatar(
-                                                backgroundImage:
-                                                    NetworkImage(p
-                                                        .coverImageUrl!))
-                                            : const CircleAvatar(
-                                                child: Icon(Icons
-                                                    .work_outline)),
-                                        title: Text(p.title,
-                                            style:
-                                                const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight
-                                                            .w700)),
-                                        subtitle: Text(
+                                  ...projects
+                                      .take(10)
+                                      .map(
+                                        (p) => ListTile(
+                                          contentPadding: EdgeInsets.zero,
+                                          leading: p.coverImageUrl != null
+                                              ? CircleAvatar(
+                                                  backgroundImage: NetworkImage(
+                                                    p.coverImageUrl!,
+                                                  ),
+                                                )
+                                              : const CircleAvatar(
+                                                  child: Icon(
+                                                    Icons.work_outline,
+                                                  ),
+                                                ),
+                                          title: Text(
+                                            p.title,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          subtitle: Text(
                                             p.summary ?? '',
                                             maxLines: 2,
-                                            overflow: TextOverflow
-                                                .ellipsis),
-                                      )),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (p.liveUrl != null &&
+                                                  p.liveUrl!.isNotEmpty)
+                                                IconButton(
+                                                  tooltip: 'Buka live demo',
+                                                  icon: const Icon(
+                                                    Icons.language_outlined,
+                                                  ),
+                                                  onPressed: () =>
+                                                      _openUrl(p.liveUrl!),
+                                                ),
+                                              if (p.githubUrl != null &&
+                                                  p.githubUrl!.isNotEmpty)
+                                                IconButton(
+                                                  tooltip: 'Buka GitHub',
+                                                  icon: const Icon(
+                                                    Icons.code_outlined,
+                                                  ),
+                                                  onPressed: () =>
+                                                      _openUrl(p.githubUrl!),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                 ],
                               );
                             },
-                            loading: () =>
-                                const ListSkeleton(rows: 3),
+                            loading: () => const ListSkeleton(rows: 3),
                             error: (e, _) => ErrorCard(
                               message: 'Gagal memuat proyek: $e',
-                              onRetry: () => ref.invalidate(
-                                  userProjectsProvider(
-                                      slug)),
+                              onRetry: () =>
+                                  ref.invalidate(userProjectsProvider(slug)),
                             ),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 14),
+                      ContactSection(key: _contactKey, slug: slug),
                     ],
                   ),
                 ),
@@ -264,10 +435,8 @@ class ProfileScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: ErrorCard(
-                message:
-                    'Profil "$slug" tidak ditemukan.\n$error\n\nPastikan backend jalan dan user sudah publish.',
-                onRetry: () =>
-                    ref.invalidate(userProfileProvider(slug)),
+                message: _profileErrorMessage(error),
+                onRetry: () => ref.invalidate(userProfileProvider(slug)),
               ),
             ),
           ),
@@ -276,71 +445,109 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _avatar(String? url, double r) => CircleAvatar(
-        radius: r,
-        backgroundImage: url != null ? NetworkImage(url) : null,
-        backgroundColor: FolioColors.primarySoft,
-        child: url == null
-            ? const Icon(Icons.person,
-                size: 44, color: FolioColors.primary)
-            : null,
-      );
+  String _dateRange(DateTime? start, DateTime? end, bool isCurrent) {
+    String fmt(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}';
+    final s = start != null ? fmt(start) : '?';
+    final e = isCurrent ? 'Sekarang' : (end != null ? fmt(end) : '?');
+    return '$s – $e';
+  }
 
-  Widget _heroText(BuildContext context, dynamic user, String name,
-      {bool centered = false}) {
+  Widget _avatar(String? url, double r) => CircleAvatar(
+    radius: r,
+    backgroundImage: url != null ? NetworkImage(url) : null,
+    backgroundColor: FolioColors.primarySoft,
+    child: url == null
+        ? const Icon(Icons.person, size: 44, color: FolioColors.primary)
+        : null,
+  );
+
+  Widget _heroText(
+    BuildContext context,
+    UserModel user,
+    String name, {
+    bool centered = false,
+  }) {
     final align = centered ? TextAlign.center : TextAlign.start;
     return Column(
-      crossAxisAlignment:
-          centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment: centered
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             color: FolioColors.greenBg,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Text('● Tersedia untuk proyek',
-              style: TextStyle(
-                  color: FolioColors.green,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12)),
+          child: const Text(
+            '● Tersedia untuk proyek',
+            style: TextStyle(
+              color: FolioColors.green,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
         ),
         const SizedBox(height: 10),
-        Text(name,
-            textAlign: align,
-            style: const TextStyle(
-                fontSize: 30, fontWeight: FontWeight.w800)),
-        Text(user.headline ?? 'Kreator Portofolio',
-            textAlign: align,
-            style:
-                const TextStyle(color: FolioColors.muted)),
+        Text(
+          name,
+          textAlign: align,
+          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
+        ),
+        Text(
+          user.headline ?? 'Kreator Portofolio',
+          textAlign: align,
+          style: const TextStyle(color: FolioColors.muted),
+        ),
         const SizedBox(height: 8),
-        Text(user.bio ?? '',
-            textAlign: align, maxLines: 4, overflow: TextOverflow.ellipsis),
+        Text(
+          user.bio ?? '',
+          textAlign: align,
+          maxLines: 4,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
 
-  Widget _heroCta(BuildContext context, dynamic user) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _heroCta(BuildContext context, UserModel user) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      ElevatedButton(
+        onPressed: _scrollToContact,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: FolioColors.primary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        ),
+        child: const Text('Hubungi Saya'),
+      ),
+      const SizedBox(height: 8),
+      if (user.resumeUrl != null && user.resumeUrl!.isNotEmpty)
+        OutlinedButton.icon(
+          onPressed: () => _openUrl(user.resumeUrl!),
+          icon: const Icon(Icons.download_outlined, size: 16),
+          label: const Text('Unduh Resume'),
+        ),
+      const SizedBox(height: 4),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(
-            onPressed: () => context.go('/register'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: FolioColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 14),
-            ),
-            child: const Text('Buat portofolio seperti ini'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
+          TextButton(
             onPressed: () => context.go('/login'),
-            child: const Text('Login pemilik'),
+            child: const Text('Login pemilik', style: TextStyle(fontSize: 12)),
+          ),
+          const Text('•', style: TextStyle(fontSize: 12)),
+          TextButton(
+            onPressed: () => context.go('/register'),
+            child: const Text(
+              'Buat portofolio',
+              style: TextStyle(fontSize: 12),
+            ),
           ),
         ],
-      );
+      ),
+    ],
+  );
 }
