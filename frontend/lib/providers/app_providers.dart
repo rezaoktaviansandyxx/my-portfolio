@@ -72,3 +72,8 @@ final adminProjectsProvider = FutureProvider<List<ProjectModel>>((ref) async {
   final api = ref.read(apiServiceProvider);
   return api.adminListProjects();
 });
+
+final galleryProjectsProvider = FutureProvider<List<ProjectModel>>((ref) async {
+  final api = ref.read(apiServiceProvider);
+  return api.getGalleryProjects();
+});

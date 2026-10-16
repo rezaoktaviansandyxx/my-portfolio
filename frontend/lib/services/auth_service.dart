@@ -78,6 +78,17 @@ class AuthService {
     );
   }
 
+  /// PATCH /auth/change-password (body: current_password, new_password).
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    await _dio.patch(
+      '/auth/change-password',
+      data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+      },
+    );
+  }
+
   Future<void> logout() async {
     // Panggil API resmi agar server bisa mencatat/audit logout.
     // JWT stateless: kalaupun gagal/offline, token lokal tetap dihapus.
