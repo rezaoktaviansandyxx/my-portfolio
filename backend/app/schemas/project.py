@@ -58,6 +58,15 @@ class ProjectUpdate(BaseModel):
   model_config = {"str_strip_whitespace": True}
 
 
+class OwnerBrief(BaseModel):
+  profile_slug: str
+  full_name: str
+  avatar_url: Optional[str] = None
+
+  class Config:
+    from_attributes = True
+
+
 class ProjectListResponse(BaseModel):
   id: int
   title: str
@@ -67,6 +76,7 @@ class ProjectListResponse(BaseModel):
   is_featured: bool
   display_order: int
   skills: List[SkillResponse] = []
+  owner: Optional[OwnerBrief] = None
 
   class Config:
     from_attributes = True
