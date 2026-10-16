@@ -1,6 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConfig {
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:8000/api/v1',
-  );
+  static final String baseUrl = dotenv.env['API_BASE_URL'] ?? '';
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/widgets/profile_screen.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/admin/admin_dashboard.dart';
 
 void main() {
+  dotenv.load(fileName: '.env');
   runApp(const ProviderScope(child: MyApp()));
 }
 
