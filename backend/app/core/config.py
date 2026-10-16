@@ -14,6 +14,10 @@ class Settings(BaseSettings):
   BACKEND_CORS_ORIGINS: list[str] = [
       "http://localhost:3000",
       "http://localhost:8080",
+      "http://localhost:5000",
+      "http://localhost:8000",
+      "http://localhost:63314",
+      "http://localhost:63316",
   ]
   RATE_LIMIT_CONTACT: str = "5/minute"
 
