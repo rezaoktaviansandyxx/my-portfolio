@@ -1,7 +1,7 @@
 from pathlib import Path
 from app.core.config import settings
 from app.core.rate_limit import limiter
-from app.routers import admin, auth, public, upload
+from app.routers import admin, auth, me, public, upload
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -42,6 +42,7 @@ app.mount(
 # Registrasi Router
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(public.router, prefix=settings.API_V1_STR)
+app.include_router(me.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(upload.router, prefix=settings.API_V1_STR)
 

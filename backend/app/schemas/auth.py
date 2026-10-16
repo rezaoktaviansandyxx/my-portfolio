@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -42,3 +42,9 @@ class RegisterRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
   current_password: str
   new_password: str = Field(min_length=8, max_length=128)
+
+
+class AdminUserUpdate(BaseModel):
+  is_active: Optional[bool] = None
+  is_published: Optional[bool] = None
+  role: Optional[Literal["admin", "user"]] = None

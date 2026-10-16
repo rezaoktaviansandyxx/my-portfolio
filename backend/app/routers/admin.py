@@ -4,7 +4,9 @@ from app.models.experience import Experience
 from app.models.message import Message
 from app.models.project import Project, ProjectMedia
 from app.models.skill import Skill
+from app.models.user import User
 from app.routers.deps import get_current_admin
+from app.schemas.auth import AdminUserUpdate, UserResponse
 from app.schemas.experience import (
     ExperienceCreate,
     ExperienceResponse,
@@ -31,9 +33,15 @@ router = APIRouter(prefix="/admin", tags=["Admin - CRUD"])
 def create_project(
     payload: ProjectCreate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_admin),
+    current: User = Depends(get_current_admin),
 ):
-  existing = db.query(Project).filter(Project.slug == payload.slug).first()
+  existing = (
+      db.query(Project)
+      .filter(
+          Project.owner_id == current.id, Project.slug == payload.slug
+      )
+      .first()
+  )
   if existing:
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -45,7 +53,7 @@ def create_project(
     skills = db.query(Skill).filter(Skill.id.in_(payload.skill_ids)).all()
 
   project_data = payload.model_dump(exclude={"skill_ids"})
-  project = Project(**project_data, skills=skills)
+  project = Project(**project_data, owner_id=current.id, skills=skills)
   db.add(project)
   db.commit()
   db.refresh(project)
@@ -65,7 +73,14 @@ def update_project(
         status_code=status.HTTP_404_NOT_FOUND, detail="Proyek tidak ditemukan"
     )
   if payload.slug and payload.slug != project.slug:
-    exists = db.query(Project).filter(Project.slug == payload.slug).first()
+    exists = (
+        db.query(Project)
+        .filter(
+            Project.owner_id == project.owner_id,
+            Project.slug == payload.slug,
+        )
+        .first()
+    )
     if exists:
       raise HTTPException(
           status_code=status.HTTP_400_BAD_REQUEST,
@@ -136,13 +151,13 @@ def add_project_media(
 def create_skill(
     payload: SkillCreate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_admin),
+    current: User = Depends(get_current_admin),
 ):
   if db.query(Skill).filter(Skill.name == payload.name).first():
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Skill sudah ada"
     )
-  s = Skill(**payload.model_dump())
+  s = Skill(**payload.model_dump(), owner_id=current.id)
   db.add(s)
   db.commit()
   db.refresh(s)
@@ -193,9 +208,9 @@ def delete_skill(
 def create_experience(
     payload: ExperienceCreate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_admin),
+    current: User = Depends(get_current_admin),
 ):
-  e = Experience(**payload.model_dump())
+  e = Experience(**payload.model_dump(), owner_id=current.id)
   db.add(e)
   db.commit()
   db.refresh(e)
@@ -285,3 +300,45 @@ def delete_message(
   db.delete(msg)
   db.commit()
   return None
+
+
+# --- Moderasi users ---
+@router.get("/users", response_model=List[UserResponse])
+def admin_list_users(
+    db: Session = Depends(get_db), _=Depends(get_current_admin)
+):
+  return db.query(User).order_by(User.id.asc()).all()
+
+
+@router.patch("/users/{user_id}", response_model=UserResponse)
+def admin_update_user(
+    user_id: int,
+    payload: AdminUserUpdate,
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+  u = db.query(User).filter(User.id == user_id).first()
+  if not u:
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, detail="User tidak ditemukan"
+    )
+  for k, v in payload.model_dump(exclude_unset=True).items():
+    setattr(u, k, v)
+  db.commit()
+  db.refresh(u)
+  return u
+
+
+# --- Moderasi projects lintas user ---
+@router.get("/projects", response_model=List[ProjectDetailResponse])
+def admin_list_projects(
+    owner_id: Optional[int] = Query(default=None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+  q = db.query(Project).order_by(Project.created_at.desc())
+  if owner_id is not None:
+    q = q.filter(Project.owner_id == owner_id)
+  return q.offset(skip).limit(limit).all()
