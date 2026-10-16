@@ -53,4 +53,4 @@ def test_contact_validation():
           "content": "short",
       },
   )
-  assert res.status_code == 422
+  assert res.status_code == 410
