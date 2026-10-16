@@ -16,6 +16,11 @@ class LocalStorageService:
   async def save_file(
       self, file: UploadFile, subfolder: str, is_document: bool = False
   ) -> str:
+    if ".." in subfolder or subfolder.startswith("/"):
+      raise HTTPException(
+          status_code=status.HTTP_400_BAD_REQUEST,
+          detail="Subfolder tidak valid",
+      )
     allowed = ALLOWED_DOC_TYPES if is_document else ALLOWED_IMAGE_TYPES
     if file.content_type not in allowed:
       raise HTTPException(

@@ -8,6 +8,7 @@ from app.models.skill import Skill
 from app.models.user import User
 from app.routers.deps import get_current_user
 from app.schemas.auth import UserResponse
+from app.services.storage import storage_service
 from app.schemas.experience import (
     ExperienceCreate,
     ExperienceResponse,
@@ -21,7 +22,7 @@ from app.schemas.project import (
     ProjectUpdate,
 )
 from app.schemas.skill import SkillCreate, SkillResponse, SkillUpdate
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -483,3 +484,40 @@ def me_delete_message(
   db.delete(msg)
   db.commit()
   return None
+
+
+# --- Uploads (isolasi per user) ---
+@router.post("/upload/cover")
+async def me_upload_cover(
+    file: UploadFile = File(...),
+    current: User = Depends(get_current_user),
+):
+  return {
+      "url": await storage_service.save_file(
+          file, subfolder=f"u/{current.id}/covers"
+      )
+  }
+
+
+@router.post("/upload/media")
+async def me_upload_media(
+    file: UploadFile = File(...),
+    current: User = Depends(get_current_user),
+):
+  return {
+      "url": await storage_service.save_file(
+          file, subfolder=f"u/{current.id}/media"
+      )
+  }
+
+
+@router.post("/upload/avatar")
+async def me_upload_avatar(
+    file: UploadFile = File(...),
+    current: User = Depends(get_current_user),
+):
+  return {
+      "url": await storage_service.save_file(
+          file, subfolder=f"u/{current.id}/avatars"
+      )
+  }
