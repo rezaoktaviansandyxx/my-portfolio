@@ -6,6 +6,7 @@ import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/admin/admin_dashboard.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   dotenv.load(fileName: '.env');
   runApp(const ProviderScope(child: MyApp()));
 }
