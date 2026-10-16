@@ -58,6 +58,14 @@ def me(current: User = Depends(get_current_user)):
   return current
 
 
+@router.post("/logout")
+def logout(current: User = Depends(get_current_user)):
+  # JWT stateless: server tidak menyimpan sesi, cukup akui logout.
+  # Endpoint ini ada agar frontend punya API resmi untuk dipanggil
+  # sebelum menghapus token lokal (konsisten + bisa dilog/audit).
+  return {"message": "Logout berhasil"}
+
+
 @router.patch("/change-password")
 def change_password(
     payload: ChangePasswordRequest,
