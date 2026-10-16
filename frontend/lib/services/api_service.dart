@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:frontend/constants/api_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/models/project_model.dart';
 import 'package:frontend/models/skill_model.dart';
@@ -9,7 +9,9 @@ class ApiService {
   final Dio _dio;
 
   ApiService(this._dio) {
-    _dio.options.baseUrl = ApiConfig.baseUrl;
+    _dio.options.baseUrl = dotenv.env['API_BASE_URL'] ?? '';
+    _dio.options.headers['Content-Type'] = 'application/json';
+    _dio.options.headers['Accept'] = 'application/json';
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.interceptors.add(LogInterceptor(responseBody: true));
