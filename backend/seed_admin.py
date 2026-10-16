@@ -21,6 +21,7 @@ if not existing:
           hashed_password=get_password_hash(password),
           full_name="Admin",
           is_active=True,
+          role="admin",
       )
   )
   db.commit()
