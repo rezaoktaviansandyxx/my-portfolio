@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/models/user_model.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -78,15 +79,31 @@ class AuthService {
     );
   }
 
+  Never _throwApiError(DioException e, String fallback) {
+    final data = e.response?.data;
+    String msg = fallback;
+    if (data is Map && data['detail'] != null) {
+      final d = data['detail'];
+      msg = d is String ? d : d.toString();
+    } else if (e.message != null && e.message!.isNotEmpty) {
+      msg = e.message!;
+    }
+    throw ApiException(msg, statusCode: e.response?.statusCode);
+  }
+
   /// PATCH /auth/change-password (body: current_password, new_password).
   Future<void> changePassword(String currentPassword, String newPassword) async {
-    await _dio.patch(
-      '/auth/change-password',
-      data: {
-        'current_password': currentPassword,
-        'new_password': newPassword,
-      },
-    );
+    try {
+      await _dio.patch(
+        '/auth/change-password',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+    } on DioException catch (e) {
+      _throwApiError(e, 'Gagal ganti password');
+    }
   }
 
   Future<void> logout() async {

@@ -73,7 +73,7 @@ class ApiService {
     try {
       final res = await _dio.get('/public/u/$slug/profile');
       if (res.data is! Map<String, dynamic>) {
-        throw Exception('Respons profil tidak valid');
+        throw ApiException('Respons profil tidak valid');
       }
       return UserModel.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -139,8 +139,11 @@ class ApiService {
         '/public/gallery/projects',
         queryParameters: {'skip': skip, 'limit': limit},
       );
-      final list = res.data as List;
-      return list.map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      final data = res.data;
+      if (data is! List) {
+        throw ApiException('Respons galeri tidak valid');
+      }
+      return data.map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat galeri');
     }
@@ -325,13 +328,13 @@ class ApiService {
     }
   }
 
-  /// POST /me/upload/cover|media|avatar (multipart FormData).
+  /// POST /me/upload/cover (multipart FormData).
   Future<String> uploadMyCover(MultipartFile file) => _uploadMultipart('/me/upload/cover', file);
 
-  /// POST /me/upload/cover|media|avatar (multipart FormData).
+  /// POST /me/upload/media (multipart FormData).
   Future<String> uploadMyMedia(MultipartFile file) => _uploadMultipart('/me/upload/media', file);
 
-  /// POST /me/upload/cover|media|avatar (multipart FormData).
+  /// POST /me/upload/avatar (multipart FormData).
   Future<String> uploadMyAvatar(MultipartFile file) => _uploadMultipart('/me/upload/avatar', file);
 
   // ---- Admin (/admin/*) ----
@@ -513,19 +516,19 @@ class ApiService {
     }
   }
 
-  /// Upload admin (multipart FormData) — path final sesuai upload.py.
+  /// POST /admin/upload/project-cover (multipart FormData).
   Future<String> adminUploadProjectCover(MultipartFile file) =>
       _uploadMultipart('/admin/upload/project-cover', file);
 
-  /// Upload admin (multipart FormData) — path final sesuai upload.py.
+  /// POST /admin/upload/project-media (multipart FormData).
   Future<String> adminUploadProjectMedia(MultipartFile file) =>
       _uploadMultipart('/admin/upload/project-media', file);
 
-  /// Upload admin (multipart FormData) — path final sesuai upload.py.
+  /// POST /admin/upload/resume (multipart FormData).
   Future<String> adminUploadResume(MultipartFile file) =>
       _uploadMultipart('/admin/upload/resume', file);
 
-  /// Upload admin (multipart FormData) — path final sesuai upload.py.
+  /// POST /admin/upload/avatar (multipart FormData).
   Future<String> adminUploadAvatar(MultipartFile file) =>
       _uploadMultipart('/admin/upload/avatar', file);
 }
