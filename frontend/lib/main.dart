@@ -5,9 +5,9 @@ import 'package:frontend/widgets/profile_screen.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/admin/admin_dashboard.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: '.env');
   runApp(const ProviderScope(child: MyApp()));
 }
 
