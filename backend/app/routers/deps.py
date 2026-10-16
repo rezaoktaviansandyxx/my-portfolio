@@ -12,7 +12,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-def get_current_admin(
+def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
 ) -> User:
   credentials_exception = HTTPException(
@@ -34,4 +34,17 @@ def get_current_admin(
   user = db.query(User).filter(User.id == int(token_data.sub)).first()
   if user is None or not user.is_active:
     raise credentials_exception
+  return user
+
+
+def get_current_admin(
+    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+) -> User:
+  user = get_current_user(db, token)
+  if user.role != "admin":
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Kredensial autentikasi tidak valid",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
   return user

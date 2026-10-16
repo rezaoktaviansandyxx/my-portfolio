@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class Token(BaseModel):
@@ -24,6 +24,21 @@ class UserBase(BaseModel):
 class UserResponse(UserBase):
   id: int
   is_active: bool
+  role: str
+  profile_slug: Optional[str] = None
+  is_published: bool
 
   class Config:
     from_attributes = True
+
+
+class RegisterRequest(BaseModel):
+  username: str = Field(pattern=r"^[a-z0-9_]{3,30}$")
+  email: EmailStr
+  password: str = Field(min_length=8, max_length=128)
+  full_name: str = Field(min_length=2, max_length=100)
+
+
+class ChangePasswordRequest(BaseModel):
+  current_password: str
+  new_password: str = Field(min_length=8, max_length=128)

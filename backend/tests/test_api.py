@@ -13,6 +13,7 @@ def setup_module():
           hashed_password=get_password_hash("pass123"),
           full_name="Admin",
           is_active=True,
+          role="admin",
       )
   )
   db.commit()
