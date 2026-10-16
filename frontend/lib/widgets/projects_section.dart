@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/providers/app_providers.dart';
@@ -49,5 +51,5 @@ class ProjectsSection extends ConsumerWidget {
 
 void launchUrl(String url) {
   // Simple placeholder — integrate url_launcher in real app
-  print('Launch URL: $url');
+  log('Launch URL: $url');
 }
