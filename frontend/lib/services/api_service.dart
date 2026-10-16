@@ -14,7 +14,11 @@ class ApiService {
     _dio.options.headers['Accept'] = 'application/json';
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
-    _dio.interceptors.add(LogInterceptor(responseBody: true));
+    _dio.options.followRedirects = true;
+    _dio.options.receiveDataWhenStatusError = false;
+    _dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
+    // Allow non-2xx responses to surface as errors without aborting the connection
+    _dio.options.validateStatus = (status) => status != null && status < 500;
   }
 
   // Public endpoints
