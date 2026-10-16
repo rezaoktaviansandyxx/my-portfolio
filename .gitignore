@@ -1,0 +1,28 @@
+# Environment & OS
+.env
+.DS_Store
+*.log
+
+#Superpowers
+docs/
+.superpowers/
+
+# Python
+backend/__pycache__/
+backend/*/__pycache__/
+backend/.venv/
+backend/venv/
+
+# Flutter
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/build/
+frontend/.pub/
+frontend/.pub-cache/
+
+# IDE
+.vscode/
+.idea/
+*.iml
