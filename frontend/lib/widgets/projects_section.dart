@@ -27,15 +27,15 @@ class ProjectsSection extends ConsumerWidget {
             itemBuilder: (_, i) {
               final p = projects[i];
               return ListTile(
-                leading: p.coverImage != null
-                    ? CircleAvatar(backgroundImage: NetworkImage(p.coverImage!))
+                leading: p.coverImageUrl != null
+                    ? CircleAvatar(backgroundImage: NetworkImage(p.coverImageUrl!))
                     : const Icon(Icons.folder, size: 40),
                 title: Text(p.title),
                 subtitle: Text(p.summary ?? ''),
-                trailing: p.projectUrl != null
+                trailing: p.liveUrl != null
                     ? IconButton(
                         icon: const Icon(Icons.link),
-                        onPressed: () => launchUrl(p.projectUrl!),
+                        onPressed: () => launchUrl(p.liveUrl!),
                       )
                     : null,
               );

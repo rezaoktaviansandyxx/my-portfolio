@@ -10,6 +10,7 @@ SkillModel _$SkillModelFromJson(Map<String, dynamic> json) => SkillModel(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
   category: json['category'] as String?,
+  proficiencyLevel: (json['proficiency_level'] as num?)?.toInt(),
   iconUrl: json['icon_url'] as String?,
   displayOrder: (json['display_order'] as num?)?.toInt(),
 );
@@ -19,6 +20,7 @@ Map<String, dynamic> _$SkillModelToJson(SkillModel instance) =>
       'id': instance.id,
       'name': instance.name,
       'category': instance.category,
+      'proficiency_level': instance.proficiencyLevel,
       'icon_url': instance.iconUrl,
       'display_order': instance.displayOrder,
     };

@@ -16,6 +16,8 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   profileSlug: json['profile_slug'] as String?,
   avatarUrl: json['avatar_url'] as String?,
   resumeUrl: json['resume_url'] as String?,
+  isActive: json['is_active'] as bool? ?? true,
+  role: json['role'] as String?,
   isPublished: json['is_published'] as bool? ?? false,
 );
 
@@ -29,5 +31,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'profile_slug': instance.profileSlug,
   'avatar_url': instance.avatarUrl,
   'resume_url': instance.resumeUrl,
+  'is_active': instance.isActive,
+  'role': instance.role,
   'is_published': instance.isPublished,
 };

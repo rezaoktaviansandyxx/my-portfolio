@@ -7,6 +7,7 @@ class SkillModel {
   final int id;
   final String name;
   final String? category;
+  @JsonKey(name: 'proficiency_level') final int? proficiencyLevel;
   @JsonKey(name: 'icon_url') final String? iconUrl;
   @JsonKey(name: 'display_order') final int? displayOrder;
 
@@ -14,6 +15,7 @@ class SkillModel {
     required this.id,
     required this.name,
     this.category,
+    this.proficiencyLevel,
     this.iconUrl,
     this.displayOrder,
   });
