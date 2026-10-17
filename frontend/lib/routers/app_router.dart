@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/widgets/profile_screen.dart';
 import 'package:frontend/widgets/gallery_screen.dart';
-import 'package:frontend/widgets/login_screen.dart';
+import 'package:frontend/widgets/auth/login_screen.dart';
 import 'package:frontend/widgets/auth/register_screen.dart';
 import 'package:frontend/widgets/user/user_dashboard.dart';
 import 'package:frontend/widgets/admin/admin_dashboard.dart';
