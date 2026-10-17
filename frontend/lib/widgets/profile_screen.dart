@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/providers/auth_providers.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/contact_section.dart';
 import 'package:frontend/widgets/dashboard/skeleton.dart';
@@ -70,11 +71,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   /// Bedakan 404 (slug tidak publish/asing) vs gagal jaringan/server.
   String _profileErrorMessage(Object error) {
-    final msg = error.toString().toLowerCase();
-    if (msg.contains('404') ||
-        msg.contains('tidak ditemukan') ||
-        msg.contains('not found')) {
-      return 'Profil "${widget.slug}" tidak ditemukan atau belum dipublish.';
+    if (error is ApiException) {
+      if (error.isNotFound) {
+        return 'Profil "${widget.slug}" tidak ditemukan atau belum dipublish.';
+      }
+      return 'Gagal memuat profil: ${error.message}';
     }
     return 'Gagal terhubung ke server. Periksa koneksi lalu coba lagi.';
   }
@@ -116,6 +117,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ),
         actions: [
+          TextButton(
+            onPressed: () => context.go('/gallery'),
+            child: const Text('Galeri'),
+          ),
           TextButton(
             onPressed: () => context.go('/register'),
             child: const Text('Buat portofolio'),

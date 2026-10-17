@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/services/api_service.dart';
+import 'package:frontend/widgets/dashboard/errors.dart';
 
 /// Form kontak publik: sender_name/sender_email/subject/content
 /// -> POST /public/u/{slug}/contact.
@@ -61,9 +62,9 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
       _contentCtrl.clear();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal mengirim pesan: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(friendlyError(e, 'Gagal mengirim pesan'))),
+      );
     } finally {
       if (mounted) setState(() => _sending = false);
     }

@@ -7,33 +7,18 @@ import 'package:frontend/models/skill_model.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/providers/app_providers.dart';
-import 'package:frontend/services/api_service.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/dashboard/dashboard_shell.dart';
+import 'package:frontend/widgets/dashboard/dialogs.dart';
+import 'package:frontend/widgets/dashboard/errors.dart';
 import 'package:frontend/widgets/dashboard/folio_field.dart';
 import 'package:frontend/widgets/dashboard/folio_widgets.dart';
 import 'package:frontend/widgets/dashboard/skeleton.dart';
-import 'package:frontend/widgets/user/dialogs.dart';
 
 /// Ubah status publish situs. Dipakai kartu profil dan form profil.
 Future<void> setSitePublished(WidgetRef ref, bool published) async {
   await ref.read(apiServiceProvider).setPublish(!published);
   ref.invalidate(myProfileProvider);
-}
-
-/// Pesan error ramah berbasis [ApiException.statusCode] (404/429),
-/// tanpa dump `$e` mentah ke pengguna.
-String friendlyError(Object e, String fallback) {
-  if (e is ApiException) {
-    if (e.isNotFound) {
-      return 'Data tidak ditemukan. Muat ulang lalu coba lagi.';
-    }
-    if (e.isRateLimited) {
-      return 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.';
-    }
-    return e.message;
-  }
-  return fallback;
 }
 
 class UserDashboard extends ConsumerStatefulWidget {

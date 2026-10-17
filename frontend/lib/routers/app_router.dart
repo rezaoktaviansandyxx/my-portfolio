@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/widgets/profile_screen.dart';
+import 'package:frontend/widgets/gallery_screen.dart';
 import 'package:frontend/widgets/login_screen.dart';
 import 'package:frontend/widgets/auth/register_screen.dart';
 import 'package:frontend/widgets/user/user_dashboard.dart';
@@ -16,7 +17,9 @@ class RouterRefresh extends ChangeNotifier {
   }
 }
 
-final routerRefreshProvider = Provider<RouterRefresh>((ref) => RouterRefresh(ref));
+final routerRefreshProvider = Provider<RouterRefresh>(
+  (ref) => RouterRefresh(ref),
+);
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = ref.watch(routerRefreshProvider);
@@ -59,23 +62,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/u/:slug',
-        builder: (_, s) => ProfileScreen(slug: s.pathParameters['slug'] ?? 'admin'),
+        builder: (_, s) =>
+            ProfileScreen(slug: s.pathParameters['slug'] ?? 'admin'),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (_, __) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (_, __) => const RegisterScreen(),
-      ),
+      GoRoute(path: '/gallery', builder: (_, __) => const GalleryScreen()),
+      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
         path: '/dashboard',
-        builder: (_, __) => const _AuthGate(adminOnly: false, child: UserDashboard()),
+        builder: (_, __) =>
+            const _AuthGate(adminOnly: false, child: UserDashboard()),
       ),
       GoRoute(
         path: '/admin',
-        builder: (_, __) => const _AuthGate(adminOnly: true, child: AdminDashboard()),
+        builder: (_, __) =>
+            const _AuthGate(adminOnly: true, child: AdminDashboard()),
       ),
     ],
     errorBuilder: (_, s) => Scaffold(
@@ -103,7 +104,9 @@ class _AuthGate extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (adminOnly && !auth.isAdmin) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/dashboard'));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => context.go('/dashboard'),
+      );
       return const Scaffold(body: Center(child: Text('Butuh role admin...')));
     }
     return child;

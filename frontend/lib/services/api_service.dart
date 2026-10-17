@@ -32,7 +32,9 @@ class ApiService {
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.followRedirects = true;
-    _dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
+    _dio.interceptors.add(
+      LogInterceptor(responseBody: true, requestBody: true),
+    );
     // Biarkan Dio throw untuk 4xx/5xx agar error 404 tidak masuk ke fromJson.
     // Default validateStatus sudah benar, jangan dilonggarkan ke <500.
   }
@@ -58,9 +60,7 @@ class ApiService {
 
   Future<String> _uploadMultipart(String path, MultipartFile file) async {
     try {
-      final form = FormData.fromMap({
-        'file': file,
-      });
+      final form = FormData.fromMap({'file': file});
       final res = await _dio.post(path, data: form);
       return _uploadUrl(res.data);
     } on DioException catch (e) {
@@ -81,46 +81,67 @@ class ApiService {
     }
   }
 
-  Future<List<ProjectModel>> getProjects(String slug, {int skip = 0, int limit = 20}) async {
+  Future<List<ProjectModel>> getProjects(
+    String slug, {
+    int skip = 0,
+    int limit = 20,
+  }) async {
     try {
       final res = await _dio.get(
         '/public/u/$slug/projects',
         queryParameters: {'skip': skip, 'limit': limit},
       );
       final list = res.data as List;
-      return list.map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => ProjectModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat proyek');
     }
   }
 
-  Future<List<SkillModel>> getSkills(String slug, {int skip = 0, int limit = 100}) async {
+  Future<List<SkillModel>> getSkills(
+    String slug, {
+    int skip = 0,
+    int limit = 100,
+  }) async {
     try {
       final res = await _dio.get(
         '/public/u/$slug/skills',
         queryParameters: {'skip': skip, 'limit': limit},
       );
       final list = res.data as List;
-      return list.map((e) => SkillModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => SkillModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat skill');
     }
   }
 
-  Future<List<ExperienceModel>> getExperiences(String slug, {int skip = 0, int limit = 50}) async {
+  Future<List<ExperienceModel>> getExperiences(
+    String slug, {
+    int skip = 0,
+    int limit = 50,
+  }) async {
     try {
       final res = await _dio.get(
         '/public/u/$slug/experiences',
         queryParameters: {'skip': skip, 'limit': limit},
       );
       final list = res.data as List;
-      return list.map((e) => ExperienceModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => ExperienceModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat pengalaman');
     }
   }
 
-  Future<MessageResponseModel> sendContact(String slug, MessageCreateModel payload) async {
+  Future<MessageResponseModel> sendContact(
+    String slug,
+    MessageCreateModel payload,
+  ) async {
     try {
       final res = await _dio.post(
         '/public/u/$slug/contact',
@@ -133,7 +154,10 @@ class ApiService {
   }
 
   /// GET /public/gallery/projects — galeri multi-user (hanya published).
-  Future<List<ProjectModel>> getGalleryProjects({int skip = 0, int limit = 20}) async {
+  Future<List<ProjectModel>> getGalleryProjects({
+    int skip = 0,
+    int limit = 20,
+  }) async {
     try {
       final res = await _dio.get(
         '/public/gallery/projects',
@@ -143,9 +167,27 @@ class ApiService {
       if (data is! List) {
         throw ApiException('Respons galeri tidak valid');
       }
-      return data.map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      return data
+          .map((e) => ProjectModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat galeri');
+    }
+  }
+
+  /// GET /health — health check backend. Endpoint ini di root, di luar
+  /// prefix `/api/v1`, jadi URL dihitung dari origin `ApiConfig.baseUrl`.
+  Future<bool> healthCheck() async {
+    final base = Uri.tryParse(ApiConfig.baseUrl);
+    if (base == null || base.host.isEmpty) {
+      throw ApiException('Base URL belum dikonfigurasi');
+    }
+    final health = base.replace(path: '/health', query: '', fragment: '');
+    try {
+      final res = await _dio.getUri(health);
+      return res.data is Map && res.data['status'] == 'ok';
+    } on DioException catch (e) {
+      _throwApiError(e, 'Health check gagal');
     }
   }
 
@@ -178,8 +220,13 @@ class ApiService {
 
   Future<List<ProjectModel>> listMyProjects() async {
     try {
-      final res = await _dio.get('/me/projects', queryParameters: {'limit': 100});
-      return (res.data as List).map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      final res = await _dio.get(
+        '/me/projects',
+        queryParameters: {'limit': 100},
+      );
+      return (res.data as List)
+          .map((e) => ProjectModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat proyek saya');
     }
@@ -194,7 +241,10 @@ class ApiService {
     }
   }
 
-  Future<ProjectModel> updateMyProject(int id, Map<String, dynamic> payload) async {
+  Future<ProjectModel> updateMyProject(
+    int id,
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.patch('/me/projects/$id', data: payload);
       return ProjectModel.fromJson(res.data as Map<String, dynamic>);
@@ -236,7 +286,9 @@ class ApiService {
   Future<List<SkillModel>> listMySkills() async {
     try {
       final res = await _dio.get('/me/skills');
-      return (res.data as List).map((e) => SkillModel.fromJson(e as Map<String, dynamic>)).toList();
+      return (res.data as List)
+          .map((e) => SkillModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat skill saya');
     }
@@ -271,13 +323,17 @@ class ApiService {
   Future<List<ExperienceModel>> listMyExperiences() async {
     try {
       final res = await _dio.get('/me/experiences');
-      return (res.data as List).map((e) => ExperienceModel.fromJson(e as Map<String, dynamic>)).toList();
+      return (res.data as List)
+          .map((e) => ExperienceModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat experience');
     }
   }
 
-  Future<ExperienceModel> createMyExperience(Map<String, dynamic> payload) async {
+  Future<ExperienceModel> createMyExperience(
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.post('/me/experiences', data: payload);
       return ExperienceModel.fromJson(res.data as Map<String, dynamic>);
@@ -286,7 +342,10 @@ class ApiService {
     }
   }
 
-  Future<ExperienceModel> updateMyExperience(int id, Map<String, dynamic> payload) async {
+  Future<ExperienceModel> updateMyExperience(
+    int id,
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.patch('/me/experiences/$id', data: payload);
       return ExperienceModel.fromJson(res.data as Map<String, dynamic>);
@@ -329,19 +388,24 @@ class ApiService {
   }
 
   /// POST /me/upload/cover (multipart FormData).
-  Future<String> uploadMyCover(MultipartFile file) => _uploadMultipart('/me/upload/cover', file);
+  Future<String> uploadMyCover(MultipartFile file) =>
+      _uploadMultipart('/me/upload/cover', file);
 
   /// POST /me/upload/media (multipart FormData).
-  Future<String> uploadMyMedia(MultipartFile file) => _uploadMultipart('/me/upload/media', file);
+  Future<String> uploadMyMedia(MultipartFile file) =>
+      _uploadMultipart('/me/upload/media', file);
 
   /// POST /me/upload/avatar (multipart FormData).
-  Future<String> uploadMyAvatar(MultipartFile file) => _uploadMultipart('/me/upload/avatar', file);
+  Future<String> uploadMyAvatar(MultipartFile file) =>
+      _uploadMultipart('/me/upload/avatar', file);
 
   // ---- Admin (/admin/*) ----
   Future<List<UserModel>> adminListUsers() async {
     try {
       final res = await _dio.get('/admin/users');
-      return (res.data as List).map((e) => UserModel.fromJson(e as Map<String, dynamic>)).toList();
+      return (res.data as List)
+          .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat users (admin only)');
     }
@@ -392,7 +456,9 @@ class ApiService {
   Future<List<ProjectModel>> adminListProjects() async {
     try {
       final res = await _dio.get('/admin/projects');
-      return (res.data as List).map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      return (res.data as List)
+          .map((e) => ProjectModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat proyek (admin)');
     }
@@ -400,7 +466,11 @@ class ApiService {
 
   /// GET /admin/projects?owner_id — filter proyek lintas user (metode baru,
   /// signature lama [adminListProjects] dipertahankan).
-  Future<List<ProjectModel>> adminListProjectsFiltered({int? ownerId, int skip = 0, int limit = 50}) async {
+  Future<List<ProjectModel>> adminListProjectsFiltered({
+    int? ownerId,
+    int skip = 0,
+    int limit = 50,
+  }) async {
     try {
       final res = await _dio.get(
         '/admin/projects',
@@ -410,7 +480,9 @@ class ApiService {
           if (ownerId != null) 'owner_id': ownerId,
         },
       );
-      return (res.data as List).map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      return (res.data as List)
+          .map((e) => ProjectModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       _throwApiError(e, 'Gagal memuat proyek (admin)');
     }
@@ -425,7 +497,10 @@ class ApiService {
     }
   }
 
-  Future<ProjectModel> adminUpdateProject(int id, Map<String, dynamic> payload) async {
+  Future<ProjectModel> adminUpdateProject(
+    int id,
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.patch('/admin/projects/$id', data: payload);
       return ProjectModel.fromJson(res.data as Map<String, dynamic>);
@@ -473,7 +548,10 @@ class ApiService {
     }
   }
 
-  Future<SkillModel> adminUpdateSkill(int id, Map<String, dynamic> payload) async {
+  Future<SkillModel> adminUpdateSkill(
+    int id,
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.patch('/admin/skills/$id', data: payload);
       return SkillModel.fromJson(res.data as Map<String, dynamic>);
@@ -490,7 +568,9 @@ class ApiService {
     }
   }
 
-  Future<ExperienceModel> adminCreateExperience(Map<String, dynamic> payload) async {
+  Future<ExperienceModel> adminCreateExperience(
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.post('/admin/experiences', data: payload);
       return ExperienceModel.fromJson(res.data as Map<String, dynamic>);
@@ -499,7 +579,10 @@ class ApiService {
     }
   }
 
-  Future<ExperienceModel> adminUpdateExperience(int id, Map<String, dynamic> payload) async {
+  Future<ExperienceModel> adminUpdateExperience(
+    int id,
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final res = await _dio.patch('/admin/experiences/$id', data: payload);
       return ExperienceModel.fromJson(res.data as Map<String, dynamic>);

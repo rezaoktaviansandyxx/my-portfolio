@@ -595,3 +595,113 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
     );
   }
 }
+
+final _usernamePattern = RegExp(r'^[a-z0-9_]{3,30}$');
+
+/// Dialog buat user (admin) -> payload `adminCreateUser`.
+Future<Map<String, dynamic>?> showAdminUserDialog(BuildContext context) {
+  return showDialog<Map<String, dynamic>>(
+    context: context,
+    builder: (_) => const _AdminUserDialog(),
+  );
+}
+
+class _AdminUserDialog extends StatefulWidget {
+  const _AdminUserDialog();
+
+  @override
+  State<_AdminUserDialog> createState() => _AdminUserDialogState();
+}
+
+class _AdminUserDialogState extends State<_AdminUserDialog> {
+  final _username = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _fullName = TextEditingController();
+  String _role = 'user';
+
+  @override
+  void dispose() {
+    _username.dispose();
+    _email.dispose();
+    _password.dispose();
+    _fullName.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final email = _email.text.trim();
+    if (!_usernamePattern.hasMatch(_username.text.trim())) {
+      _warn(context, 'Username 3-30 karakter (huruf kecil, angka, underscore)');
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      _warn(context, 'Email tidak valid');
+      return;
+    }
+    if (_password.text.length < 8) {
+      _warn(context, 'Password minimal 8 karakter');
+      return;
+    }
+    if (_fullName.text.trim().length < 2) {
+      _warn(context, 'Nama lengkap minimal 2 karakter');
+      return;
+    }
+    Navigator.pop(context, <String, dynamic>{
+      'username': _username.text.trim(),
+      'email': email,
+      'password': _password.text,
+      'full_name': _fullName.text.trim(),
+      'role': _role,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('User baru'),
+      content: SizedBox(
+        width: 380,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              folioField(_username, 'Username*', hint: 'misal: budi_dev'),
+              folioField(
+                _email,
+                'Email*',
+                hint: 'misal: budi@mail.com',
+                keyboard: TextInputType.emailAddress,
+              ),
+              folioField(
+                _fullName,
+                'Nama lengkap*',
+                hint: 'misal: Budi Santoso',
+              ),
+              folioField(_password, 'Password* (min 8)', obscureText: true),
+              DropdownButtonFormField<String>(
+                initialValue: _role,
+                decoration: const InputDecoration(
+                  labelText: 'Role',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: const ['user', 'admin']
+                    .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                    .toList(),
+                onChanged: (v) => setState(() => _role = v ?? 'user'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Simpan')),
+      ],
+    );
+  }
+}

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/models/project_model.dart';
+import 'package:frontend/models/user_model.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/dashboard/dashboard_shell.dart';
+import 'package:frontend/widgets/dashboard/dialogs.dart';
+import 'package:frontend/widgets/dashboard/errors.dart';
 import 'package:frontend/widgets/dashboard/folio_widgets.dart';
 import 'package:frontend/widgets/dashboard/skeleton.dart';
 
@@ -16,23 +20,40 @@ class AdminDashboard extends ConsumerStatefulWidget {
 
 class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   int tab = 0;
+  int? _ownerFilter;
+
+  void _snack(String msg, {bool error = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: error ? Colors.red.shade700 : null,
+      ),
+    );
+  }
+
+  void _refreshAll() {
+    ref.invalidate(adminUsersProvider);
+    ref.invalidate(adminMessagesProvider);
+    ref.invalidate(adminProjectsProvider);
+    ref.invalidate(adminProjectsFilteredProvider);
+    ref.invalidate(adminHealthProvider);
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authNotifierProvider);
     final users = ref.watch(adminUsersProvider);
     final messages = ref.watch(adminMessagesProvider);
-    final projects = ref.watch(adminProjectsProvider);
+    final projects = _ownerFilter == null
+        ? ref.watch(adminProjectsProvider)
+        : ref.watch(adminProjectsFilteredProvider(_ownerFilter));
 
     final userList = users.asData?.value ?? [];
     final msgList = messages.asData?.value ?? [];
     final projList = projects.asData?.value ?? [];
     final publishedCount = userList.where((u) => u.isPublished).length;
-
-    final totalUsers = userList.isEmpty ? 1842 : userList.length;
-    final publicCount = userList.isEmpty ? 1284 : publishedCount;
-    final totalProjects = projList.isEmpty ? 6420 : projList.length;
-    final unread = msgList.isEmpty ? 128 : msgList.length;
+    final unread = msgList.where((m) => m['is_read'] != true).length;
     final isLoading =
         users.isLoading || messages.isLoading || projects.isLoading;
 
@@ -42,37 +63,26 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       menu: [
         const SidebarItem(icon: Icons.grid_view_rounded, label: 'Overview'),
         SidebarItem(
-            icon: Icons.group_outlined,
-            label: 'Pengguna',
-            badge: users.asData == null
-                ? '…'
-                : userList.isEmpty
-                    ? '8'
-                    : '${userList.length}'),
-        const SidebarItem(
-            icon: Icons.work_outline, label: 'Semua Proyek'),
+          icon: Icons.group_outlined,
+          label: 'Pengguna',
+          badge: users.asData == null ? '…' : '${userList.length}',
+        ),
+        const SidebarItem(icon: Icons.work_outline, label: 'Semua Proyek'),
         SidebarItem(
-            icon: Icons.mail_outline,
-            label: 'Pesan Masuk',
-            badge: messages.asData == null
-                ? '…'
-                : msgList.isEmpty
-                    ? '12'
-                    : '${msgList.length}'),
+          icon: Icons.mail_outline,
+          label: 'Pesan Masuk',
+          badge: messages.asData == null ? '…' : '${msgList.length}',
+        ),
       ],
       displayName: auth.user?.fullName ?? auth.user?.username ?? 'Admin',
       displayRole: 'Platform Admin',
       unreadCount: unread,
       child: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(adminUsersProvider);
-          ref.invalidate(adminMessagesProvider);
-          ref.invalidate(adminProjectsProvider);
-        },
+        onRefresh: () async => _refreshAll(),
         child: _body(
-          totalUsers: totalUsers,
-          publicCount: publicCount,
-          totalProjects: totalProjects,
+          totalUsers: userList.length,
+          publicCount: publishedCount,
+          totalProjects: projList.length,
           unread: unread,
           isLoading: isLoading,
         ),
@@ -104,177 +114,86 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         if (isLoading)
           const StatCardsSkeleton()
         else
-          LayoutBuilder(builder: (_, c) {
-            final twoCol = c.maxWidth > 700;
-            final cards = [
-              StatCard(
+          LayoutBuilder(
+            builder: (_, c) {
+              final twoCol = c.maxWidth > 700;
+              final cards = [
+                StatCard(
                   label: 'Total pengguna',
                   value: _fmt(totalUsers),
-                  delta: '12,8%',
                   icon: Icons.group_outlined,
                   iconBg: FolioColors.lilacBg,
-                  iconColor: FolioColors.primary),
-              StatCard(
+                  iconColor: FolioColors.primary,
+                ),
+                StatCard(
                   label: 'Portofolio publik',
                   value: _fmt(publicCount),
-                  delta: '16,8%',
                   icon: Icons.open_in_new_rounded,
                   iconBg: FolioColors.mintBg,
-                  iconColor: FolioColors.green),
-              StatCard(
+                  iconColor: FolioColors.green,
+                ),
+                StatCard(
                   label: 'Total proyek',
                   value: _fmt(totalProjects),
-                  delta: '9,4%',
                   icon: Icons.image_outlined,
                   iconBg: FolioColors.orangeBg,
-                  iconColor: Colors.orange),
-              StatCard(
+                  iconColor: Colors.orange,
+                ),
+                StatCard(
                   label: 'Pesan belum dibaca',
                   value: _fmt(unread),
-                  delta: '5,1%',
                   icon: Icons.mail_outline,
                   iconBg: FolioColors.lilacBg,
-                  iconColor: FolioColors.primary),
-            ];
-            if (!twoCol) {
-              return Column(
+                  iconColor: FolioColors.primary,
+                ),
+              ];
+              if (!twoCol) {
+                return Column(
                   children: cards
-                      .map((w) => Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: 14),
-                          child: SizedBox(
-                              width: double.infinity, child: w)))
-                      .toList());
-            }
-            return GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
-              childAspectRatio: 2.6,
-              children: cards,
-            );
-          }),
+                      .map(
+                        (w) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: SizedBox(width: double.infinity, child: w),
+                        ),
+                      )
+                      .toList(),
+                );
+              }
+              return GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: 2.6,
+                children: cards,
+              );
+            },
+          ),
         const SizedBox(height: 14),
         if (isLoading) ...[
-          const ChartSkeleton(),
-          const SizedBox(height: 14),
           const TableSkeleton(rows: 4),
         ] else ...[
-          LayoutBuilder(builder: (_, c) {
-            final side = c.maxWidth > 820;
-            final chart = SectionCard(
-              title: 'Pertumbuhan portofolio',
-              subtitle: 'Portofolio baru yang dipublikasikan',
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                    border:
-                        Border.all(color: FolioColors.border),
-                    borderRadius: BorderRadius.circular(10)),
-                child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('6 bulan',
-                          style:
-                              TextStyle(fontWeight: FontWeight.w600)),
-                      Icon(Icons.keyboard_arrow_down, size: 16),
-                    ]),
-              ),
-              child: Column(
+          LayoutBuilder(
+            builder: (_, c) {
+              final side = c.maxWidth > 820;
+              final summary = _contentSummaryCard();
+              final status = _statusCard();
+              if (!side) {
+                return Column(
+                  children: [summary, const SizedBox(height: 14), status],
+                );
+              }
+              return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(_fmt(publicCount),
-                          style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800)),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                            color: FolioColors.greenBg,
-                            borderRadius:
-                                BorderRadius.circular(8)),
-                        child: const Text('↗ 16,8%',
-                            style: TextStyle(
-                                color: FolioColors.green,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  const GrowthChart(values: [22, 34, 30, 46, 58, 82]),
+                  Expanded(child: summary),
+                  const SizedBox(width: 14),
+                  Expanded(child: status),
                 ],
-              ),
-            );
-            final status = SectionCard(
-              title: 'Status platform',
-              subtitle: 'Kondisi layanan saat ini',
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                    color: FolioColors.greenBg,
-                    borderRadius: BorderRadius.circular(8)),
-                child: const Text('Healthy',
-                    style: TextStyle(
-                        color: FolioColors.green,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12)),
-              ),
-              child: Column(
-                children: [
-                  _meter('API Service', '99,99%', 0.99),
-                  _meter('Database', '24 ms', 0.9),
-                  _meter('File Storage', '68%', 0.68),
-                  _meter('Rate limit', 'Normal', 0.35),
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(top: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFF7F8FB),
-                        borderRadius: BorderRadius.circular(12)),
-                    child: const Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Text('API v1 aktif',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700)),
-                        Text(
-                            '55 endpoint tersedia dan berjalan normal.',
-                            style: TextStyle(
-                                color: FolioColors.muted,
-                                fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-            if (!side) {
-              return Column(children: [
-                chart,
-                const SizedBox(height: 14),
-                status
-              ]);
-            }
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: chart),
-                const SizedBox(width: 14),
-                Expanded(child: status),
-              ],
-            );
-          }),
+              );
+            },
+          ),
           const SizedBox(height: 14),
           _creatorsCard(),
         ],
@@ -282,7 +201,59 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     );
   }
 
-  Widget _meter(String label, String value, double p) {
+  /// Ringkasan konten berbasis data nyata (bukan angka dummy).
+  Widget _contentSummaryCard() {
+    final users = ref.watch(adminUsersProvider).asData?.value ?? [];
+    final projects = _ownerFilter == null
+        ? ref.watch(adminProjectsProvider).asData?.value ?? []
+        : ref
+                  .watch(adminProjectsFilteredProvider(_ownerFilter))
+                  .asData
+                  ?.value ??
+              [];
+    final publishedProjects = projects
+        .where((p) => p.status == 'published')
+        .length;
+    final draftProjects = projects.length - publishedProjects;
+    final publishedUsers = users.where((u) => u.isPublished).length;
+    return SectionCard(
+      title: 'Ringkasan konten',
+      subtitle: 'Komposisi konten saat ini',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _barRow(
+            'Proyek published',
+            publishedProjects,
+            projects.length,
+            FolioColors.green,
+          ),
+          _barRow(
+            'Proyek draft',
+            draftProjects,
+            projects.length,
+            FolioColors.muted,
+          ),
+          const SizedBox(height: 6),
+          _barRow(
+            'Portofolio publik',
+            publishedUsers,
+            users.length,
+            FolioColors.primary,
+          ),
+          _barRow(
+            'Portofolio draft',
+            users.length - publishedUsers,
+            users.length,
+            FolioColors.muted,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _barRow(String label, int value, int total, Color color) {
+    final ratio = total == 0 ? 0.0 : value / total;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
       child: Column(
@@ -290,21 +261,23 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
           Row(
             children: [
               Expanded(child: Text(label)),
-              Text(value,
-                  style: const TextStyle(
-                      color: FolioColors.muted,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                '$value dari $total',
+                style: const TextStyle(
+                  color: FolioColors.muted,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
-              value: p,
+              value: ratio,
               minHeight: 6,
               backgroundColor: const Color(0xFFEEF0F6),
-              valueColor: const AlwaysStoppedAnimation(
-                  FolioColors.primary),
+              valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
         ],
@@ -312,14 +285,103 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     );
   }
 
+  /// Status platform dari GET /health (best-effort, tanpa angka palsu).
+  Widget _statusCard() {
+    final health = ref.watch(adminHealthProvider);
+    final Widget badge;
+    final String description;
+    switch (health) {
+      case AsyncData(:final value):
+        if (value) {
+          badge = _pill('Terjangkau', FolioColors.greenBg, FolioColors.green);
+          description = 'Backend merespons GET /health dengan status ok.';
+        } else {
+          badge = _pill(
+            'Respons tidak dikenal',
+            FolioColors.orangeBg,
+            Colors.orange.shade800,
+          );
+          description = 'Backend merespons, tetapi format tidak sesuai.';
+        }
+      case AsyncError():
+        badge = _pill(
+          'Tidak terjangkau',
+          Colors.red.shade50,
+          Colors.red.shade700,
+        );
+        description =
+            'Tidak dapat menghubungi backend. Periksa koneksi atau server.';
+      default:
+        badge = _pill('Memeriksa…', const Color(0xFFF1F2F7), FolioColors.muted);
+        description = 'Sedang memeriksa status backend.';
+    }
+    return SectionCard(
+      title: 'Status platform',
+      subtitle: 'Kondisi layanan saat ini',
+      trailing: badge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F8FB),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'API v1',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: FolioColors.muted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => ref.invalidate(adminHealthProvider),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Periksa ulang'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(String text, Color bg, Color fg) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: 12),
+    ),
+  );
+
   Widget _creatorsCard() {
     final users = ref.watch(adminUsersProvider);
     return SectionCard(
       title: 'Kreator terbaru',
       subtitle: 'Pengguna yang baru bergabung',
       trailing: TextButton(
-          onPressed: () => setState(() => tab = 1),
-          child: const Text('Kelola pengguna')),
+        onPressed: () => setState(() => tab = 1),
+        child: const Text('Kelola pengguna'),
+      ),
       child: users.when(
         data: (list) {
           if (list.isEmpty) {
@@ -329,19 +391,18 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   'Data pengguna akan muncul di sini setelah ada yang mendaftar.',
             );
           }
-          final rows = list.take(6).toList();
-          return _creatorTable(rows);
+          return _creatorTable(list.take(6).toList());
         },
         loading: () => const TableSkeleton(rows: 4),
         error: (e, _) => ErrorCard(
-          message: 'Gagal memuat pengguna: $e',
+          message: friendlyError(e, 'Gagal memuat pengguna'),
           onRetry: () => ref.invalidate(adminUsersProvider),
         ),
       ),
     );
   }
 
-  Widget _creatorTable(List<dynamic> rows) {
+  Widget _creatorTable(List<UserModel> rows) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: ConstrainedBox(
@@ -350,60 +411,73 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
           columns: const [
             DataColumn(label: Text('Kreator')),
             DataColumn(label: Text('Profesi')),
-            DataColumn(label: Text('Proyek')),
+            DataColumn(label: Text('Slug')),
             DataColumn(label: Text('Status')),
             DataColumn(label: Text('Publikasi')),
           ],
-          rows: rows.map((r) {
-            final u = r as dynamic;
-            final int id = u.id as int;
-            final String name =
-                ((u.fullName ?? u.username) as String);
-            final String prof =
-                ((u.headline ?? u.role ?? 'Kreator') as String);
-            final bool published = u.isPublished as bool;
-            final initials = name.trim().isEmpty
-                ? '?'
-                : name
-                    .trim()
-                    .split(RegExp(r'\s+'))
-                    .take(2)
-                    .map((e) => e[0].toUpperCase())
-                    .join();
-            return DataRow(cells: [
-              DataCell(Row(children: [
-                CircleAvatar(
-                    radius: 15,
-                    backgroundColor:
-                        FolioColors.primarySoft,
-                    child: Text(initials,
-                        style: const TextStyle(
+          rows: rows.map((u) {
+            final name = u.fullName ?? u.username;
+            return DataRow(
+              cells: [
+                DataCell(
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 15,
+                        backgroundColor: FolioColors.primarySoft,
+                        child: Text(
+                          _initials(name),
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: FolioColors.primary))),
-                const SizedBox(width: 10),
-                Text(name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600)),
-              ])),
-              DataCell(Text(prof)),
-              DataCell(Text(u.profileSlug ?? '-')),
-              DataCell(StatusPill(
-                  published ? 'Published' : 'Draft')),
-              DataCell(Switch(
-                value: published,
-                onChanged: (v) async {
-                  await ref
-                      .read(apiServiceProvider)
-                      .adminUpdateUser(id, {'is_published': v});
-                  ref.invalidate(adminUsersProvider);
-                },
-              )),
-            ]);
+                            color: FolioColors.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        name,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+                DataCell(Text(u.headline ?? u.role ?? '-')),
+                DataCell(Text(u.profileSlug ?? '-')),
+                DataCell(StatusPill(u.isPublished ? 'Published' : 'Draft')),
+                DataCell(
+                  Switch(
+                    value: u.isPublished,
+                    onChanged: (v) => _setUserField(u.id, {'is_published': v}),
+                  ),
+                ),
+              ],
+            );
           }).toList(),
         ),
       ),
     );
+  }
+
+  Future<void> _setUserField(int id, Map<String, dynamic> patch) async {
+    try {
+      await ref.read(apiServiceProvider).adminUpdateUser(id, patch);
+      ref.invalidate(adminUsersProvider);
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal update user'), error: true);
+    }
+  }
+
+  Future<void> _createUser() async {
+    final payload = await showAdminUserDialog(context);
+    if (payload == null) return;
+    try {
+      await ref.read(apiServiceProvider).adminCreateUser(payload);
+      ref.invalidate(adminUsersProvider);
+      _snack('User dibuat');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal buat user'), error: true);
+    }
   }
 
   Widget _usersTab() {
@@ -414,14 +488,14 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         PageHeader(
           eyebrow: 'Admin Console',
           title: 'Pengguna',
-          subtitle: 'Kelola publikasi semua kreator.',
-          actionLabel: 'Refresh',
-          onAction: () => ref.invalidate(adminUsersProvider),
+          subtitle: 'Kelola publikasi, status aktif, dan role kreator.',
+          actionLabel: 'Tambah user',
+          onAction: _createUser,
         ),
         const SizedBox(height: 16),
         SectionCard(
           title: 'Semua pengguna',
-          subtitle: 'Toggle untuk publish / unpublish portofolio.',
+          subtitle: 'Toggle publikasi, aktif/nonaktif, dan role lewat menu ⋮.',
           child: users.when(
             data: (list) {
               if (list.isEmpty) {
@@ -432,28 +506,83 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               }
               return Column(
                 children: list
-                    .map((u) => SwitchListTile(
-                          title: Text(
-                              '${u.fullName ?? u.username} (${u.role ?? 'user'})'),
-                          subtitle: Text(
-                              '${u.email} • slug: ${u.profileSlug ?? '-'}'),
-                          value: u.isPublished,
-                          onChanged: (v) async {
-                            await ref
-                                .read(apiServiceProvider)
-                                .adminUpdateUser(
-                                    u.id, {'is_published': v});
-                            ref.invalidate(adminUsersProvider);
-                          },
-                        ))
+                    .map(
+                      (u) => ListTile(
+                        leading: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: FolioColors.primarySoft,
+                          child: Text(
+                            _initials(u.fullName ?? u.username),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: FolioColors.primary,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          '${u.fullName ?? u.username} (${u.role ?? 'user'})',
+                        ),
+                        subtitle: Text(
+                          '${u.email} • slug: ${u.profileSlug ?? '-'}'
+                          '${u.isActive ? '' : ' • nonaktif'}',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Tooltip(
+                              message: u.isPublished
+                                  ? 'Sembunyikan portofolio'
+                                  : 'Publikasikan portofolio',
+                              child: Switch(
+                                value: u.isPublished,
+                                onChanged: (v) =>
+                                    _setUserField(u.id, {'is_published': v}),
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              onSelected: (v) {
+                                if (v == 'active') {
+                                  _setUserField(u.id, {
+                                    'is_active': !u.isActive,
+                                  });
+                                }
+                                if (v == 'role') {
+                                  _setUserField(u.id, {
+                                    'role': u.isAdmin ? 'user' : 'admin',
+                                  });
+                                }
+                              },
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'active',
+                                  child: Text(
+                                    u.isActive
+                                        ? 'Nonaktifkan akun'
+                                        : 'Aktifkan akun',
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'role',
+                                  child: Text(
+                                    u.isAdmin
+                                        ? 'Jadikan user'
+                                        : 'Jadikan admin',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
               );
             },
             loading: () => const TableSkeleton(rows: 5),
             error: (e, _) => ErrorCard(
-              message: 'Gagal memuat pengguna: $e',
-              onRetry: () =>
-                  ref.invalidate(adminUsersProvider),
+              message: friendlyError(e, 'Gagal memuat pengguna'),
+              onRetry: () => ref.invalidate(adminUsersProvider),
             ),
           ),
         ),
@@ -461,18 +590,105 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     );
   }
 
+  Future<void> _createProject() async {
+    final payload = await showProjectDialog(context);
+    if (payload == null) return;
+    try {
+      await ref.read(apiServiceProvider).adminCreateProject(payload);
+      ref.invalidate(adminProjectsProvider);
+      ref.invalidate(adminProjectsFilteredProvider);
+      _snack('Proyek dibuat');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal buat proyek'), error: true);
+    }
+  }
+
+  Future<void> _editProject(ProjectModel p) async {
+    final payload = await showProjectDialog(context, project: p);
+    if (payload == null) return;
+    try {
+      await ref.read(apiServiceProvider).adminUpdateProject(p.id, payload);
+      ref.invalidate(adminProjectsProvider);
+      ref.invalidate(adminProjectsFilteredProvider);
+      _snack('Proyek diperbarui');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal update proyek'), error: true);
+    }
+  }
+
+  Future<void> _deleteProject(ProjectModel p) async {
+    if (!await confirmDelete(context, 'Proyek "${p.title}"')) return;
+    try {
+      await ref.read(apiServiceProvider).adminDeleteProject(p.id);
+      ref.invalidate(adminProjectsProvider);
+      ref.invalidate(adminProjectsFilteredProvider);
+      _snack('Proyek dihapus');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal hapus proyek'), error: true);
+    }
+  }
+
+  Future<void> _addProjectMedia(ProjectModel p) async {
+    final data = await showProjectMediaDialog(context);
+    if (data == null) return;
+    try {
+      await ref
+          .read(apiServiceProvider)
+          .adminAddProjectMedia(
+            p.id,
+            mediaUrl: data['media_url']!,
+            mediaType: data['media_type'] ?? 'image',
+            caption: (data['caption']?.isEmpty ?? true)
+                ? null
+                : data['caption'],
+          );
+      _snack('Media ditambahkan');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal tambah media'), error: true);
+    }
+  }
+
   Widget _projectsTab() {
-    final projects = ref.watch(adminProjectsProvider);
+    final users = ref.watch(adminUsersProvider).asData?.value ?? [];
+    final projects = _ownerFilter == null
+        ? ref.watch(adminProjectsProvider)
+        : ref.watch(adminProjectsFilteredProvider(_ownerFilter));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const PageHeader(
+        PageHeader(
           eyebrow: 'Admin Console',
           title: 'Semua Proyek',
           subtitle: 'Konten portofolio di seluruh platform.',
-          actionLabel: 'Lihat publik',
+          actionLabel: 'Tambah proyek',
+          onAction: _createProject,
         ),
         const SizedBox(height: 16),
+        SectionCard(
+          title: 'Filter kreator',
+          child: DropdownButtonFormField<int?>(
+            initialValue: _ownerFilter,
+            decoration: const InputDecoration(
+              labelText: 'Pemilik proyek',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            items: [
+              const DropdownMenuItem<int?>(
+                value: null,
+                child: Text('Semua kreator'),
+              ),
+              ...users.map(
+                (u) => DropdownMenuItem<int?>(
+                  value: u.id,
+                  child: Text(u.fullName ?? u.username),
+                ),
+              ),
+            ],
+            onChanged: (v) => setState(() => _ownerFilter = v),
+          ),
+        ),
+        const SizedBox(height: 14),
         SectionCard(
           title: 'Daftar proyek',
           child: projects.when(
@@ -485,30 +701,78 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               }
               return Column(
                 children: list
-                    .take(30)
-                    .map((p) => ListTile(
-                          leading: const Icon(
-                              Icons.image_outlined),
-                          title: Text(p.title),
-                          subtitle: Text(p.status ?? p.slug),
-                          trailing: StatusPill(
-                              (p.status ?? 'published').isEmpty
-                                  ? 'Published'
-                                  : p.status!),
-                        ))
+                    .take(50)
+                    .map(
+                      (p) => ListTile(
+                        leading: const Icon(Icons.image_outlined),
+                        title: Text(p.title),
+                        subtitle: Text('slug: ${p.slug} • ${p.status ?? '-'}'),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (v) {
+                            if (v == 'edit') {
+                              _editProject(p);
+                            } else if (v == 'media') {
+                              _addProjectMedia(p);
+                            } else if (v == 'delete') {
+                              _deleteProject(p);
+                            }
+                          },
+                          itemBuilder: (_) => const [
+                            PopupMenuItem(value: 'edit', child: Text('Edit')),
+                            PopupMenuItem(
+                              value: 'media',
+                              child: Text('Tambah media'),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Hapus'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
               );
             },
             loading: () => const ListSkeleton(rows: 5),
             error: (e, _) => ErrorCard(
-              message: 'Gagal memuat proyek: $e',
-              onRetry: () =>
-                  ref.invalidate(adminProjectsProvider),
+              message: friendlyError(e, 'Gagal memuat proyek'),
+              onRetry: () {
+                ref.invalidate(adminProjectsProvider);
+                ref.invalidate(adminProjectsFilteredProvider);
+              },
             ),
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _markRead(int id) async {
+    try {
+      await ref.read(apiServiceProvider).adminMarkMessageRead(id);
+      ref.invalidate(adminMessagesProvider);
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal tandai pesan'), error: true);
+    }
+  }
+
+  Future<void> _deleteMessage(Map<String, dynamic> m) async {
+    if (!await confirmDelete(
+      context,
+      'Pesan dari "${m['sender_name'] ?? 'pengirim'}"',
+    )) {
+      return;
+    }
+    try {
+      await ref
+          .read(apiServiceProvider)
+          .adminDeleteMessage((m['id'] as num).toInt());
+      ref.invalidate(adminMessagesProvider);
+      _snack('Pesan dihapus');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal hapus pesan'), error: true);
+    }
   }
 
   Widget _messagesTab() {
@@ -521,8 +785,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
           title: 'Pesan Masuk',
           subtitle: 'Semua pesan dari pengunjung.',
           actionLabel: 'Refresh',
-          onAction: () =>
-              ref.invalidate(adminMessagesProvider),
+          onAction: () => ref.invalidate(adminMessagesProvider),
         ),
         const SizedBox(height: 16),
         SectionCard(
@@ -537,36 +800,87 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               }
               return Column(
                 children: list
-                    .take(30)
-                    .map((m) => ListTile(
-                          leading: CircleAvatar(
-                              backgroundColor:
-                                  FolioColors.primarySoft,
-                              child: Text(
-                                  (m['sender_name']
-                                              ?.toString() ??
-                                          '?')
-                                      .take(1)
-                                      .toUpperCase())),
-                          title: Text(
-                              m['sender_name']?.toString() ??
-                                  '-'),
-                          subtitle: Text(
-                              m['content']?.toString() ?? ''),
-                        ))
+                    .take(50)
+                    .map(
+                      (m) => ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: FolioColors.primarySoft,
+                          child: Text(
+                            (m['sender_name']?.toString() ?? '?')
+                                .substring(0, 1)
+                                .toUpperCase(),
+                          ),
+                        ),
+                        title: Text(m['sender_name']?.toString() ?? '-'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(m['sender_email']?.toString() ?? ''),
+                            Text(m['content']?.toString() ?? ''),
+                            Text(
+                              _fmtDate(m['created_at']),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: FolioColors.muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                        isThreeLine: true,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (m['is_read'] != true)
+                              IconButton(
+                                tooltip: 'Tandai dibaca',
+                                icon: const Icon(
+                                  Icons.mark_email_read_outlined,
+                                ),
+                                onPressed: () =>
+                                    _markRead((m['id'] as num).toInt()),
+                              ),
+                            IconButton(
+                              tooltip: 'Hapus',
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => _deleteMessage(m),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
               );
             },
             loading: () => const ListSkeleton(rows: 5),
             error: (e, _) => ErrorCard(
-              message: 'Gagal memuat pesan: $e',
-              onRetry: () =>
-                  ref.invalidate(adminMessagesProvider),
+              message: friendlyError(e, 'Gagal memuat pesan'),
+              onRetry: () => ref.invalidate(adminMessagesProvider),
             ),
           ),
         ),
       ],
     );
+  }
+
+  String _initials(String name) {
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return '?';
+    return parts.take(2).map((e) => e[0].toUpperCase()).join();
+  }
+
+  /// Format `created_at` ISO -> `d/m/yyyy`. Fallback: 10 char pertama.
+  String _fmtDate(dynamic raw) {
+    if (raw == null) return '';
+    final text = raw.toString();
+    final dt = DateTime.tryParse(text);
+    if (dt == null) {
+      return text.length > 10 ? text.substring(0, 10) : text;
+    }
+    return '${dt.day}/${dt.month}/${dt.year}';
   }
 
   String _fmt(int n) {
@@ -583,9 +897,4 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     }
     return buf.toString().split('').reversed.join();
   }
-}
-
-extension on String {
-  String take(int n) =>
-      length <= n ? this : '${substring(0, n)}…';
 }

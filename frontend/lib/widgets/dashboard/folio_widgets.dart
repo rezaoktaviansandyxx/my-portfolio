@@ -4,7 +4,7 @@ import 'package:frontend/theme/app_theme.dart';
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
-  final String delta;
+  final String? delta;
   final IconData icon;
   final Color iconBg;
   final Color iconColor;
@@ -12,7 +12,7 @@ class StatCard extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
-    required this.delta,
+    this.delta,
     required this.icon,
     required this.iconBg,
     required this.iconColor,
@@ -32,8 +32,9 @@ class StatCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                      color: iconBg,
-                      borderRadius: BorderRadius.circular(14)),
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   child: Icon(icon, color: iconColor),
                 ),
                 const Spacer(),
@@ -47,22 +48,33 @@ class StatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: Text(value,
-                      style: const TextStyle(
-                          fontSize: 26, fontWeight: FontWeight.w800)),
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
+                if (delta != null && delta!.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
                       color: FolioColors.greenBg,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text('↗ $delta',
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '↗ $delta',
                       style: const TextStyle(
-                          color: FolioColors.green,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
-                ),
+                        color: FolioColors.green,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -100,14 +112,22 @@ class SectionCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800, fontSize: 16)),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 2),
-                        Text(subtitle!,
-                            style: const TextStyle(
-                                color: FolioColors.muted, fontSize: 13)),
+                        Text(
+                          subtitle!,
+                          style: const TextStyle(
+                            color: FolioColors.muted,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ],
                   ),
@@ -136,11 +156,14 @@ class StatusPill extends StatelessWidget {
         color: published ? FolioColors.greenBg : const Color(0xFFF1F2F7),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(text,
-          style: TextStyle(
-              color: published ? FolioColors.green : FolioColors.muted,
-              fontWeight: FontWeight.w700,
-              fontSize: 12)),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: published ? FolioColors.green : FolioColors.muted,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }
@@ -174,8 +197,7 @@ class GrowthChart extends StatelessWidget {
     );
   }
 
-  static const _axis =
-      TextStyle(color: FolioColors.muted, fontSize: 12);
+  static const _axis = TextStyle(color: FolioColors.muted, fontSize: 12);
 }
 
 class _AreaPainter extends CustomPainter {
@@ -190,7 +212,8 @@ class _AreaPainter extends CustomPainter {
     final pts = <Offset>[];
     for (var i = 0; i < values.length; i++) {
       final x = size.width * i / (values.length - 1);
-      final y = size.height -
+      final y =
+          size.height -
           ((values[i] - minV) / span) * (size.height * 0.8) -
           size.height * 0.1;
       pts.add(Offset(x, y));
@@ -212,26 +235,28 @@ class _AreaPainter extends CustomPainter {
       ..lineTo(0, size.height)
       ..close();
     canvas.drawPath(
-        fill,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              FolioColors.primary.withValues(alpha: 0.22),
-              FolioColors.primary.withValues(alpha: 0.02),
-            ],
-          ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
-          ..style = PaintingStyle.fill);
+      fill,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            FolioColors.primary.withValues(alpha: 0.22),
+            FolioColors.primary.withValues(alpha: 0.02),
+          ],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+        ..style = PaintingStyle.fill,
+    );
     for (final p in pts) {
       canvas.drawCircle(p, 4, Paint()..color = Colors.white);
       canvas.drawCircle(
-          p,
-          4,
-          Paint()
-            ..color = FolioColors.primary
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 2.5);
+        p,
+        4,
+        Paint()
+          ..color = FolioColors.primary
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5,
+      );
     }
   }
 
@@ -264,37 +289,36 @@ class PageHeader extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: FolioColors.primary,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(
-            horizontal: 18, vertical: 14),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14)),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     );
     final text = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(eyebrow,
-            style: const TextStyle(
-                color: FolioColors.primary,
-                fontWeight: FontWeight.w700)),
+        Text(
+          eyebrow,
+          style: const TextStyle(
+            color: FolioColors.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(title,
-            style: TextStyle(
-                fontSize: narrow ? 24 : 30,
-                fontWeight: FontWeight.w800)),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: narrow ? 24 : 30,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(subtitle,
-            style: const TextStyle(color: FolioColors.muted)),
+        Text(subtitle, style: const TextStyle(color: FolioColors.muted)),
       ],
     );
     if (narrow) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          text,
-          const SizedBox(height: 12),
-          action,
-        ],
+        children: [text, const SizedBox(height: 12), action],
       );
     }
     return Row(
