@@ -5,11 +5,11 @@ import 'package:frontend/models/user_model.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/dashboard/dashboard_shell.dart';
-import 'package:frontend/widgets/dashboard/dialogs.dart';
-import 'package:frontend/widgets/dashboard/errors.dart';
-import 'package:frontend/widgets/dashboard/folio_widgets.dart';
-import 'package:frontend/widgets/dashboard/skeleton.dart';
+import 'package:frontend/widgets/dashboard_shell.dart';
+import 'package:frontend/widgets/dashboard_dialogs.dart';
+import 'package:frontend/widgets/errors.dart';
+import 'package:frontend/widgets/folio_widgets.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
@@ -21,6 +21,63 @@ class AdminDashboard extends ConsumerStatefulWidget {
 class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   int tab = 0;
   int? _ownerFilter;
+  final TextEditingController _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Filter sederhana untuk search bar di topbar (case-insensitive).
+  bool _hit(List<String?> fields) =>
+      _query.isEmpty ||
+      fields.any((f) => f?.toLowerCase().contains(_query) ?? false);
+
+  List<UserModel> _filterUsers(List<UserModel> list) => _query.isEmpty
+      ? list
+      : list
+          .where((u) => _hit([
+                u.fullName,
+                u.username,
+                u.email,
+                u.profileSlug,
+              ]))
+          .toList(growable: false);
+
+  List<ProjectModel> _filterProjects(List<ProjectModel> list) => _query.isEmpty
+      ? list
+      : list
+          .where((p) => _hit([p.title, p.slug]))
+          .toList(growable: false);
+
+  List<Map<String, dynamic>> _filterMessages(
+          List<Map<String, dynamic>> list) =>
+      _query.isEmpty
+          ? list
+          : list
+              .where((m) => _hit([
+                    m['sender_name']?.toString(),
+                    m['sender_email']?.toString(),
+                    m['content']?.toString(),
+                  ]))
+              .toList(growable: false);
+
+  Widget _noResult(String what) => EmptyCard(
+        title: 'Tidak ada hasil',
+        subtitle: 'Tidak ada $what yang cocok dengan pencarian "$_query".',
+      );
+
+  /// Lompat ke tab Pesan Masuk dari lonceng notifikasi; bersihkan query
+  /// agar pesan yang baru dibuka tidak tersaring.
+  void _goMessages() {
+    _search.clear();
+    setState(() {
+      _query = '';
+      tab = 3;
+    });
+  }
 
   void _snack(String msg, {bool error = false}) {
     if (!mounted) return;
@@ -76,7 +133,14 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       ],
       displayName: auth.user?.fullName ?? auth.user?.username ?? 'Admin',
       displayRole: 'Platform Admin',
+      avatarUrl: auth.user?.avatarUrl,
       unreadCount: unread,
+      searchController: _search,
+      onSearch: (q) => setState(() => _query = q.trim().toLowerCase()),
+      unreadMessages:
+          msgList.where((m) => m['is_read'] != true).toList(),
+      onOpenNotification: (_) => _goMessages(),
+      onOpenInbox: _goMessages,
       child: RefreshIndicator(
         onRefresh: () async => _refreshAll(),
         child: _body(
@@ -504,8 +568,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   subtitle: 'Pengguna baru akan tampil di sini.',
                 );
               }
+              final filtered = _filterUsers(list);
+              if (filtered.isEmpty) return _noResult('pengguna');
               return Column(
-                children: list
+                children: filtered
                     .map(
                       (u) => ListTile(
                         leading: CircleAvatar(
@@ -699,8 +765,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   subtitle: 'Proyek kreator akan tampil di sini.',
                 );
               }
+              final filtered = _filterProjects(list);
+              if (filtered.isEmpty) return _noResult('proyek');
               return Column(
-                children: list
+                children: filtered
                     .take(50)
                     .map(
                       (p) => ListTile(
@@ -798,8 +866,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   subtitle: 'Pesan masuk akan tampil di sini.',
                 );
               }
+              final filtered = _filterMessages(list);
+              if (filtered.isEmpty) return _noResult('pesan');
               return Column(
-                children: list
+                children: filtered
                     .take(50)
                     .map(
                       (m) => ListTile(

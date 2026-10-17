@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/dashboard/errors.dart';
-import 'package:frontend/widgets/dashboard/skeleton.dart';
+import 'package:frontend/widgets/errors.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 /// Halaman publik: galeri proyek published dari seluruh kreator
 /// (`GET /public/gallery/projects`).
@@ -77,7 +78,8 @@ class GalleryScreen extends ConsumerWidget {
                                 Expanded(
                                   child: p.coverImageUrl != null
                                       ? Image.network(
-                                          p.coverImageUrl!,
+                                          ApiConfig.resolveFileUrl(
+                                              p.coverImageUrl),
                                           fit: BoxFit.cover,
                                           errorBuilder: (_, __, ___) =>
                                               _placeholder(),

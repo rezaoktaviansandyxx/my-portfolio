@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/models/experience_model.dart';
 import 'package:frontend/models/project_model.dart';
 import 'package:frontend/models/skill_model.dart';
@@ -8,12 +9,12 @@ import 'package:frontend/models/user_model.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/dashboard/dashboard_shell.dart';
-import 'package:frontend/widgets/dashboard/dialogs.dart';
-import 'package:frontend/widgets/dashboard/errors.dart';
-import 'package:frontend/widgets/dashboard/folio_field.dart';
-import 'package:frontend/widgets/dashboard/folio_widgets.dart';
-import 'package:frontend/widgets/dashboard/skeleton.dart';
+import 'package:frontend/widgets/dashboard_shell.dart';
+import 'package:frontend/widgets/dashboard_dialogs.dart';
+import 'package:frontend/widgets/errors.dart';
+import 'package:frontend/widgets/folio_field.dart';
+import 'package:frontend/widgets/folio_widgets.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 /// Ubah status publish situs. Dipakai kartu profil dan form profil.
 Future<void> setSitePublished(WidgetRef ref, bool published) async {
@@ -30,6 +31,52 @@ class UserDashboard extends ConsumerStatefulWidget {
 
 class _UserDashboardState extends ConsumerState<UserDashboard> {
   int tab = 0;
+  final TextEditingController _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Filter sederhana untuk search bar di topbar (case-insensitive).
+  bool _hit(List<String?> fields) =>
+      _query.isEmpty ||
+      fields.any((f) => f?.toLowerCase().contains(_query) ?? false);
+
+  List<ProjectModel> _filterProjects(List<ProjectModel> list) => _query.isEmpty
+      ? list
+      : list
+          .where((p) => _hit([p.title, p.slug]))
+          .toList(growable: false);
+
+  List<Map<String, dynamic>> _filterMessages(
+          List<Map<String, dynamic>> list) =>
+      _query.isEmpty
+          ? list
+          : list
+              .where((m) => _hit([
+                    m['sender_name']?.toString(),
+                    m['sender_email']?.toString(),
+                    m['content']?.toString(),
+                  ]))
+              .toList(growable: false);
+
+  Widget _noResult(String what) => EmptyCard(
+        title: 'Tidak ada hasil',
+        subtitle: 'Tidak ada $what yang cocok dengan pencarian "$_query".',
+      );
+
+  /// Lompat ke tab Pesan dari lonceng notifikasi; bersihkan query agar
+  /// pesan yang baru dibuka tidak tersaring.
+  void _goInbox() {
+    _search.clear();
+    setState(() {
+      _query = '';
+      tab = 4;
+    });
+  }
 
   void _snack(String msg, {bool error = false}) {
     if (!mounted) return;
@@ -110,7 +157,14 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       displayName:
           profile.asData?.value.fullName ?? auth.user?.username ?? 'Kreator',
       displayRole: profile.asData?.value.headline ?? '',
+      avatarUrl: profile.asData?.value.avatarUrl,
       unreadCount: unread,
+      searchController: _search,
+      onSearch: (q) => setState(() => _query = q.trim().toLowerCase()),
+      unreadMessages:
+          msgList.where((m) => m['is_read'] != true).toList(),
+      onOpenNotification: (_) => _goInbox(),
+      onOpenInbox: _goInbox,
       child: RefreshIndicator(
         onRefresh: () async => _refreshAll(),
         child: _body(first),
@@ -189,17 +243,36 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                       .take(2)
                       .map((e) => e[0].toUpperCase())
                       .join();
+            final avatarUrl = ApiConfig.resolveFileUrl(u.avatarUrl);
             return Row(
               children: [
+                // Avatar foto user jika tersedia, fallback ke inisial
+                // saat kosong atau gagal dimuat.
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: FolioColors.primarySoft,
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: FolioColors.primary,
-                    ),
+                  child: ClipOval(
+                    child: avatarUrl.isEmpty
+                        ? Text(
+                            initials,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: FolioColors.primary,
+                            ),
+                          )
+                        : Image.network(
+                            avatarUrl,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Text(
+                              initials,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: FolioColors.primary,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -285,8 +358,10 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                   'Tambahkan proyek pertamamu agar portofolio tampil menarik.',
             );
           }
+          final filtered = _filterProjects(list);
+          if (filtered.isEmpty) return _noResult('proyek');
           return Column(
-            children: list.take(3).map((p) {
+            children: filtered.take(3).map((p) {
               final cat = (p.skills?.isNotEmpty == true)
                   ? p.skills!.first.name
                   : (p.status ?? 'Proyek');
@@ -577,8 +652,11 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                   'Pesan dari pengunjung portofoliomu akan tampil di sini.',
             );
           }
+          final filtered = _filterMessages(list);
+          if (filtered.isEmpty) return _noResult('pesan');
           return Column(
-            children: list.take(3).map((m) => _messageTile(m)).toList(),
+            children:
+                filtered.take(3).map((m) => _messageTile(m)).toList(),
           );
         },
         loading: () => const ListSkeleton(rows: 3),
@@ -714,8 +792,10 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                   subtitle: 'Proyek akan tampil di sini.',
                 );
               }
+              final filtered = _filterProjects(list);
+              if (filtered.isEmpty) return _noResult('proyek');
               return Column(
-                children: list
+                children: filtered
                     .map(
                       (p) => ListTile(
                         contentPadding: EdgeInsets.zero,
@@ -991,8 +1071,10 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
               subtitle: 'Pesan akan tampil di sini.',
             );
           }
+          final filtered = _filterMessages(list);
+          if (filtered.isEmpty) return _noResult('pesan');
           return Column(
-            children: list
+            children: filtered
                 .map(
                   (m) => Column(
                     children: [

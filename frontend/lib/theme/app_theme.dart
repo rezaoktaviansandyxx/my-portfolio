@@ -19,13 +19,15 @@ class FolioColors {
   static const primaryDeep = Color(0xFF3730A3);
   static const primarySoft = Color(0xFFEDEBFF);
 
-  // Sidebar gelap shell dashboard (top→bottom gradient halus)
-  static const sbBgTop = Color(0xFF1B1E33);
-  static const sbBgBottom = Color(0xFF13161F);
-  static const sbText = Color(0xFF9BA2BA);
-  static const sbMuted = Color(0xFF6E7590);
-  static const sbBadge = Color(0x29FFFFFF); // putih ~16%
-  static const sbBorder = Color(0x14FFFFFF); // putih ~8%
+  // Sidebar shell dashboard (mode terang: mengikuti tema terang)
+  static const sbBgTop = Color(0xFFFBFCFE);
+  static const sbBgBottom = Color(0xFFF3F5FA);
+  static const sbText = Color(0xFF3E4459);
+  static const sbMuted = Color(0xFF8A91A5);
+  static const sbBadge = Color(0xFFF1F2F8);
+  static const sbBorder = Color(0xFFE5E8F0);
+  static const sbTitle = Color(0xFF171A2C);
+  static const sbSubtitle = Color(0xFF8A91A5);
 
   // Aksen pendukung
   static const greenBg = Color(0xFFE2F7EC);
@@ -58,6 +60,8 @@ class FolioDarkColors {
   static const sbMuted = Color(0xFF6E7590);
   static const sbBadge = Color(0x29FFFFFF);
   static const sbBorder = Color(0x14FFFFFF);
+  static const sbTitle = Color(0xFFFFFFFF);
+  static const sbSubtitle = Color(0xFF9BA2BA);
 
   static const greenBg = Color(0xFF15301F);
   static const green = Color(0xFF34D399);

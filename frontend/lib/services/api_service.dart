@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/constants/api_config.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/models/project_model.dart';
 import 'package:frontend/models/skill_model.dart';
@@ -32,9 +33,15 @@ class ApiService {
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.followRedirects = true;
-    _dio.interceptors.add(
-      LogInterceptor(responseBody: true, requestBody: true),
-    );
+    _dio.interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseBody: true,
+      responseHeader: false,
+      error: true,
+      compact: true,
+      maxWidth: 100,
+    ));
     // Biarkan Dio throw untuk 4xx/5xx agar error 404 tidak masuk ke fromJson.
     // Default validateStatus sudah benar, jangan dilonggarkan ke <500.
   }

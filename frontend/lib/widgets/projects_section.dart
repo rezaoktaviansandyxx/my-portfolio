@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/providers/app_providers.dart';
 
 class ProjectsSection extends ConsumerWidget {
@@ -28,7 +29,9 @@ class ProjectsSection extends ConsumerWidget {
               final p = projects[i];
               return ListTile(
                 leading: p.coverImageUrl != null
-                    ? CircleAvatar(backgroundImage: NetworkImage(p.coverImageUrl!))
+                    ? CircleAvatar(
+                        backgroundImage: NetworkImage(
+                            ApiConfig.resolveFileUrl(p.coverImageUrl)))
                     : const Icon(Icons.folder, size: 40),
                 title: Text(p.title),
                 subtitle: Text(p.summary ?? ''),

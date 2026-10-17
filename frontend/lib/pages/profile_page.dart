@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
+import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/models/experience_model.dart';
 import 'package:frontend/models/project_model.dart';
 import 'package:frontend/models/user_model.dart';
@@ -11,7 +12,7 @@ import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/contact_section.dart';
-import 'package:frontend/widgets/dashboard/skeleton.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 /// Halaman publik:
 /// "/" -> portofolio default (slug 'admin'), "/u/:slug" -> portofolio kreator.
@@ -177,6 +178,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         name: name,
                         wide: wide,
                         dark: dark,
+                        isAuthenticated: auth.isAuthenticated,
+                        isAdmin: auth.isAdmin,
                         onContact: _scrollToContact,
                         onOpenUrl: _openUrl,
                       ),
@@ -384,6 +387,8 @@ class _HeroCard extends StatelessWidget {
   final String name;
   final bool wide;
   final bool dark;
+  final bool isAuthenticated;
+  final bool isAdmin;
   final VoidCallback onContact;
   final void Function(String) onOpenUrl;
 
@@ -392,6 +397,8 @@ class _HeroCard extends StatelessWidget {
     required this.name,
     required this.wide,
     required this.dark,
+    required this.isAuthenticated,
+    required this.isAdmin,
     required this.onContact,
     required this.onOpenUrl,
   });
@@ -429,13 +436,15 @@ class _HeroCard extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: wide ? 52 : 44,
-        backgroundImage: user.avatarUrl != null
-            ? NetworkImage(user.avatarUrl!)
+        // resolveFileUrl: backend mengembalikan path relatif `/uploads/...`
+        // hasil upload, NetworkImage butuh URL absolut.
+        backgroundImage: ApiConfig.resolveFileUrl(user.avatarUrl).isNotEmpty
+            ? NetworkImage(ApiConfig.resolveFileUrl(user.avatarUrl))
             : null,
         backgroundColor: dark
             ? FolioDarkColors.primarySoft
             : FolioColors.primarySoft,
-        child: user.avatarUrl == null
+        child: (user.avatarUrl ?? '').trim().isEmpty
             ? Icon(
                 Icons.person,
                 size: wide ? 52 : 44,
@@ -533,15 +542,22 @@ class _HeroCard extends StatelessWidget {
     final ownerLinks = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TextButton(
-          onPressed: () => context.go('/login'),
-          child: const Text('Login pemilik', style: TextStyle(fontSize: 12)),
-        ),
-        Text('•', style: TextStyle(color: muted, fontSize: 12)),
-        TextButton(
-          onPressed: () => context.go('/register'),
-          child: const Text('Buat portofolio', style: TextStyle(fontSize: 12)),
-        ),
+        if (isAuthenticated)
+          TextButton(
+            onPressed: () => context.go(isAdmin ? '/admin' : '/dashboard'),
+            child: const Text('Ke Dashboard', style: TextStyle(fontSize: 12)),
+          )
+        else ...[
+          TextButton(
+            onPressed: () => context.go('/login'),
+            child: const Text('Login pemilik', style: TextStyle(fontSize: 12)),
+          ),
+          Text('•', style: TextStyle(color: muted, fontSize: 12)),
+          TextButton(
+            onPressed: () => context.go('/register'),
+            child: const Text('Buat portofolio', style: TextStyle(fontSize: 12)),
+          ),
+        ],
       ],
     );
 

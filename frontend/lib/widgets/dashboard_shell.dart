@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
 
@@ -20,9 +21,21 @@ class DashboardShell extends ConsumerWidget {
   final ValueChanged<int> onSelect;
   final String displayName;
   final String displayRole;
+  final String? avatarUrl;
   final int unreadCount;
   final Widget child;
   final String searchHint;
+
+  /// Search bar: controller & callback milik parent (dashboard) agar hasil
+  /// ketikan bisa memfilter daftar di tab yang aktif.
+  final TextEditingController? searchController;
+  final ValueChanged<String>? onSearch;
+
+  /// Lonceng notifikasi: daftar pesan belum dibaca (data asli dari provider)
+  /// + aksi saat item / footer menu diklik (biasanya lompat ke tab Pesan).
+  final List<Map<String, dynamic>> unreadMessages;
+  final ValueChanged<Map<String, dynamic>>? onOpenNotification;
+  final VoidCallback? onOpenInbox;
 
   const DashboardShell({
     super.key,
@@ -31,9 +44,15 @@ class DashboardShell extends ConsumerWidget {
     required this.onSelect,
     required this.displayName,
     required this.displayRole,
+    this.avatarUrl,
     required this.unreadCount,
     required this.child,
     this.searchHint = 'Cari proyek, pengguna...',
+    this.searchController,
+    this.onSearch,
+    this.unreadMessages = const [],
+    this.onOpenNotification,
+    this.onOpenInbox,
   });
 
   String get _initials {
@@ -41,6 +60,30 @@ class DashboardShell extends ConsumerWidget {
     if (parts.isEmpty || parts.first.isEmpty) return 'U';
     if (parts.length == 1) return parts.first[0].toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  /// Foto avatar di topbar: gambar full-bleed jika avatarUrl tersedia,
+  /// fallback ke teks inisial saat URL kosong atau gagal dimuat.
+  Widget _topbarAvatarImage({required Color destColor}) {
+    final url = ApiConfig.resolveFileUrl(avatarUrl);
+    if (url.isEmpty) {
+      return Text(_initials,
+          style: TextStyle(
+              color: destColor,
+              fontWeight: FontWeight.w800,
+              fontSize: 12));
+    }
+    return Image.network(
+      url,
+      width: 32,
+      height: 32,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Text(_initials,
+          style: TextStyle(
+              color: destColor,
+              fontWeight: FontWeight.w800,
+              fontSize: 12)),
+    );
   }
 
   /// Token sidebar: beda antara mode terang & gelap.
@@ -53,6 +96,8 @@ class DashboardShell extends ConsumerWidget {
           muted: FolioDarkColors.sbMuted,
           badge: FolioDarkColors.sbBadge,
           border: FolioDarkColors.sbBorder,
+          title: FolioDarkColors.sbTitle,
+          subtitle: FolioDarkColors.sbSubtitle,
           active: FolioDarkColors.primaryDeep,
         )
       : const _SidebarTokens(
@@ -62,6 +107,8 @@ class DashboardShell extends ConsumerWidget {
           muted: FolioColors.sbMuted,
           badge: FolioColors.sbBadge,
           border: FolioColors.sbBorder,
+          title: FolioColors.sbTitle,
+          subtitle: FolioColors.sbSubtitle,
           active: FolioColors.primary,
         );
 
@@ -217,6 +264,8 @@ class DashboardShell extends ConsumerWidget {
 
   Widget _sidebar(BuildContext context, WidgetRef ref, bool inDrawer) {
     final t = _tokens(context);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final danger = dark ? const Color(0xFFF97066) : const Color(0xFFB42318);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -262,25 +311,24 @@ class DashboardShell extends ConsumerWidget {
                             fontSize: 20)),
                   ),
                   const SizedBox(width: 10),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('FolioSpace',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: t.title,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 16)),
                         Text('Portfolio builder',
                             style: TextStyle(
-                                color: Color(0xFF9BA2BA), fontSize: 12)),
+                                color: t.subtitle, fontSize: 12)),
                       ],
                     ),
                   ),
                   if (inDrawer)
                     IconButton(
-                      icon: const Icon(Icons.close,
-                          color: Color(0xFF9BA2BA), size: 20),
+                      icon: Icon(Icons.close, color: t.muted, size: 20),
                       onPressed: () => Navigator.pop(context),
                     )
                   else
@@ -384,20 +432,33 @@ class DashboardShell extends ConsumerWidget {
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () => _confirmLogout(context, ref),
-                    icon: Icon(Icons.logout_rounded,
-                        size: 18, color: t.text),
-                    label: Text('Logout',
-                        style:
-                            TextStyle(color: t.text, fontWeight: FontWeight.w600)),
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: const Text('Logout',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: t.border),
+                      side: BorderSide(color: danger.withValues(alpha: 0.5)),
                       padding:
                           const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
+                    ).copyWith(
+                      // Aksi destruktif: selalu merah, bukan hanya saat
+                      // hover/tekan. Hover hanya memberi efek latar tipis.
+                      foregroundColor: WidgetStateProperty.resolveWith(
+                        (states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return t.muted;
+                          }
+                          return danger;
+                        },
+                      ),
+                      overlayColor: WidgetStateProperty.resolveWith(
+                        (states) => states.contains(WidgetState.hovered) ||
+                                states.contains(WidgetState.pressed)
+                            ? danger.withValues(alpha: 0.08)
+                            : Colors.transparent,
+                      ),
                     ),
-                    // Warna teks diatur lewat style TextStyle di atas agar
-                    // tidak menimpa warna dimatikan/disabled bawaan.
                   ),
                 ],
               ),
@@ -433,45 +494,30 @@ class DashboardShell extends ConsumerWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 340),
             child: TextField(
+              controller: searchController,
+              onChanged: onSearch,
+              textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: searchHint,
                 prefixIcon: const Icon(Icons.search, size: 20),
+                isDense: true,
+                suffixIcon: (searchController?.text.isNotEmpty ?? false)
+                    ? IconButton(
+                        tooltip: 'Hapus pencarian',
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.close, size: 16),
+                        onPressed: () {
+                          searchController?.clear();
+                          // Reset state filter di parent juga.
+                          onSearch?.call('');
+                        },
+                      )
+                    : null,
               ),
             ),
           ),
           const Spacer(),
-          Stack(
-            children: [
-              IconButton(
-                onPressed: () {},
-                tooltip: 'Notifikasi',
-                icon: Icon(
-                  Icons.notifications_outlined,
-                  color: dark ? FolioDarkColors.primary : FolioColors.primary,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor:
-                      dark ? FolioDarkColors.primarySoft : FolioColors.primarySoft,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              if (unreadCount > 0)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5484D),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: bar, width: 2),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          _bellButton(context, bar),
           const SizedBox(width: 12),
           Container(
             padding:
@@ -490,13 +536,13 @@ class DashboardShell extends ConsumerWidget {
                   backgroundColor: dark
                       ? FolioDarkColors.primarySoft
                       : FolioColors.primarySoft,
-                  child: Text(_initials,
-                      style: TextStyle(
-                          color: dark
-                              ? FolioDarkColors.primary
-                              : FolioColors.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12)),
+                  // Avatar foto user jika ada (dukung path relatif hasil
+                  // upload), fallback ke inisial saat kosong/gagal dimuat.
+                  child: ClipOval(
+                    child: _topbarAvatarImage(destColor: dark
+                            ? FolioDarkColors.primary
+                            : FolioColors.primary),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Column(
@@ -551,6 +597,188 @@ class DashboardShell extends ConsumerWidget {
       ),
     );
   }
+
+  /// Lonceng notifikasi: dibungkus PopupMenuButton agar klik memunculkan
+  /// daftar pesan belum dibaca. Item -> lompat ke tab Pesan; footer membuka
+  /// semua pesan. Titik merah tetap mengikuti `unreadCount`.
+  Widget _bellButton(BuildContext context, Color bar) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final accent = dark ? FolioDarkColors.primary : FolioColors.primary;
+    final soft = dark ? FolioDarkColors.primarySoft : FolioColors.primarySoft;
+    final ink = dark ? FolioDarkColors.ink : FolioColors.ink;
+    final muted = dark ? FolioDarkColors.muted : FolioColors.muted;
+    return PopupMenuButton<Map<String, dynamic>?>(
+      tooltip: 'Notifikasi',
+      position: PopupMenuPosition.under,
+      offset: const Offset(0, 8),
+      color: dark ? const Color(0xFF171C28) : Colors.white,
+      onSelected: (m) {
+        // NOTE: onSelected TIDAK terpanggil bila value PopupMenuItem null
+        // (Flutter menganggap null = popup ditutup tanpa memilih). Karena itu
+        // footer "Lihat semua pesan" memakai sentinel `_view: 'all'`, bukan null.
+        if (m == null) return;
+        if (m['_view'] == 'all') {
+          onOpenInbox?.call();
+        } else {
+          onOpenNotification?.call(m);
+        }
+      },
+      itemBuilder: (_) {
+        final items = <PopupMenuEntry<Map<String, dynamic>?>>[];
+        if (unreadMessages.isEmpty) {
+          items.add(
+            const PopupMenuItem<Map<String, dynamic>?>(
+              enabled: false,
+              child: Row(
+                children: [
+                  Icon(Icons.notifications_none_outlined, size: 18),
+                  SizedBox(width: 10),
+                  Text('Tidak ada notifikasi baru'),
+                ],
+              ),
+            ),
+          );
+        } else {
+          items.add(
+            PopupMenuItem<Map<String, dynamic>?>(
+              enabled: false,
+              child: Text(
+                '${unreadMessages.length} pesan belum dibaca',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: muted,
+                ),
+              ),
+            ),
+          );
+          for (final m in unreadMessages.take(5)) {
+            final sender = m['sender_name']?.toString() ?? 'Anonim';
+            final content = m['content']?.toString() ?? '';
+            final raw = m['created_at']?.toString() ?? '';
+            final date = raw.length > 10 ? raw.substring(0, 10) : raw;
+            items.add(
+              PopupMenuItem<Map<String, dynamic>?>(
+                value: m,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.mark_email_unread_outlined,
+                      size: 18,
+                      color: accent,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sender,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13,
+                                    color: ink,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                date,
+                                style: TextStyle(fontSize: 11, color: muted),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            content.isEmpty ? '(tanpa isi)' : content,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 12, color: muted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          if (unreadMessages.length > 5) {
+            items.add(
+              PopupMenuItem<Map<String, dynamic>?>(
+                enabled: false,
+                child: Text(
+                  '+${unreadMessages.length - 5} pesan lainnya',
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+              ),
+            );
+          }
+        }
+        items.add(const PopupMenuDivider());
+        items.add(
+          PopupMenuItem<Map<String, dynamic>?>(
+            // Sentinel! Jangan pakai null: onSelected tidak terpanggil untuk
+            // value null (padding popup), sehingga tombolnya "tidak ke mana-mana".
+            value: const {'_view': 'all'},
+            height: 42,
+            child: Row(
+              children: [
+                Icon(Icons.mail_outline, size: 16, color: accent),
+                const SizedBox(width: 10),
+                Text(
+                  'Lihat semua pesan',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        return items;
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: soft,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.notifications_outlined,
+              size: 22,
+              color: accent,
+            ),
+          ),
+          if (unreadCount > 0)
+            Positioned(
+              right: 5,
+              top: 5,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5484D),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: bar, width: 2),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SidebarTokens {
@@ -560,6 +788,8 @@ class _SidebarTokens {
   final Color muted;
   final Color badge;
   final Color border;
+  final Color title;
+  final Color subtitle;
   final Color active;
   const _SidebarTokens({
     required this.bgTop,
@@ -568,6 +798,8 @@ class _SidebarTokens {
     required this.muted,
     required this.badge,
     required this.border,
+    required this.title,
+    required this.subtitle,
     required this.active,
   });
 }

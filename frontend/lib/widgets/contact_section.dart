@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/dashboard/errors.dart';
+import 'package:frontend/widgets/errors.dart';
 
 /// Form kontak publik: sender_name/sender_email/subject/content
 /// -> POST /public/u/{slug}/contact.
