@@ -183,7 +183,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       child: _heroText(context, user, name),
                                     ),
                                     const SizedBox(width: 24),
-                                    _heroCta(context, user),
+                                    IntrinsicWidth(
+                                      child: _heroCta(context, user),
+                                    ),
                                   ],
                                 )
                               : Column(
