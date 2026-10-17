@@ -40,6 +40,38 @@ class DashboardShell extends ConsumerWidget {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text('Keluar dari akun?'),
+        content: const Text(
+          'Kamu akan keluar dari dashboard dan perlu login ulang untuk mengaksesnya. Lanjutkan?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFB42318),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Ya, logout'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await _doLogout(context, ref);
+    }
+  }
+
   Future<void> _doLogout(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(authNotifierProvider.notifier).logout();
@@ -214,7 +246,7 @@ class DashboardShell extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: OutlinedButton.icon(
-                onPressed: () => _doLogout(context, ref),
+                onPressed: () => _confirmLogout(context, ref),
                 icon: const Icon(Icons.logout_rounded, size: 18),
                 label: const Text('Logout'),
                 style: OutlinedButton.styleFrom(
@@ -224,30 +256,6 @@ class DashboardShell extends ConsumerWidget {
                       const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF9F7F2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: FolioColors.border),
-                ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Bangun personal brand',
-                        style: TextStyle(fontWeight: FontWeight.w700)),
-                    SizedBox(height: 4),
-                    Text(
-                      'Lihat panduan membuat portofolio yang menarik.',
-                      style:
-                          TextStyle(color: FolioColors.muted, fontSize: 12),
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -356,7 +364,7 @@ class DashboardShell extends ConsumerWidget {
                   tooltip: 'Akun',
                   onSelected: (v) {
                     if (v == 'public') context.go('/');
-                    if (v == 'logout') _doLogout(context, ref);
+                    if (v == 'logout') _confirmLogout(context, ref);
                   },
                   itemBuilder: (_) => const [
                     PopupMenuItem(
