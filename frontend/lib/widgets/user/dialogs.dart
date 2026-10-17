@@ -10,7 +10,13 @@ const _projectStatuses = ['draft', 'published'];
 
 final _slugPattern = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$');
 
+final _dateOk = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
 String? _nullIfEmpty(String v) => v.trim().isEmpty ? null : v.trim();
+
+void _warn(BuildContext ctx, String msg) {
+  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+}
 
 Future<bool> confirmDelete(BuildContext context, String label) async {
   final ok = await showDialog<bool>(
@@ -39,487 +45,553 @@ Future<Map<String, dynamic>?> showProjectDialog(
   BuildContext context, {
   ProjectModel? project,
   List<SkillModel> allSkills = const [],
-}) async {
-  final title = TextEditingController(text: project?.title ?? '');
-  final slug = TextEditingController(text: project?.slug ?? '');
-  final summary = TextEditingController(text: project?.summary ?? '');
-  final liveUrl = TextEditingController(text: project?.liveUrl ?? '');
-  final githubUrl = TextEditingController(text: project?.githubUrl ?? '');
-  final coverUrl = TextEditingController(text: project?.coverImageUrl ?? '');
-  final skillIds = TextEditingController(
-    text: (project?.skills ?? []).map((s) => '${s.id}').join(', '),
-  );
-  var status = project?.status ?? 'published';
-
-  final skillHint = allSkills.isEmpty
-      ? 'Belum ada skill — kosongkan saja'
-      : 'ID tersedia: ${allSkills.map((s) => '${s.id}=${s.name}').join(', ')}';
-
-  final result = await showDialog<Map<String, dynamic>>(
+}) {
+  return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => AlertDialog(
-        title: Text(project == null ? 'Proyek baru' : 'Edit proyek'),
-        content: SingleChildScrollView(
-          child: SizedBox(
-            width: 420,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                folioField(title, 'Judul*', hint: 'misal: Toko Online'),
-                folioField(slug, 'Slug*', hint: 'misal: toko-online'),
-                folioField(
-                  summary,
-                  'Ringkasan* (min 10 karakter)',
-                  hint: 'Ceritakan proyek ini...',
-                  maxLines: 3,
+    builder: (_) => _ProjectDialog(project: project, allSkills: allSkills),
+  );
+}
+
+class _ProjectDialog extends StatefulWidget {
+  final ProjectModel? project;
+  final List<SkillModel> allSkills;
+
+  const _ProjectDialog({required this.project, required this.allSkills});
+
+  @override
+  State<_ProjectDialog> createState() => _ProjectDialogState();
+}
+
+class _ProjectDialogState extends State<_ProjectDialog> {
+  late final _title = TextEditingController(text: widget.project?.title ?? '');
+  late final _slug = TextEditingController(text: widget.project?.slug ?? '');
+  late final _summary = TextEditingController(
+    text: widget.project?.summary ?? '',
+  );
+  late final _liveUrl = TextEditingController(
+    text: widget.project?.liveUrl ?? '',
+  );
+  late final _githubUrl = TextEditingController(
+    text: widget.project?.githubUrl ?? '',
+  );
+  late final _coverUrl = TextEditingController(
+    text: widget.project?.coverImageUrl ?? '',
+  );
+  late final _skillIds = TextEditingController(
+    text: (widget.project?.skills ?? []).map((s) => '${s.id}').join(', '),
+  );
+  late String _status = widget.project?.status ?? 'published';
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _slug.dispose();
+    _summary.dispose();
+    _liveUrl.dispose();
+    _githubUrl.dispose();
+    _coverUrl.dispose();
+    _skillIds.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_title.text.trim().length < 3 || _summary.text.trim().length < 10) {
+      _warn(context, 'Judul (min 3) dan ringkasan (min 10) wajib diisi');
+      return;
+    }
+    if (!_slugPattern.hasMatch(_slug.text.trim())) {
+      _warn(
+        context,
+        'Slug hanya huruf kecil, angka, dan strip (mis. toko-online)',
+      );
+      return;
+    }
+    final ids = _skillIds.text
+        .split(',')
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
+    Navigator.pop(context, <String, dynamic>{
+      'title': _title.text.trim(),
+      'slug': _slug.text.trim(),
+      'summary': _summary.text.trim(),
+      'status': _status,
+      'skill_ids': ids,
+      'live_url': _nullIfEmpty(_liveUrl.text),
+      'github_url': _nullIfEmpty(_githubUrl.text),
+      'cover_image_url': _nullIfEmpty(_coverUrl.text),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final allSkills = widget.allSkills;
+    final skillHint = allSkills.isEmpty
+        ? 'Belum ada skill — kosongkan saja'
+        : 'ID tersedia: ${allSkills.map((s) => '${s.id}=${s.name}').join(', ')}';
+    return AlertDialog(
+      title: Text(widget.project == null ? 'Proyek baru' : 'Edit proyek'),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              folioField(_title, 'Judul*', hint: 'misal: Toko Online'),
+              folioField(_slug, 'Slug*', hint: 'misal: toko-online'),
+              folioField(
+                _summary,
+                'Ringkasan* (min 10 karakter)',
+                hint: 'Ceritakan proyek ini...',
+                maxLines: 3,
+              ),
+              DropdownButtonFormField<String>(
+                initialValue: _projectStatuses.contains(_status)
+                    ? _status
+                    : 'published',
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                  isDense: true,
                 ),
-                DropdownButtonFormField<String>(
-                  initialValue: _projectStatuses.contains(status)
-                      ? status
-                      : 'published',
-                  decoration: const InputDecoration(
-                    labelText: 'Status',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: _projectStatuses
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                      .toList(),
-                  onChanged: (v) => setState(() => status = v ?? 'published'),
-                ),
-                const SizedBox(height: 10),
-                folioField(
-                  liveUrl,
-                  'Live URL',
-                  hint: 'https://...',
-                  keyboard: TextInputType.url,
-                ),
-                folioField(
-                  githubUrl,
-                  'GitHub URL',
-                  hint: 'https://github.com/...',
-                  keyboard: TextInputType.url,
-                ),
-                folioField(
-                  coverUrl,
-                  'Cover image URL',
-                  hint: 'https://.../cover.png (hasil upload cover)',
-                  keyboard: TextInputType.url,
-                ),
-                folioField(
-                  skillIds,
-                  'Skill IDs (koma)',
-                  hint: skillHint,
-                  keyboard: TextInputType.text,
-                ),
-              ],
-            ),
+                items: _projectStatuses
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
+                onChanged: (v) => setState(() => _status = v ?? 'published'),
+              ),
+              const SizedBox(height: 10),
+              folioField(
+                _liveUrl,
+                'Live URL',
+                hint: 'https://...',
+                keyboard: TextInputType.url,
+              ),
+              folioField(
+                _githubUrl,
+                'GitHub URL',
+                hint: 'https://github.com/...',
+                keyboard: TextInputType.url,
+              ),
+              folioField(
+                _coverUrl,
+                'Cover image URL',
+                hint: 'https://.../cover.png (hasil upload cover)',
+                keyboard: TextInputType.url,
+              ),
+              folioField(
+                _skillIds,
+                'Skill IDs (koma)',
+                hint: skillHint,
+                keyboard: TextInputType.text,
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (title.text.trim().length < 3 ||
-                  summary.text.trim().length < 10) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Judul (min 3) dan ringkasan (min 10) wajib diisi',
-                    ),
-                  ),
-                );
-                return;
-              }
-              if (!_slugPattern.hasMatch(slug.text.trim())) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Slug hanya huruf kecil, angka, dan strip (mis. toko-online)',
-                    ),
-                  ),
-                );
-                return;
-              }
-              final ids = skillIds.text
-                  .split(',')
-                  .map((e) => int.tryParse(e.trim()))
-                  .whereType<int>()
-                  .toList();
-              final payload = <String, dynamic>{
-                'title': title.text.trim(),
-                'slug': slug.text.trim(),
-                'summary': summary.text.trim(),
-                'status': status,
-                'skill_ids': ids,
-                'live_url': _nullIfEmpty(liveUrl.text),
-                'github_url': _nullIfEmpty(githubUrl.text),
-                'cover_image_url': _nullIfEmpty(coverUrl.text),
-              };
-              Navigator.pop(ctx, payload);
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
       ),
-    ),
-  );
-  for (final c in [
-    title,
-    slug,
-    summary,
-    liveUrl,
-    githubUrl,
-    coverUrl,
-    skillIds,
-  ]) {
-    c.dispose();
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Simpan')),
+      ],
+    );
   }
-  return result;
 }
 
 /// Dialog tambah/edit skill -> payload `createMySkill` / `updateMySkill`.
 Future<Map<String, dynamic>?> showSkillDialog(
   BuildContext context, {
   SkillModel? skill,
-}) async {
-  final name = TextEditingController(text: skill?.name ?? '');
-  final proficiency = TextEditingController(
-    text: skill?.proficiencyLevel?.toString() ?? '',
-  );
-  var category = skill?.category ?? 'Other';
-  if (!_skillCategories.contains(category)) category = 'Other';
-
-  final result = await showDialog<Map<String, dynamic>>(
+}) {
+  return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => AlertDialog(
-        title: Text(skill == null ? 'Skill baru' : 'Edit skill'),
-        content: SizedBox(
-          width: 360,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              folioField(name, 'Nama*', hint: 'misal: Flutter'),
-              DropdownButtonFormField<String>(
-                initialValue: category,
-                decoration: const InputDecoration(
-                  labelText: 'Kategori',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-                items: _skillCategories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                    .toList(),
-                onChanged: (v) => setState(() => category = v ?? 'Other'),
-              ),
-              const SizedBox(height: 10),
-              folioField(
-                proficiency,
-                'Proficiency (1-100, opsional)',
-                hint: 'misal: 80',
-                keyboard: TextInputType.number,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (name.text.trim().isEmpty) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('Nama skill wajib diisi')),
-                );
-                return;
-              }
-              final raw = proficiency.text.trim();
-              final level = int.tryParse(raw);
-              if (raw.isNotEmpty &&
-                  (level == null || level < 1 || level > 100)) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                    content: Text('Proficiency harus angka 1-100 atau kosong'),
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(ctx, <String, dynamic>{
-                'name': name.text.trim(),
-                'category': category,
-                'proficiency_level': level,
-              });
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    ),
+    builder: (_) => _SkillDialog(skill: skill),
   );
-  name.dispose();
-  proficiency.dispose();
-  return result;
 }
+
+class _SkillDialog extends StatefulWidget {
+  final SkillModel? skill;
+
+  const _SkillDialog({required this.skill});
+
+  @override
+  State<_SkillDialog> createState() => _SkillDialogState();
+}
+
+class _SkillDialogState extends State<_SkillDialog> {
+  late final _name = TextEditingController(text: widget.skill?.name ?? '');
+  late final _proficiency = TextEditingController(
+    text: widget.skill?.proficiencyLevel?.toString() ?? '',
+  );
+  late String _category = _skillCategories.contains(widget.skill?.category)
+      ? widget.skill!.category!
+      : 'Other';
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _proficiency.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_name.text.trim().isEmpty) {
+      _warn(context, 'Nama skill wajib diisi');
+      return;
+    }
+    final raw = _proficiency.text.trim();
+    final level = int.tryParse(raw);
+    if (raw.isNotEmpty && (level == null || level < 1 || level > 100)) {
+      _warn(context, 'Proficiency harus angka 1-100 atau kosong');
+      return;
+    }
+    Navigator.pop(context, <String, dynamic>{
+      'name': _name.text.trim(),
+      'category': _category,
+      'proficiency_level': level,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.skill == null ? 'Skill baru' : 'Edit skill'),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            folioField(_name, 'Nama*', hint: 'misal: Flutter'),
+            DropdownButtonFormField<String>(
+              initialValue: _category,
+              decoration: const InputDecoration(
+                labelText: 'Kategori',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: _skillCategories
+                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                  .toList(),
+              onChanged: (v) => setState(() => _category = v ?? 'Other'),
+            ),
+            const SizedBox(height: 10),
+            folioField(
+              _proficiency,
+              'Proficiency (1-100, opsional)',
+              hint: 'misal: 80',
+              keyboard: TextInputType.number,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Simpan')),
+      ],
+    );
+  }
+}
+
+String _fmtDate(DateTime? d) =>
+    d == null ? '' : d.toIso8601String().substring(0, 10);
 
 /// Dialog tambah/edit experience -> payload `createMyExperience` /
 /// `updateMyExperience`. Tanggal format `YYYY-MM-DD`.
 Future<Map<String, dynamic>?> showExperienceDialog(
   BuildContext context, {
   ExperienceModel? experience,
-}) async {
-  String fmt(DateTime? d) =>
-      d == null ? '' : d.toIso8601String().substring(0, 10);
-  final role = TextEditingController(text: experience?.role ?? '');
-  final company = TextEditingController(text: experience?.company ?? '');
-  final location = TextEditingController(text: experience?.location ?? '');
-  final start = TextEditingController(text: fmt(experience?.startDate));
-  final end = TextEditingController(text: fmt(experience?.endDate));
-  final description = TextEditingController(
-    text: experience?.description ?? '',
-  );
-  final tech = TextEditingController(
-    text: (experience?.technologiesUsed ?? []).join(', '),
-  );
-  var isCurrent = experience?.isCurrent ?? false;
-
-  final result = await showDialog<Map<String, dynamic>>(
+}) {
+  return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => AlertDialog(
-        title: Text(experience == null ? 'Pengalaman baru' : 'Edit pengalaman'),
-        content: SingleChildScrollView(
-          child: SizedBox(
-            width: 420,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                folioField(role, 'Role*', hint: 'misal: Frontend Engineer'),
-                folioField(company, 'Perusahaan*', hint: 'misal: FolioSpace'),
-                folioField(location, 'Lokasi', hint: 'misal: Jakarta'),
-                folioField(
-                  start,
-                  'Mulai* (YYYY-MM-DD)',
-                  hint: 'misal: 2023-01-15',
-                ),
-                folioField(
-                  end,
-                  'Selesai (YYYY-MM-DD, kosong jika kini)',
-                  hint: 'misal: 2024-06-30',
-                ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: const Text('Masih bekerja di sini'),
-                  value: isCurrent,
-                  onChanged: (v) => setState(() => isCurrent = v ?? false),
-                ),
-                folioField(
-                  description,
-                  'Deskripsi',
-                  hint: 'Ceritakan peranmu...',
-                  maxLines: 3,
-                ),
-                folioField(
-                  tech,
-                  'Teknologi (koma)',
-                  hint: 'misal: Flutter, Go, Postgres',
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final dateOk = RegExp(r'^\d{4}-\d{2}-\d{2}$');
-              if (role.text.trim().length < 2 ||
-                  company.text.trim().length < 2 ||
-                  !dateOk.hasMatch(start.text.trim()) ||
-                  (end.text.trim().isNotEmpty &&
-                      !dateOk.hasMatch(end.text.trim()))) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Role, perusahaan (min 2), dan tanggal (YYYY-MM-DD) wajib valid',
-                    ),
-                  ),
-                );
-                return;
-              }
-              final endText = end.text.trim();
-              if (!isCurrent &&
-                  endText.isNotEmpty &&
-                  endText.compareTo(start.text.trim()) < 0) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tanggal selesai tidak boleh sebelum mulai'),
-                  ),
-                );
-                return;
-              }
-              final techs = tech.text
-                  .split(',')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-              Navigator.pop(ctx, <String, dynamic>{
-                'role': role.text.trim(),
-                'company': company.text.trim(),
-                'location': _nullIfEmpty(location.text),
-                'start_date': start.text.trim(),
-                'end_date': isCurrent ? null : _nullIfEmpty(end.text),
-                'is_current': isCurrent,
-                'description': _nullIfEmpty(description.text),
-                'technologies_used': techs,
-              });
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    ),
+    builder: (_) => _ExperienceDialog(experience: experience),
   );
-  for (final c in [role, company, location, start, end, description, tech]) {
-    c.dispose();
-  }
-  return result;
 }
 
-/// Dialog tambah media proyek -> dipakai `addMyProjectMedia`.
-Future<Map<String, String>?> showProjectMediaDialog(
-  BuildContext context,
-) async {
-  final url = TextEditingController();
-  final caption = TextEditingController();
-  var type = 'image';
+class _ExperienceDialog extends StatefulWidget {
+  final ExperienceModel? experience;
 
-  final result = await showDialog<Map<String, String>>(
-    context: context,
-    builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => AlertDialog(
-        title: const Text('Tambah media proyek'),
-        content: SizedBox(
-          width: 360,
+  const _ExperienceDialog({required this.experience});
+
+  @override
+  State<_ExperienceDialog> createState() => _ExperienceDialogState();
+}
+
+class _ExperienceDialogState extends State<_ExperienceDialog> {
+  late final _role = TextEditingController(text: widget.experience?.role ?? '');
+  late final _company = TextEditingController(
+    text: widget.experience?.company ?? '',
+  );
+  late final _location = TextEditingController(
+    text: widget.experience?.location ?? '',
+  );
+  late final _start = TextEditingController(
+    text: _fmtDate(widget.experience?.startDate),
+  );
+  late final _end = TextEditingController(
+    text: _fmtDate(widget.experience?.endDate),
+  );
+  late final _description = TextEditingController(
+    text: widget.experience?.description ?? '',
+  );
+  late final _tech = TextEditingController(
+    text: (widget.experience?.technologiesUsed ?? []).join(', '),
+  );
+  late bool _isCurrent = widget.experience?.isCurrent ?? false;
+
+  @override
+  void dispose() {
+    _role.dispose();
+    _company.dispose();
+    _location.dispose();
+    _start.dispose();
+    _end.dispose();
+    _description.dispose();
+    _tech.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final start = _start.text.trim();
+    final end = _end.text.trim();
+    if (_role.text.trim().length < 2 ||
+        _company.text.trim().length < 2 ||
+        !_dateOk.hasMatch(start) ||
+        (end.isNotEmpty && !_dateOk.hasMatch(end))) {
+      _warn(
+        context,
+        'Role, perusahaan (min 2), dan tanggal (YYYY-MM-DD) wajib valid',
+      );
+      return;
+    }
+    if (!_isCurrent && end.isNotEmpty && end.compareTo(start) < 0) {
+      _warn(context, 'Tanggal selesai tidak boleh sebelum mulai');
+      return;
+    }
+    final techs = _tech.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    Navigator.pop(context, <String, dynamic>{
+      'role': _role.text.trim(),
+      'company': _company.text.trim(),
+      'location': _nullIfEmpty(_location.text),
+      'start_date': start,
+      'end_date': _isCurrent ? null : _nullIfEmpty(_end.text),
+      'is_current': _isCurrent,
+      'description': _nullIfEmpty(_description.text),
+      'technologies_used': techs,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.experience == null ? 'Pengalaman baru' : 'Edit pengalaman',
+      ),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: 420,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              folioField(_role, 'Role*', hint: 'misal: Frontend Engineer'),
+              folioField(_company, 'Perusahaan*', hint: 'misal: FolioSpace'),
+              folioField(_location, 'Lokasi', hint: 'misal: Jakarta'),
               folioField(
-                url,
-                'Media URL*',
-                hint: 'https://... (hasil upload media)',
-                keyboard: TextInputType.url,
+                _start,
+                'Mulai* (YYYY-MM-DD)',
+                hint: 'misal: 2023-01-15',
               ),
-              DropdownButtonFormField<String>(
-                initialValue: type,
-                decoration: const InputDecoration(
-                  labelText: 'Tipe',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-                items: const ['image', 'video', 'link']
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
-                onChanged: (v) => setState(() => type = v ?? 'image'),
+              folioField(
+                _end,
+                'Selesai (YYYY-MM-DD, kosong jika kini)',
+                hint: 'misal: 2024-06-30',
               ),
-              const SizedBox(height: 10),
-              folioField(caption, 'Caption', hint: 'opsional'),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const Text('Masih bekerja di sini'),
+                value: _isCurrent,
+                onChanged: (v) => setState(() => _isCurrent = v ?? false),
+              ),
+              folioField(
+                _description,
+                'Deskripsi',
+                hint: 'Ceritakan peranmu...',
+                maxLines: 3,
+              ),
+              folioField(
+                _tech,
+                'Teknologi (koma)',
+                hint: 'misal: Flutter, Go, Postgres',
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (url.text.trim().isEmpty) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('Media URL wajib diisi')),
-                );
-                return;
-              }
-              Navigator.pop(ctx, {
-                'media_url': url.text.trim(),
-                'media_type': type,
-                'caption': caption.text.trim(),
-              });
-            },
-            child: const Text('Tambah'),
-          ),
-        ],
       ),
-    ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Simpan')),
+      ],
+    );
+  }
+}
+
+/// Dialog tambah media proyek -> dipakai `addMyProjectMedia`.
+Future<Map<String, String>?> showProjectMediaDialog(BuildContext context) {
+  return showDialog<Map<String, String>>(
+    context: context,
+    builder: (_) => const _ProjectMediaDialog(),
   );
-  url.dispose();
-  caption.dispose();
-  return result;
+}
+
+class _ProjectMediaDialog extends StatefulWidget {
+  const _ProjectMediaDialog();
+
+  @override
+  State<_ProjectMediaDialog> createState() => _ProjectMediaDialogState();
+}
+
+class _ProjectMediaDialogState extends State<_ProjectMediaDialog> {
+  final _url = TextEditingController();
+  final _caption = TextEditingController();
+  String _type = 'image';
+
+  @override
+  void dispose() {
+    _url.dispose();
+    _caption.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_url.text.trim().isEmpty) {
+      _warn(context, 'Media URL wajib diisi');
+      return;
+    }
+    Navigator.pop(context, <String, String>{
+      'media_url': _url.text.trim(),
+      'media_type': _type,
+      'caption': _caption.text.trim(),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Tambah media proyek'),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            folioField(
+              _url,
+              'Media URL*',
+              hint: 'https://... (hasil upload media)',
+              keyboard: TextInputType.url,
+            ),
+            DropdownButtonFormField<String>(
+              initialValue: _type,
+              decoration: const InputDecoration(
+                labelText: 'Tipe',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: const [
+                'image',
+                'video',
+                'link',
+              ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+              onChanged: (v) => setState(() => _type = v ?? 'image'),
+            ),
+            const SizedBox(height: 10),
+            folioField(_caption, 'Caption', hint: 'opsional'),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Tambah')),
+      ],
+    );
+  }
 }
 
 /// Dialog ganti password -> [current, baru], atau null bila dibatalkan.
-Future<List<String>?> showChangePasswordDialog(BuildContext context) async {
-  final current = TextEditingController();
-  final fresh = TextEditingController();
-  final confirm = TextEditingController();
-
-  final result = await showDialog<List<String>>(
+Future<List<String>?> showChangePasswordDialog(BuildContext context) {
+  return showDialog<List<String>>(
     context: context,
-    builder: (ctx) => AlertDialog(
+    builder: (_) => const _ChangePasswordDialog(),
+  );
+}
+
+class _ChangePasswordDialog extends StatefulWidget {
+  const _ChangePasswordDialog();
+
+  @override
+  State<_ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+}
+
+class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
+  final _current = TextEditingController();
+  final _fresh = TextEditingController();
+  final _confirm = TextEditingController();
+
+  @override
+  void dispose() {
+    _current.dispose();
+    _fresh.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_fresh.text.length < 8) {
+      _warn(context, 'Password baru minimal 8 karakter');
+      return;
+    }
+    if (_fresh.text != _confirm.text) {
+      _warn(context, 'Konfirmasi password tidak cocok');
+      return;
+    }
+    Navigator.pop(context, <String>[_current.text, _fresh.text]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       title: const Text('Ganti password'),
       content: SizedBox(
         width: 340,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            folioField(current, 'Password saat ini', obscureText: true),
-            folioField(fresh, 'Password baru (min 8)', obscureText: true),
-            folioField(confirm, 'Ulangi password baru', obscureText: true),
+            folioField(_current, 'Password saat ini', obscureText: true),
+            folioField(_fresh, 'Password baru (min 8)', obscureText: true),
+            folioField(_confirm, 'Ulangi password baru', obscureText: true),
           ],
         ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(ctx),
+          onPressed: () => Navigator.pop(context),
           child: const Text('Batal'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            if (fresh.text.length < 8) {
-              ScaffoldMessenger.of(ctx).showSnackBar(
-                const SnackBar(
-                  content: Text('Password baru minimal 8 karakter'),
-                ),
-              );
-              return;
-            }
-            if (fresh.text != confirm.text) {
-              ScaffoldMessenger.of(ctx).showSnackBar(
-                const SnackBar(
-                  content: Text('Konfirmasi password tidak cocok'),
-                ),
-              );
-              return;
-            }
-            Navigator.pop(ctx, [current.text, fresh.text]);
-          },
-          child: const Text('Simpan'),
-        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Simpan')),
       ],
-    ),
-  );
-  current.dispose();
-  fresh.dispose();
-  confirm.dispose();
-  return result;
+    );
+  }
 }
