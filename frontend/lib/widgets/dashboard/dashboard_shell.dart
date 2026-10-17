@@ -66,30 +66,103 @@ class DashboardShell extends ConsumerWidget {
         );
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      barrierColor: const Color(0xFF0F172A).withValues(alpha: 0.55),
+      builder: (dialogContext) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
-        title: const Text('Keluar dari akun?'),
-        content: const Text(
-          'Kamu akan keluar dari dashboard dan perlu login ulang untuk mengaksesnya. Lanjutkan?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFB42318),
-              foregroundColor: Colors.white,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFB42318).withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.logout_rounded,
+                    color: Color(0xFFB42318),
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Keluar dari akun?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: dark ? FolioDarkColors.ink : FolioColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Kamu akan keluar dari dashboard dan perlu login ulang '
+                  'untuk mengaksesnya.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: dark ? FolioDarkColors.muted : FolioColors.muted,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () =>
+                            Navigator.of(dialogContext).pop(false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor:
+                              dark ? FolioDarkColors.ink : FolioColors.ink,
+                          side: BorderSide(
+                            color: dark
+                                ? FolioDarkColors.border
+                                : FolioColors.border,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Batal',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFB42318),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () =>
+                            Navigator.of(dialogContext).pop(true),
+                        child: const Text('Keluar',
+                            style: TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Ya, logout'),
           ),
-        ],
+        ),
       ),
     );
     if (confirmed == true && context.mounted) {
@@ -122,7 +195,7 @@ class DashboardShell extends ConsumerWidget {
           Expanded(
             child: Column(
               children: [
-                _topbar(context, ref, wide),
+                _topbar(context, wide),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
@@ -335,7 +408,7 @@ class DashboardShell extends ConsumerWidget {
     );
   }
 
-  Widget _topbar(BuildContext context, WidgetRef ref, bool wide) {
+  Widget _topbar(BuildContext context, bool wide) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final bar = dark ? FolioDarkColors.card : Colors.white;
     return Container(
@@ -458,8 +531,9 @@ class DashboardShell extends ConsumerWidget {
                   tooltip: 'Akun',
                   onSelected: (v) {
                     if (v == 'public') context.go('/');
-                    if (v == 'logout') _confirmLogout(context, ref);
                   },
+                  // Logout sengaja hanya ada di sidebar agar tidak bingung
+                  // dengan dua tombol logout.
                   itemBuilder: (_) => const [
                     PopupMenuItem(
                         value: 'public',
@@ -467,16 +541,6 @@ class DashboardShell extends ConsumerWidget {
                           Icon(Icons.public, size: 16),
                           SizedBox(width: 8),
                           Text('Lihat situs publik')
-                        ])),
-                    PopupMenuItem(
-                        value: 'logout',
-                        child: Row(children: [
-                          Icon(Icons.logout,
-                              size: 16, color: Color(0xFFB42318)),
-                          SizedBox(width: 8),
-                          Text('Logout',
-                              style: TextStyle(
-                                  color: Color(0xFFB42318)))
                         ])),
                   ],
                 ),
