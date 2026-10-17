@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/experience_model.dart';
 import 'package:frontend/models/project_model.dart';
 import 'package:frontend/models/skill_model.dart';
+import 'package:frontend/widgets/dashboard/folio_field.dart';
 
 const _skillCategories = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 
@@ -32,29 +33,6 @@ Future<bool> confirmDelete(BuildContext context, String label) async {
   return ok == true;
 }
 
-Widget _field(
-  TextEditingController c,
-  String label, {
-  String? hint,
-  int maxLines = 1,
-  TextInputType? keyboard,
-}) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: TextField(
-      controller: c,
-      maxLines: maxLines,
-      keyboardType: keyboard,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        isDense: true,
-      ),
-    ),
-  );
-}
-
 /// Dialog tambah/edit proyek. Mengembalikan payload siap kirim ke
 /// `createMyProject` / `updateMyProject`, atau null bila dibatalkan.
 Future<Map<String, dynamic>?> showProjectDialog(
@@ -77,7 +55,7 @@ Future<Map<String, dynamic>?> showProjectDialog(
       ? 'Belum ada skill — kosongkan saja'
       : 'ID tersedia: ${allSkills.map((s) => '${s.id}=${s.name}').join(', ')}';
 
-  return showDialog<Map<String, dynamic>>(
+  final result = await showDialog<Map<String, dynamic>>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
@@ -88,9 +66,9 @@ Future<Map<String, dynamic>?> showProjectDialog(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _field(title, 'Judul*', hint: 'misal: Toko Online'),
-                _field(slug, 'Slug*', hint: 'misal: toko-online'),
-                _field(
+                folioField(title, 'Judul*', hint: 'misal: Toko Online'),
+                folioField(slug, 'Slug*', hint: 'misal: toko-online'),
+                folioField(
                   summary,
                   'Ringkasan* (min 10 karakter)',
                   hint: 'Ceritakan proyek ini...',
@@ -111,25 +89,25 @@ Future<Map<String, dynamic>?> showProjectDialog(
                   onChanged: (v) => setState(() => status = v ?? 'published'),
                 ),
                 const SizedBox(height: 10),
-                _field(
+                folioField(
                   liveUrl,
                   'Live URL',
                   hint: 'https://...',
                   keyboard: TextInputType.url,
                 ),
-                _field(
+                folioField(
                   githubUrl,
                   'GitHub URL',
                   hint: 'https://github.com/...',
                   keyboard: TextInputType.url,
                 ),
-                _field(
+                folioField(
                   coverUrl,
                   'Cover image URL',
                   hint: 'https://.../cover.png (hasil upload cover)',
                   keyboard: TextInputType.url,
                 ),
-                _field(
+                folioField(
                   skillIds,
                   'Skill IDs (koma)',
                   hint: skillHint,
@@ -190,6 +168,18 @@ Future<Map<String, dynamic>?> showProjectDialog(
       ),
     ),
   );
+  for (final c in [
+    title,
+    slug,
+    summary,
+    liveUrl,
+    githubUrl,
+    coverUrl,
+    skillIds,
+  ]) {
+    c.dispose();
+  }
+  return result;
 }
 
 /// Dialog tambah/edit skill -> payload `createMySkill` / `updateMySkill`.
@@ -204,7 +194,7 @@ Future<Map<String, dynamic>?> showSkillDialog(
   var category = skill?.category ?? 'Other';
   if (!_skillCategories.contains(category)) category = 'Other';
 
-  return showDialog<Map<String, dynamic>>(
+  final result = await showDialog<Map<String, dynamic>>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
@@ -214,7 +204,7 @@ Future<Map<String, dynamic>?> showSkillDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _field(name, 'Nama*', hint: 'misal: Flutter'),
+              folioField(name, 'Nama*', hint: 'misal: Flutter'),
               DropdownButtonFormField<String>(
                 initialValue: category,
                 decoration: const InputDecoration(
@@ -228,7 +218,7 @@ Future<Map<String, dynamic>?> showSkillDialog(
                 onChanged: (v) => setState(() => category = v ?? 'Other'),
               ),
               const SizedBox(height: 10),
-              _field(
+              folioField(
                 proficiency,
                 'Proficiency (1-100, opsional)',
                 hint: 'misal: 80',
@@ -273,6 +263,9 @@ Future<Map<String, dynamic>?> showSkillDialog(
       ),
     ),
   );
+  name.dispose();
+  proficiency.dispose();
+  return result;
 }
 
 /// Dialog tambah/edit experience -> payload `createMyExperience` /
@@ -296,7 +289,7 @@ Future<Map<String, dynamic>?> showExperienceDialog(
   );
   var isCurrent = experience?.isCurrent ?? false;
 
-  return showDialog<Map<String, dynamic>>(
+  final result = await showDialog<Map<String, dynamic>>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
@@ -307,11 +300,15 @@ Future<Map<String, dynamic>?> showExperienceDialog(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _field(role, 'Role*', hint: 'misal: Frontend Engineer'),
-                _field(company, 'Perusahaan*', hint: 'misal: FolioSpace'),
-                _field(location, 'Lokasi', hint: 'misal: Jakarta'),
-                _field(start, 'Mulai* (YYYY-MM-DD)', hint: 'misal: 2023-01-15'),
-                _field(
+                folioField(role, 'Role*', hint: 'misal: Frontend Engineer'),
+                folioField(company, 'Perusahaan*', hint: 'misal: FolioSpace'),
+                folioField(location, 'Lokasi', hint: 'misal: Jakarta'),
+                folioField(
+                  start,
+                  'Mulai* (YYYY-MM-DD)',
+                  hint: 'misal: 2023-01-15',
+                ),
+                folioField(
                   end,
                   'Selesai (YYYY-MM-DD, kosong jika kini)',
                   hint: 'misal: 2024-06-30',
@@ -323,13 +320,13 @@ Future<Map<String, dynamic>?> showExperienceDialog(
                   value: isCurrent,
                   onChanged: (v) => setState(() => isCurrent = v ?? false),
                 ),
-                _field(
+                folioField(
                   description,
                   'Deskripsi',
                   hint: 'Ceritakan peranmu...',
                   maxLines: 3,
                 ),
-                _field(
+                folioField(
                   tech,
                   'Teknologi (koma)',
                   hint: 'misal: Flutter, Go, Postgres',
@@ -360,6 +357,17 @@ Future<Map<String, dynamic>?> showExperienceDialog(
                 );
                 return;
               }
+              final endText = end.text.trim();
+              if (!isCurrent &&
+                  endText.isNotEmpty &&
+                  endText.compareTo(start.text.trim()) < 0) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(
+                    content: Text('Tanggal selesai tidak boleh sebelum mulai'),
+                  ),
+                );
+                return;
+              }
               final techs = tech.text
                   .split(',')
                   .map((e) => e.trim())
@@ -382,6 +390,10 @@ Future<Map<String, dynamic>?> showExperienceDialog(
       ),
     ),
   );
+  for (final c in [role, company, location, start, end, description, tech]) {
+    c.dispose();
+  }
+  return result;
 }
 
 /// Dialog tambah media proyek -> dipakai `addMyProjectMedia`.
@@ -392,7 +404,7 @@ Future<Map<String, String>?> showProjectMediaDialog(
   final caption = TextEditingController();
   var type = 'image';
 
-  return showDialog<Map<String, String>>(
+  final result = await showDialog<Map<String, String>>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
@@ -402,7 +414,7 @@ Future<Map<String, String>?> showProjectMediaDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _field(
+              folioField(
                 url,
                 'Media URL*',
                 hint: 'https://... (hasil upload media)',
@@ -421,7 +433,7 @@ Future<Map<String, String>?> showProjectMediaDialog(
                 onChanged: (v) => setState(() => type = v ?? 'image'),
               ),
               const SizedBox(height: 10),
-              _field(caption, 'Caption', hint: 'opsional'),
+              folioField(caption, 'Caption', hint: 'opsional'),
             ],
           ),
         ),
@@ -450,6 +462,9 @@ Future<Map<String, String>?> showProjectMediaDialog(
       ),
     ),
   );
+  url.dispose();
+  caption.dispose();
+  return result;
 }
 
 /// Dialog ganti password -> [current, baru], atau null bila dibatalkan.
@@ -458,7 +473,7 @@ Future<List<String>?> showChangePasswordDialog(BuildContext context) async {
   final fresh = TextEditingController();
   final confirm = TextEditingController();
 
-  return showDialog<List<String>>(
+  final result = await showDialog<List<String>>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Ganti password'),
@@ -467,9 +482,9 @@ Future<List<String>?> showChangePasswordDialog(BuildContext context) async {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _field(current, 'Password saat ini'),
-            _field(fresh, 'Password baru (min 8)'),
-            _field(confirm, 'Ulangi password baru'),
+            folioField(current, 'Password saat ini', obscureText: true),
+            folioField(fresh, 'Password baru (min 8)', obscureText: true),
+            folioField(confirm, 'Ulangi password baru', obscureText: true),
           ],
         ),
       ),
@@ -503,4 +518,8 @@ Future<List<String>?> showChangePasswordDialog(BuildContext context) async {
       ],
     ),
   );
+  current.dispose();
+  fresh.dispose();
+  confirm.dispose();
+  return result;
 }

@@ -10,9 +10,31 @@ import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/dashboard/dashboard_shell.dart';
+import 'package:frontend/widgets/dashboard/folio_field.dart';
 import 'package:frontend/widgets/dashboard/folio_widgets.dart';
 import 'package:frontend/widgets/dashboard/skeleton.dart';
 import 'package:frontend/widgets/user/dialogs.dart';
+
+/// Ubah status publish situs. Dipakai kartu profil dan form profil.
+Future<void> setSitePublished(WidgetRef ref, bool published) async {
+  await ref.read(apiServiceProvider).setPublish(!published);
+  ref.invalidate(myProfileProvider);
+}
+
+/// Pesan error ramah berbasis [ApiException.statusCode] (404/429),
+/// tanpa dump `$e` mentah ke pengguna.
+String friendlyError(Object e, String fallback) {
+  if (e is ApiException) {
+    if (e.isNotFound) {
+      return 'Data tidak ditemukan. Muat ulang lalu coba lagi.';
+    }
+    if (e.isRateLimited) {
+      return 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.';
+    }
+    return e.message;
+  }
+  return fallback;
+}
 
 class UserDashboard extends ConsumerStatefulWidget {
   const UserDashboard({super.key});
@@ -34,19 +56,13 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
     );
   }
 
-  /// Pesan error ramah berbasis [ApiException.statusCode] (404/429),
-  /// tanpa dump `$e` mentah ke pengguna.
-  String _friendly(Object e, String fallback) {
-    if (e is ApiException) {
-      if (e.isNotFound) {
-        return 'Data tidak ditemukan. Muat ulang lalu coba lagi.';
-      }
-      if (e.isRateLimited) {
-        return 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.';
-      }
-      return e.message;
+  Future<void> _togglePublish(bool published) async {
+    try {
+      await setSitePublished(ref, published);
+      _snack(published ? 'Situs di-unpublish' : 'Situs dipublish');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal ubah status publish'), error: true);
     }
-    return fallback;
   }
 
   void _refreshAll() {
@@ -60,7 +76,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
   int _unreadCount(List<Map<String, dynamic>> list) =>
       list.where((m) => m['is_read'] != true).length;
 
-  /// Format `created_at` ISO backend -> `dd/mm/yyyy`. Fallback 10 char.
+  /// Format `created_at` ISO backend -> `d/m/yyyy`. Fallback: 10 char pertama.
   String _fmtDate(dynamic raw) {
     final s = raw?.toString() ?? '';
     if (s.isEmpty) return '-';
@@ -108,7 +124,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ],
       displayName:
           profile.asData?.value.fullName ?? auth.user?.username ?? 'Kreator',
-      displayRole: profile.asData?.value.headline ?? 'Kreator Portofolio',
+      displayRole: profile.asData?.value.headline ?? '',
       unreadCount: unread,
       child: RefreshIndicator(
         onRefresh: () async => _refreshAll(),
@@ -181,7 +197,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           data: (u) {
             final name = u.fullName ?? u.username;
             final initials = name.trim().isEmpty
-                ? 'AR'
+                ? '?'
                 : name
                       .trim()
                       .split(RegExp(r'\s+'))
@@ -222,10 +238,11 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                         ],
                       ),
                       const SizedBox(height: 3),
-                      Text(
-                        '${u.headline ?? 'Product Designer'} · Jakarta, Indonesia',
-                        style: const TextStyle(color: FolioColors.muted),
-                      ),
+                      if ((u.headline ?? '').isNotEmpty)
+                        Text(
+                          u.headline!,
+                          style: const TextStyle(color: FolioColors.muted),
+                        ),
                       Text(
                         'foliospace.id/${u.profileSlug ?? u.username.toLowerCase()}',
                         style: const TextStyle(
@@ -240,29 +257,13 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                   spacing: 8,
                   children: [
                     OutlinedButton(
-                      onPressed: () =>
-                          context.go('/u/${u.profileSlug ?? 'admin'}'),
+                      onPressed: u.profileSlug == null
+                          ? null
+                          : () => context.go('/u/${u.profileSlug}'),
                       child: const Text('Preview'),
                     ),
                     ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          await ref
-                              .read(apiServiceProvider)
-                              .setPublish(!u.isPublished);
-                          ref.invalidate(myProfileProvider);
-                          _snack(
-                            u.isPublished
-                                ? 'Situs di-unpublish'
-                                : 'Situs dipublish',
-                          );
-                        } catch (e) {
-                          _snack(
-                            _friendly(e, 'Gagal ubah status publish'),
-                            error: true,
-                          );
-                        }
-                      },
+                      onPressed: () => _togglePublish(u.isPublished),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: FolioColors.ink,
                         foregroundColor: Colors.white,
@@ -275,7 +276,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             );
           },
           loading: () => const ProfileCardSkeleton(),
-          error: (e, _) => Text(_friendly(e, 'Gagal memuat profil')),
+          error: (e, _) => Text(friendlyError(e, 'Gagal memuat profil')),
         ),
       ),
     );
@@ -361,7 +362,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         },
         loading: () => const ListSkeleton(rows: 3),
         error: (e, _) => ErrorCard(
-          message: _friendly(e, 'Gagal memuat proyek'),
+          message: friendlyError(e, 'Gagal memuat proyek'),
           onRetry: () => ref.invalidate(myProjectsProvider),
         ),
       ),
@@ -593,7 +594,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         },
         loading: () => const ListSkeleton(rows: 3),
         error: (e, _) => ErrorCard(
-          message: _friendly(e, 'Gagal memuat pesan'),
+          message: friendlyError(e, 'Gagal memuat pesan'),
           onRetry: () => ref.invalidate(myMessagesProvider),
         ),
       ),
@@ -613,8 +614,8 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           subtitle: 'Atur identitas, slug publik, dan status publikasi.',
           actionLabel: 'Lihat publik',
           onAction: () {
-            final slug = profile.asData?.value.profileSlug ?? 'admin';
-            context.go('/u/$slug');
+            final slug = profile.asData?.value.profileSlug;
+            if (slug != null) context.go('/u/$slug');
           },
         ),
         const SizedBox(height: 16),
@@ -630,7 +631,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           ),
           loading: () => const ListSkeleton(rows: 4),
           error: (e, _) => ErrorCard(
-            message: _friendly(e, 'Gagal memuat profil'),
+            message: friendlyError(e, 'Gagal memuat profil'),
             onRetry: () => ref.invalidate(myProfileProvider),
           ),
         ),
@@ -659,7 +660,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       }
       ref.invalidate(myProjectsProvider);
     } catch (e) {
-      _snack(_friendly(e, 'Gagal simpan proyek'), error: true);
+      _snack(friendlyError(e, 'Gagal simpan proyek'), error: true);
     }
   }
 
@@ -670,7 +671,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ref.invalidate(myProjectsProvider);
       _snack('Proyek dihapus');
     } catch (e) {
-      _snack(_friendly(e, 'Gagal hapus proyek'), error: true);
+      _snack(friendlyError(e, 'Gagal hapus proyek'), error: true);
     }
   }
 
@@ -689,7 +690,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ref.invalidate(myProjectsProvider);
       _snack('Media ditambahkan ke "${p.title}"');
     } catch (e) {
-      _snack(_friendly(e, 'Gagal tambah media'), error: true);
+      _snack(friendlyError(e, 'Gagal tambah media'), error: true);
     }
   }
 
@@ -708,8 +709,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         const SizedBox(height: 16),
         SectionCard(
           title: 'Daftar proyek',
-          subtitle:
-              'Dialog tambah/edit: title, slug, summary, status, live/github URL, skill_ids. Cover via URL cover, media via tombol +.',
+          subtitle: 'Edit, tambah media, atau hapus lewat menu ⋮ tiap proyek.',
           child: projects.when(
             data: (list) {
               if (list.isEmpty) {
@@ -758,7 +758,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             },
             loading: () => const ListSkeleton(rows: 3),
             error: (e, _) => ErrorCard(
-              message: _friendly(e, 'Gagal memuat proyek'),
+              message: friendlyError(e, 'Gagal memuat proyek'),
               onRetry: () => ref.invalidate(myProjectsProvider),
             ),
           ),
@@ -783,7 +783,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       }
       ref.invalidate(mySkillsProvider);
     } catch (e) {
-      _snack(_friendly(e, 'Gagal simpan skill'), error: true);
+      _snack(friendlyError(e, 'Gagal simpan skill'), error: true);
     }
   }
 
@@ -794,7 +794,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ref.invalidate(mySkillsProvider);
       _snack('Skill dihapus');
     } catch (e) {
-      _snack(_friendly(e, 'Gagal hapus skill'), error: true);
+      _snack(friendlyError(e, 'Gagal hapus skill'), error: true);
     }
   }
 
@@ -812,7 +812,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       }
       ref.invalidate(myExperiencesProvider);
     } catch (e) {
-      _snack(_friendly(e, 'Gagal simpan pengalaman'), error: true);
+      _snack(friendlyError(e, 'Gagal simpan pengalaman'), error: true);
     }
   }
 
@@ -825,7 +825,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ref.invalidate(myExperiencesProvider);
       _snack('Pengalaman dihapus');
     } catch (err) {
-      _snack(_friendly(err, 'Gagal hapus pengalaman'), error: true);
+      _snack(friendlyError(err, 'Gagal hapus pengalaman'), error: true);
     }
   }
 
@@ -844,7 +844,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       children: [
         SectionCard(
           title: 'Skill & keahlian',
-          subtitle: 'Ketuk ikon pensil untuk edit (PATCH).',
+          subtitle: 'Ketuk ikon pensil untuk mengedit skill.',
           trailing: TextButton.icon(
             onPressed: () => _saveSkill(),
             icon: const Icon(Icons.add, size: 16),
@@ -890,7 +890,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             },
             loading: () => const ListSkeleton(rows: 3),
             error: (e, _) => ErrorCard(
-              message: _friendly(e, 'Gagal memuat skill'),
+              message: friendlyError(e, 'Gagal memuat skill'),
               onRetry: () => ref.invalidate(mySkillsProvider),
             ),
           ),
@@ -898,7 +898,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         const SizedBox(height: 14),
         SectionCard(
           title: 'Pengalaman kerja',
-          subtitle: 'CRUD penuh: role, company, tanggal, is_current.',
+          subtitle: 'Role, perusahaan, dan periode kerja.',
           trailing: TextButton.icon(
             onPressed: () => _saveExperience(),
             icon: const Icon(Icons.add, size: 16),
@@ -941,7 +941,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             },
             loading: () => const ListSkeleton(rows: 3),
             error: (e, _) => ErrorCard(
-              message: _friendly(e, 'Gagal memuat pengalaman'),
+              message: friendlyError(e, 'Gagal memuat pengalaman'),
               onRetry: () => ref.invalidate(myExperiencesProvider),
             ),
           ),
@@ -960,7 +960,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ref.invalidate(myMessagesProvider);
       _snack('Pesan ditandai dibaca');
     } catch (e) {
-      _snack(_friendly(e, 'Gagal tandai pesan'), error: true);
+      _snack(friendlyError(e, 'Gagal tandai pesan'), error: true);
     }
   }
 
@@ -978,7 +978,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       ref.invalidate(myMessagesProvider);
       _snack('Pesan dihapus');
     } catch (e) {
-      _snack(_friendly(e, 'Gagal hapus pesan'), error: true);
+      _snack(friendlyError(e, 'Gagal hapus pesan'), error: true);
     }
   }
 
@@ -1029,7 +1029,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         },
         loading: () => const ListSkeleton(rows: 4),
         error: (e, _) => ErrorCard(
-          message: _friendly(e, 'Gagal memuat pesan'),
+          message: friendlyError(e, 'Gagal memuat pesan'),
           onRetry: () => ref.invalidate(myMessagesProvider),
         ),
       ),
@@ -1078,6 +1078,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     _slug = TextEditingController(text: widget.user.profileSlug ?? '');
     _avatar = TextEditingController(text: widget.user.avatarUrl ?? '');
     _resume = TextEditingController(text: widget.user.resumeUrl ?? '');
+    _slug.addListener(() => setState(() {}));
   }
 
   @override
@@ -1089,17 +1090,6 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     _avatar.dispose();
     _resume.dispose();
     super.dispose();
-  }
-
-  String _friendly(Object e) {
-    if (e is ApiException) {
-      if (e.isNotFound) return 'Profil tidak ditemukan.';
-      if (e.isRateLimited) {
-        return 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.';
-      }
-      return e.message;
-    }
-    return 'Gagal simpan profil';
   }
 
   String? _orNull(TextEditingController c) {
@@ -1121,7 +1111,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
       widget.onSaved();
       widget.onSuccess('Profil disimpan');
     } catch (e) {
-      widget.onError(_friendly(e));
+      widget.onError(friendlyError(e, 'Gagal simpan profil'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -1129,11 +1119,11 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
 
   Future<void> _togglePublish(bool published) async {
     try {
-      await ref.read(apiServiceProvider).setPublish(!published);
+      await setSitePublished(ref, published);
       widget.onSaved();
       widget.onSuccess(published ? 'Situs di-unpublish' : 'Situs dipublish');
     } catch (e) {
-      widget.onError(_friendly(e));
+      widget.onError(friendlyError(e, 'Gagal ubah status publish'));
     }
   }
 
@@ -1144,29 +1134,8 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
       await ref.read(authServiceProvider).changePassword(pair[0], pair[1]);
       widget.onSuccess('Password diganti');
     } catch (e) {
-      widget.onError(_friendly(e));
+      widget.onError(friendlyError(e, 'Gagal ganti password'));
     }
-  }
-
-  Widget _field(
-    TextEditingController c,
-    String label, {
-    String? hint,
-    int maxLines = 1,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: c,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-      ),
-    );
   }
 
   @override
@@ -1174,25 +1143,26 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     final published = widget.user.isPublished;
     return SectionCard(
       title: 'Edit profil',
-      subtitle:
-          'foliospace.id/${_slug.text.trim().isEmpty ? '-' : _slug.text.trim()}',
+      subtitle: _slug.text.trim().isEmpty
+          ? 'Belum ada slug publik'
+          : 'foliospace.id/${_slug.text.trim()}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _field(_fullName, 'Nama lengkap', hint: 'misal: Budi Santoso'),
-          _field(_headline, 'Headline', hint: 'misal: Product Designer'),
-          _field(_bio, 'Bio', hint: 'Ceritakan dirimu...', maxLines: 3),
-          _field(
+          folioField(_fullName, 'Nama lengkap', hint: 'misal: Budi Santoso'),
+          folioField(_headline, 'Headline', hint: 'misal: Product Designer'),
+          folioField(_bio, 'Bio', hint: 'Ceritakan dirimu...', maxLines: 3),
+          folioField(
             _slug,
             'Profile slug',
             hint: 'huruf-kecil-angka-strip, misal: budi-dev',
           ),
-          _field(
+          folioField(
             _avatar,
             'Avatar URL',
             hint: 'https://... (hasil upload avatar)',
           ),
-          _field(
+          folioField(
             _resume,
             'Resume URL',
             hint: 'https://... (hasil upload resume)',
