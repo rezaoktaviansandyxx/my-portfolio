@@ -193,12 +193,12 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: FolioColors.peachBg,
+                  backgroundColor: FolioColors.primarySoft,
                   child: Text(
                     initials,
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: FolioColors.peachInk,
+                      color: FolioColors.primary,
                     ),
                   ),
                 ),
@@ -303,12 +303,12 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEEF0F6),
+                        color: FolioColors.primarySoft,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.image_outlined,
-                        color: FolioColors.muted,
+                        color: FolioColors.primary,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -439,7 +439,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             child: LinearProgressIndicator(
               value: pct / 100,
               minHeight: 7,
-              backgroundColor: const Color(0xFFEEF0F6),
+              backgroundColor: FolioColors.primarySoft,
               valueColor: const AlwaysStoppedAnimation(FolioColors.primary),
             ),
           ),
@@ -552,16 +552,20 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       title: 'Pesan terbaru',
       subtitle: 'Dari pengunjung portofoliomu',
       trailing: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFE9D6),
-          borderRadius: BorderRadius.circular(8),
+          color: FolioColors.primarySoft,
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
           messages.isLoading
               ? '…'
               : '${_unreadCount(messages.asData?.value ?? const [])} belum dibaca',
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+          style: const TextStyle(
+            color: FolioColors.primary,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+          ),
         ),
       ),
       child: messages.when(
@@ -600,7 +604,14 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           actionLabel: 'Lihat publik',
           onAction: () {
             final slug = profile.asData?.value.profileSlug;
-            if (slug != null) context.go('/u/$slug');
+            if (slug == null || slug.isEmpty) {
+              _snack(
+                'Simpan Profile slug dulu di bawah untuk membuka situs publik.',
+                error: true,
+              );
+              return;
+            }
+            context.go('/u/$slug');
           },
         ),
         const SizedBox(height: 16),
@@ -1126,61 +1137,97 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   @override
   Widget build(BuildContext context) {
     final published = widget.user.isPublished;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final slug = _slug.text.trim();
     return SectionCard(
       title: 'Edit profil',
-      subtitle: _slug.text.trim().isEmpty
-          ? 'Belum ada slug publik'
-          : 'foliospace.id/${_slug.text.trim()}',
+      subtitle: slug.isEmpty
+          ? 'Lengkapi identitasmu, lalu atur slug & publikasi.'
+          : 'Publik di foliospace.id/$slug',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          folioField(_fullName, 'Nama lengkap', hint: 'misal: Budi Santoso'),
-          folioField(_headline, 'Headline', hint: 'misal: Product Designer'),
-          folioField(_bio, 'Bio', hint: 'Ceritakan dirimu...', maxLines: 3),
+          // ---------- Identitas ----------
+          const FormHeading('Identitas'),
+          folioField(
+            _fullName,
+            'Nama lengkap',
+            hint: 'misal: Budi Santoso',
+            icon: Icons.badge_outlined,
+          ),
+          folioField(
+            _headline,
+            'Headline',
+            hint: 'misal: Product Designer',
+            icon: Icons.work_outline,
+          ),
+          folioField(
+            _bio,
+            'Bio',
+            hint: 'Ceritakan dirimu...',
+            maxLines: 3,
+            icon: Icons.notes_rounded,
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 4),
+
+          // ---------- Alamat publik ----------
+          const FormHeading('Alamat publik'),
           folioField(
             _slug,
             'Profile slug',
-            hint: 'huruf-kecil-angka-strip, misal: budi-dev',
+            hint: 'huruf-kecil-angka-strip',
+            icon: Icons.alternate_email_rounded,
+            prefixText: 'foliospace.id/',
           ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 4),
+
+          // ---------- Media ----------
+          const FormHeading('Media'),
           folioField(
             _avatar,
             'Avatar URL',
             hint: 'https://... (hasil upload avatar)',
+            keyboard: TextInputType.url,
+            icon: Icons.image_outlined,
           ),
           folioField(
             _resume,
             'Resume URL',
             hint: 'https://... (hasil upload resume)',
+            keyboard: TextInputType.url,
+            icon: Icons.description_outlined,
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Publish situs'),
-            subtitle: Text(
-              published ? 'PUBLISHED — publik bisa melihat' : 'DRAFT',
-            ),
-            value: published,
-            onChanged: (_) => _togglePublish(published),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const SizedBox(height: 12),
+
+          // ---------- Publish ----------
+          _publishCard(context, published: published, dark: dark),
+          const SizedBox(height: 14),
+          Row(
             children: [
-              ElevatedButton.icon(
-                onPressed: _saving ? null : _save,
-                icon: _saving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.save_outlined, size: 18),
-                label: Text(_saving ? 'Menyimpan...' : 'Simpan profil'),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _saving ? null : _save,
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save_outlined, size: 18),
+                  label: Text(_saving ? 'Menyimpan...' : 'Simpan profil'),
+                ),
               ),
-              OutlinedButton.icon(
-                onPressed: _changePassword,
-                icon: const Icon(Icons.lock_outline, size: 18),
-                label: const Text('Ganti password'),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _changePassword,
+                  icon: const Icon(Icons.lock_outline, size: 18),
+                  label: const Text('Ganti password'),
+                ),
               ),
             ],
           ),
@@ -1188,4 +1235,80 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
       ),
     );
   }
+
+  /// Kartu status publikasi: ikon bola dunia + label status + Switch,
+  /// menggantikan SwitchListTile polos agar terlihat menyatu.
+  Widget _publishCard(
+    BuildContext context, {
+    required bool published,
+    required bool dark,
+  }) {
+    final bg = published
+        ? (dark ? FolioDarkColors.greenBg : FolioColors.greenBg)
+        : (dark ? FolioDarkColors.bg : FolioColors.bg);
+    final border = published
+        ? ((dark ? FolioDarkColors.green : FolioColors.green)
+              .withValues(alpha: 0.35))
+        : (dark ? FolioDarkColors.border : FolioColors.border);
+    final iconBg =
+        dark ? FolioDarkColors.primarySoft : FolioColors.primarySoft;
+    final iconColor =
+        published
+            ? (dark ? FolioDarkColors.green : FolioColors.green)
+            : (dark ? FolioDarkColors.primary : FolioColors.primary);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              published ? Icons.public_rounded : Icons.edit_off_outlined,
+              color: iconColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Publish situs',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color:
+                        dark ? FolioDarkColors.ink : FolioColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  published
+                      ? 'Situsmu bisa diakses publik lewat slug di atas.'
+                      : 'Situs masih privat — aktifkan untuk menerbitkan.',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color:
+                        dark ? FolioDarkColors.muted : FolioColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch(value: published, onChanged: (_) => _togglePublish(published)),
+        ],
+      ),
+    );
+  }
 }
+

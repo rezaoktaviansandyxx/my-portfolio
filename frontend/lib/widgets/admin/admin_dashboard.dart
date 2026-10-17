@@ -276,7 +276,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 6,
-              backgroundColor: const Color(0xFFEEF0F6),
+              backgroundColor: FolioColors.primarySoft,
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
@@ -326,7 +326,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF7F8FB),
+              color: FolioColors.primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(

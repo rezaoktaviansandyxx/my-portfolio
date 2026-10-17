@@ -135,10 +135,48 @@ class SectionCard extends StatelessWidget {
                 if (trailing != null) trailing!,
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             child,
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Judul kelompok kecil di dalam form (mis. "IDENTITAS", "MEDIA").
+/// Bar aksen indigo di kiri + teks kapital halus.
+class FormHeading extends StatelessWidget {
+  final String text;
+  const FormHeading(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final color = dark ? FolioDarkColors.primary : FolioColors.primary;
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 14,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text.toUpperCase(),
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.9,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,16 +188,19 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final published = text.toLowerCase() == 'published';
+    final bg = published ? FolioColors.greenBg : const Color(0xFFF1F2F7);
+    final fg = published ? FolioColors.green : FolioColors.muted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: published ? FolioColors.greenBg : const Color(0xFFF1F2F7),
-        borderRadius: BorderRadius.circular(8),
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: fg.withValues(alpha: 0.18)),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: published ? FolioColors.green : FolioColors.muted,
+          color: fg,
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),

@@ -19,6 +19,14 @@ class FolioColors {
   static const primaryDeep = Color(0xFF3730A3);
   static const primarySoft = Color(0xFFEDEBFF);
 
+  // Sidebar gelap shell dashboard (top→bottom gradient halus)
+  static const sbBgTop = Color(0xFF1B1E33);
+  static const sbBgBottom = Color(0xFF13161F);
+  static const sbText = Color(0xFF9BA2BA);
+  static const sbMuted = Color(0xFF6E7590);
+  static const sbBadge = Color(0x29FFFFFF); // putih ~16%
+  static const sbBorder = Color(0x14FFFFFF); // putih ~8%
+
   // Aksen pendukung
   static const greenBg = Color(0xFFE2F7EC);
   static const green = Color(0xFF0E9F6E);
@@ -43,6 +51,14 @@ class FolioDarkColors {
   static const primaryDeep = Color(0xFF6D63F0);
   static const primarySoft = Color(0xFF262A44);
 
+  // Sidebar gelap shell dashboard (mode gelap: tumpuk lebih pekat)
+  static const sbBgTop = Color(0xFF181A2B);
+  static const sbBgBottom = Color(0xFF10111A);
+  static const sbText = Color(0xFF8F95A8);
+  static const sbMuted = Color(0xFF6E7590);
+  static const sbBadge = Color(0x29FFFFFF);
+  static const sbBorder = Color(0x14FFFFFF);
+
   static const greenBg = Color(0xFF15301F);
   static const green = Color(0xFF34D399);
   static const peachBg = Color(0xFF372510);
@@ -55,8 +71,8 @@ class FolioDarkColors {
 class AppTheme {
   AppTheme._();
 
-  static const _radiusCard = 18.0;
-  static const _radiusField = 12.0;
+  static const _radiusCard = 20.0;
+  static const _radiusField = 14.0;
 
   static ThemeData get lightTheme {
     final scheme =
@@ -107,7 +123,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_radiusField),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: Color(0xFFE7EAF2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_radiusField),
@@ -145,7 +161,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
         ),
@@ -156,7 +172,7 @@ class AppTheme {
           side: const BorderSide(color: Color(0xFFD8DCE8)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w700,
@@ -230,7 +246,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_radiusField),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: Color(0xFF2C3047)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_radiusField),
@@ -271,7 +287,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
         ),
@@ -282,7 +298,7 @@ class AppTheme {
           side: const BorderSide(color: FolioDarkColors.border),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w700,
