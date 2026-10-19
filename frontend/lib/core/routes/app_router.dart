@@ -5,8 +5,7 @@ import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/features/public_portfolio/profile_page.dart';
 import 'package:frontend/features/gallery/gallery_page.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
-import 'package:frontend/features/auth/login_page.dart';
-import 'package:frontend/features/auth/register_page.dart';
+import 'package:frontend/features/auth/auth_screen.dart';
 import 'package:frontend/features/dashboard_me/user_dashboard_page.dart';
 import 'package:frontend/features/admin/admin_dashboard_page.dart';
 
@@ -79,8 +78,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, s) => ProfileScreen(slug: s.pathParameters['slug']!),
       ),
       GoRoute(path: '/gallery', builder: (_, __) => const GalleryScreen()),
-      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+        path: '/login',
+        builder: (_, __) => const AuthScreen(registerMode: false),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (_, __) => const AuthScreen(registerMode: true),
+      ),
       GoRoute(
         path: '/dashboard',
         builder: (_, __) =>
