@@ -5,6 +5,8 @@ import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/core/theme/app_text.dart';
+import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
 import 'package:frontend/shared/widgets/errors.dart';
@@ -544,8 +546,165 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     }
   }
 
-  Widget _usersTab() {
-    final users = ref.watch(adminUsersProvider);
+  Widget _userTableHeader() {
+    const style = TextStyle(
+      fontSize: 11,
+      letterSpacing: 0.6,
+      fontWeight: FontWeight.w700,
+      color: AppColors.muted,
+    );
+    return const Row(
+      children: [
+        Expanded(flex: 4, child: Text('NAMA', style: style)),
+        Expanded(flex: 3, child: Text('MODERASI', style: style)),
+        Expanded(flex: 2, child: Text('DRAFT / LIVE', style: style)),
+        SizedBox(width: 52, child: Text('AKSI', style: style)),
+      ],
+    );
+  }
+
+  /// Baris tabel user. Kolom AKSI menonaktifkan akun (PATCH is_active),
+  /// karena backend belum punya endpoint hapus user.
+  Widget _userRow(UserModel u) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 4,
+          child: Row(
+            children: [
+              ClipOval(
+                child: AppNetworkImage(
+                  url: u.avatarUrl,
+                  width: 30,
+                  height: 30,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            u.fullName ?? u.username,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                        if (u.isAdmin) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.indigoSoft,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'admin',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.cyan,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(u.email, style: AppText.caption),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Row(
+            children: [
+              Switch.adaptive(
+                value: u.isActive,
+                activeThumbColor: AppColors.success,
+                onChanged: (v) => _setUserField(u.id, {'is_active': v}),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  u.isActive ? 'Aktif' : 'Ditangguhkan',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: u.isActive ? AppColors.body : AppColors.warning,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Row(
+            children: [
+              Switch.adaptive(
+                value: u.isPublished,
+                activeThumbColor: AppColors.success,
+                onChanged: (v) => _setUserField(u.id, {'is_published': v}),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                u.isPublished ? 'Live' : 'Draft',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: u.isPublished ? AppColors.success : AppColors.warning,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          width: 52,
+          child: PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded, size: 18),
+            color: const Color(0xFF171C28),
+            onSelected: (v) {
+              if (v == 'active') {
+                _setUserField(u.id, {'is_active': !u.isActive});
+              }
+              if (v == 'role') {
+                _setUserField(u.id, {'role': u.isAdmin ? 'user' : 'admin'});
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'active',
+                child: Text(
+                  u.isActive ? 'Nonaktifkan akun' : 'Aktifkan akun',
+                ),
+              ),
+              PopupMenuItem(
+                value: 'role',
+                child: Text(u.isAdmin ? 'Jadikan user' : 'Jadikan admin'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _usersTab() {    final users = ref.watch(adminUsersProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -571,78 +730,15 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               final filtered = _filterUsers(list);
               if (filtered.isEmpty) return _noResult('pengguna');
               return Column(
-                children: filtered
-                    .map(
-                      (u) => ListTile(
-                        leading: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: AppColors.indigoSoft,
-                          child: Text(
-                            _initials(u.fullName ?? u.username),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.indigo,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          '${u.fullName ?? u.username} (${u.role ?? 'user'})',
-                        ),
-                        subtitle: Text(
-                          '${u.email} • slug: ${u.profileSlug ?? '-'}'
-                          '${u.isActive ? '' : ' • nonaktif'}',
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Tooltip(
-                              message: u.isPublished
-                                  ? 'Sembunyikan portofolio'
-                                  : 'Publikasikan portofolio',
-                              child: Switch(
-                                value: u.isPublished,
-                                onChanged: (v) =>
-                                    _setUserField(u.id, {'is_published': v}),
-                              ),
-                            ),
-                            PopupMenuButton<String>(
-                              onSelected: (v) {
-                                if (v == 'active') {
-                                  _setUserField(u.id, {
-                                    'is_active': !u.isActive,
-                                  });
-                                }
-                                if (v == 'role') {
-                                  _setUserField(u.id, {
-                                    'role': u.isAdmin ? 'user' : 'admin',
-                                  });
-                                }
-                              },
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 'active',
-                                  child: Text(
-                                    u.isActive
-                                        ? 'Nonaktifkan akun'
-                                        : 'Aktifkan akun',
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'role',
-                                  child: Text(
-                                    u.isAdmin
-                                        ? 'Jadikan user'
-                                        : 'Jadikan admin',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _userTableHeader(),
+                  const Divider(height: 20),
+                  for (var i = 0; i < filtered.length; i++) ...[
+                    _userRow(filtered[i]),
+                    if (i < filtered.length - 1) const Divider(height: 20),
+                  ],
+                ],
               );
             },
             loading: () => const TableSkeleton(rows: 5),
