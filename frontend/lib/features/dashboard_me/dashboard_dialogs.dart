@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/experience_model.dart';
-import 'package:frontend/models/project_model.dart';
-import 'package:frontend/models/skill_model.dart';
-import 'package:frontend/widgets/folio_field.dart';
+import 'package:frontend/core/models/experience_model.dart';
+import 'package:frontend/core/models/project_model.dart';
+import 'package:frontend/core/models/skill_model.dart';
+import 'package:frontend/shared/widgets/folio_field.dart';
 
 const _skillCategories = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 

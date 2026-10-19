@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/constants/api_config.dart';
-import 'package:frontend/providers/auth_providers.dart';
-import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/features/auth/auth_providers.dart';
+import 'package:frontend/core/theme/app_theme.dart';
 
 class SidebarItem {
   final IconData icon;

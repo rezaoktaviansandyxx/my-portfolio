@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/providers/app_providers.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/errors.dart';
-import 'package:frontend/widgets/skeleton.dart';
+import 'package:frontend/core/network/app_providers.dart';
+import 'package:frontend/core/network/api_service.dart';
+import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/shared/widgets/errors.dart';
+import 'package:frontend/shared/widgets/skeleton.dart';
 
 /// Form kontak publik: sender_name/sender_email/subject/content
 /// -> POST /public/u/{slug}/contact.

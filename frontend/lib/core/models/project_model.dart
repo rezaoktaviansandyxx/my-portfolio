@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:frontend/models/skill_model.dart';
+import 'package:frontend/core/models/skill_model.dart';
 
 part 'project_model.g.dart';
 

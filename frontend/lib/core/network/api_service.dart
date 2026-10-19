@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:frontend/constants/api_config.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/models/project_model.dart';
-import 'package:frontend/models/skill_model.dart';
-import 'package:frontend/models/experience_model.dart';
+import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/models/project_model.dart';
+import 'package:frontend/core/models/skill_model.dart';
+import 'package:frontend/core/models/experience_model.dart';
 
 /// Typed error dengan HTTP status agar UI bisa bedakan 404/429/dll
 /// tanpa string-match. `implements Exception` sehingga pemanggil lama

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:frontend/constants/api_config.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/services/api_service.dart';
+import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/network/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {

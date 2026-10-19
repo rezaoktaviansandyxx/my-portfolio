@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/providers/auth_providers.dart';
-import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/auth_layout.dart';
-import 'package:frontend/widgets/skeleton.dart';
+import 'package:frontend/features/auth/auth_providers.dart';
+import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/features/auth/auth_layout.dart';
+import 'package:frontend/shared/widgets/skeleton.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

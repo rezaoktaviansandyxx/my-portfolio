@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_theme.dart';
 
 /// Semua efek shimmer berasal dari package `skeletonizer`.
 /// File ini hanya berisi susunan layout (Bone) agar bentuknya

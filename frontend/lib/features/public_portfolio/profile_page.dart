@@ -3,16 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
-import 'package:frontend/constants/api_config.dart';
-import 'package:frontend/models/experience_model.dart';
-import 'package:frontend/models/project_model.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/providers/app_providers.dart';
-import 'package:frontend/providers/auth_providers.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/theme/app_theme.dart';
-import 'package:frontend/widgets/contact_section.dart';
-import 'package:frontend/widgets/skeleton.dart';
+import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/models/experience_model.dart';
+import 'package:frontend/core/models/project_model.dart';
+import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/network/app_providers.dart';
+import 'package:frontend/features/auth/auth_providers.dart';
+import 'package:frontend/core/network/api_service.dart';
+import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/features/public_portfolio/widgets/contact_section.dart';
+import 'package:frontend/shared/widgets/skeleton.dart';
 
 /// Halaman publik portofolio kreator: "/u/:slug".
 /// "/" di-redirect router ke situs publik milik sendiri, atau galeri

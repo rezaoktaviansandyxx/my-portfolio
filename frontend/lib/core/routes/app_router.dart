@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/providers/auth_providers.dart';
-import 'package:frontend/pages/profile_page.dart';
-import 'package:frontend/pages/gallery_page.dart';
-import 'package:frontend/widgets/skeleton.dart';
-import 'package:frontend/pages/login_page.dart';
-import 'package:frontend/pages/register_page.dart';
-import 'package:frontend/pages/user_dashboard_page.dart';
-import 'package:frontend/pages/admin_dashboard_page.dart';
+import 'package:frontend/features/auth/auth_providers.dart';
+import 'package:frontend/features/public_portfolio/profile_page.dart';
+import 'package:frontend/features/gallery/gallery_page.dart';
+import 'package:frontend/shared/widgets/skeleton.dart';
+import 'package:frontend/features/auth/login_page.dart';
+import 'package:frontend/features/auth/register_page.dart';
+import 'package:frontend/features/dashboard_me/user_dashboard_page.dart';
+import 'package:frontend/features/admin/admin_dashboard_page.dart';
 
 /// Notifier agar GoRouter re-evaluasi redirect setiap auth berubah
 /// (login/logout/restore token). Tanpa ini gate telat jalan di web.

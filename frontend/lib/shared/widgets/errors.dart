@@ -1,4 +1,4 @@
-import 'package:frontend/services/api_service.dart';
+import 'package:frontend/core/network/api_service.dart';
 
 /// Pesan error ramah berbasis [ApiException.statusCode] (404/429),
 /// tanpa dump `$e` mentah ke pengguna.

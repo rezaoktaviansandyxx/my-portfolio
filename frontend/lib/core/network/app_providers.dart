@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/providers/auth_providers.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/models/project_model.dart';
-import 'package:frontend/models/skill_model.dart';
-import 'package:frontend/models/experience_model.dart';
+import 'package:frontend/core/network/api_service.dart';
+import 'package:frontend/features/auth/auth_providers.dart';
+import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/models/project_model.dart';
+import 'package:frontend/core/models/skill_model.dart';
+import 'package:frontend/core/models/experience_model.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) {
   // Pakai Dio yang sama dengan AuthService agar header Bearer ikut terkirim.

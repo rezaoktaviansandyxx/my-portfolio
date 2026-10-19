@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_theme.dart';
 
 /// Layout auth FolioSpace: panel brand kiri (desktop), form kanan.
 class AuthLayout extends StatelessWidget {

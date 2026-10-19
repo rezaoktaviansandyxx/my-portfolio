@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/services/auth_service.dart';
+import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/network/auth_service.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio();
