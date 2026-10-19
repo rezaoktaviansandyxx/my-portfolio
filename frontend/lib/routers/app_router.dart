@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/pages/profile_page.dart';
 import 'package:frontend/pages/gallery_page.dart';
+import 'package:frontend/widgets/skeleton.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/register_page.dart';
 import 'package:frontend/pages/user_dashboard_page.dart';
@@ -36,6 +37,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAdmin = auth.isAdmin;
       final path = state.matchedLocation;
 
+      // HOME "/": tampilkan situs publik milik pengguna sendiri.
+      // Kalau belum login atau slug belum diset, fallback ke galeri kreator.
+      // (Sebelumnya "/" hardcoded ke slug 'admin' sehingga selalu memuat
+      // profil admin, bukan profil kreator yang dipublish.)
+      if (path == '/') {
+        final slug = auth.user?.profileSlug;
+        final hasOwnSite = isAuth && slug != null && slug.trim().isNotEmpty;
+        return hasOwnSite ? '/u/$slug' : '/gallery';
+      }
+
       // GATE: semua halaman privat wajib access_token
       if (path == '/dashboard' || path.startsWith('/dashboard/')) {
         if (!isAuth) return '/login';
@@ -50,7 +61,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (!isAuth) return null;
         return isAdmin ? '/admin' : '/dashboard';
       }
-      // Publik: '/' dan '/u/:slug' boleh tanpa token (portofolio).
+      // Publik: '/u/:slug' dan '/gallery' boleh tanpa token (portofolio).
+      // "/" di-handle di atas (redirect ke situs sendiri / galeri).
       // Kalau mau full-private, uncomment 2 baris ini:
       // if (!isAuth) return '/login';
       return null;
@@ -58,12 +70,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (_, __) => const ProfileScreen(slug: 'admin'),
+        // Hanya tampil sesaat saat restore token (isLoading), karena
+        // redirect di atas langsung antarkan ke /u/<slug> atau /gallery.
+        builder: (_, __) => const PageSkeleton(),
       ),
       GoRoute(
         path: '/u/:slug',
-        builder: (_, s) =>
-            ProfileScreen(slug: s.pathParameters['slug'] ?? 'admin'),
+        builder: (_, s) => ProfileScreen(slug: s.pathParameters['slug']!),
       ),
       GoRoute(path: '/gallery', builder: (_, __) => const GalleryScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
@@ -96,12 +109,12 @@ class _AuthGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authNotifierProvider);
     if (auth.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const PageSkeleton();
     }
     if (!auth.isAuthenticated) {
       // Gate: belum ada access_token -> ke login dulu
       WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/login'));
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const PageSkeleton();
     }
     if (adminOnly && !auth.isAdmin) {
       WidgetsBinding.instance.addPostFrameCallback(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/constants/api_config.dart';
 import 'package:frontend/providers/app_providers.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 class ProjectsSection extends ConsumerWidget {
   final String slug;
@@ -44,7 +45,7 @@ class ProjectsSection extends ConsumerWidget {
               );
             },
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const ListSkeleton(rows: 3),
           error: (error, _) => Text('Error: $error'),
         ),
       ],

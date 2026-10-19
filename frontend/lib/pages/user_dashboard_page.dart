@@ -1293,13 +1293,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: _saving ? null : _save,
-                  icon: _saving
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_outlined, size: 18),
+                  icon: _saving ? const SkeletonBox(width: 16, height: 16, radius: 8) : const Icon(Icons.save_outlined, size: 18),
                   label: Text(_saving ? 'Menyimpan...' : 'Simpan profil'),
                 ),
               ),

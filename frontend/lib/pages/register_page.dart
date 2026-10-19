@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:frontend/providers/auth_providers.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/auth_layout.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -145,11 +146,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       borderRadius: BorderRadius.circular(14)),
                 ),
                 child: _loading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
+                    ? const SkeletonBox(width: 100, height: 18, radius: 9)
                     : const Text('Buat akun',
                         style: TextStyle(fontWeight: FontWeight.w700)),
               ),

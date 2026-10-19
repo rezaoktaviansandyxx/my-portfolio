@@ -214,6 +214,82 @@ class ListSkeleton extends StatelessWidget {
   }
 }
 
+/// Skeleton halaman penuh: dipakai router saat restore token / auth gate.
+/// Bentuknya menyerupai halaman profil: avatar, judul, dan beberapa kartu.
+class PageSkeleton extends StatelessWidget {
+  const PageSkeleton({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Skeletonizer(
+      enabled: true,
+      child: Scaffold(
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Bone.circle(size: 64),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Bone.text(words: 2, fontSize: 20),
+                            const SizedBox(height: 8),
+                            Bone.text(words: 3),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  for (var i = 0; i < 3; i++)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Bone(
+                        width: double.infinity,
+                        height: 110,
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Skeleton baris chip, menyerupai daftar Chip di section Keahlian.
+class SkillChipsSkeleton extends StatelessWidget {
+  const SkillChipsSkeleton({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Skeletonizer(
+      enabled: true,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          Bone(width: 88, height: 36, borderRadius: BorderRadius.circular(18)),
+          Bone(width: 64, height: 36, borderRadius: BorderRadius.circular(18)),
+          Bone(width: 116, height: 36, borderRadius: BorderRadius.circular(18)),
+          Bone(width: 76, height: 36, borderRadius: BorderRadius.circular(18)),
+          Bone(width: 96, height: 36, borderRadius: BorderRadius.circular(18)),
+        ],
+      ),
+    );
+  }
+}
+
 class ErrorCard extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

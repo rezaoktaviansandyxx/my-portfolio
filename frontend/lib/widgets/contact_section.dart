@@ -4,6 +4,7 @@ import 'package:frontend/providers/app_providers.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/errors.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 /// Form kontak publik: sender_name/sender_email/subject/content
 /// -> POST /public/u/{slug}/contact.
@@ -178,11 +179,7 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
         icon: _sending
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+            ? const SkeletonBox(width: 16, height: 16, radius: 8)
             : const Icon(Icons.send_rounded, size: 17),
         label: Text(
           _sending ? 'Mengirim...' : 'Kirim Pesan',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/providers/app_providers.dart';
+import 'package:frontend/widgets/skeleton.dart';
 
 class SkillsSection extends ConsumerWidget {
   final String slug;
@@ -26,7 +27,7 @@ class SkillsSection extends ConsumerWidget {
               );
             }).toList(),
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkillChipsSkeleton(),
           error: (error, _) => Text('Error: $error'),
         ),
       ],

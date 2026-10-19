@@ -14,10 +14,11 @@ import 'package:frontend/theme/app_theme.dart';
 import 'package:frontend/widgets/contact_section.dart';
 import 'package:frontend/widgets/skeleton.dart';
 
-/// Halaman publik:
-/// "/" -> portofolio default (slug 'admin'), "/u/:slug" -> portofolio kreator.
-/// Bisa dibuka tanpa login. Kalau pemilik sudah login, tombol kanan atas
-/// mengarah ke dashboard masing-masing.
+/// Halaman publik portofolio kreator: "/u/:slug".
+/// "/" di-redirect router ke situs publik milik sendiri, atau galeri
+/// kalau belum login / slug belum diset. Bisa dibuka tanpa login.
+/// Kalau pemilik sudah login, tombol kanan atas mengarah ke dashboard
+/// masing-masing.
 class ProfileScreen extends ConsumerStatefulWidget {
   final String slug;
 
