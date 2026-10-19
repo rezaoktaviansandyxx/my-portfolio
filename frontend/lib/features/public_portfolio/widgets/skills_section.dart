@@ -22,14 +22,13 @@ class SkillsSection extends StatelessWidget {
 
   IconData? _iconFor(String? category) {
     switch ((category ?? '').toLowerCase()) {
-      case 'mobile':
-        return Icons.phone_iphone_rounded;
       case 'frontend':
         return Icons.web_rounded;
       case 'backend':
         return Icons.dns_outlined;
+      case 'database':
+        return Icons.storage_rounded;
       case 'tools':
-      case 'devops':
         return Icons.terminal_rounded;
       default:
         return Icons.bolt_rounded;
