@@ -73,9 +73,12 @@ class ProjectListResponse(BaseModel):
   slug: str
   summary: str
   cover_image_url: Optional[str] = None
+  live_url: Optional[str] = None
+  github_url: Optional[str] = None
   is_featured: bool
   display_order: int
   skills: List[SkillResponse] = []
+  media: List[ProjectMediaResponse] = []
   owner: Optional[OwnerBrief] = None
 
   class Config:

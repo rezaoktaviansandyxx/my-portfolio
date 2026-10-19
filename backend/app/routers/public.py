@@ -12,7 +12,7 @@ from app.schemas.message import MessageCreate, MessageResponse
 from app.schemas.project import ProjectDetailResponse, ProjectListResponse
 from app.schemas.skill import SkillResponse
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 router = APIRouter(prefix="/public", tags=["Public"])
 
@@ -45,6 +45,7 @@ def gallery_projects(
 ):
   return (
       db.query(Project)
+      .options(selectinload(Project.media))
       .join(User, Project.owner_id == User.id)
       .filter(
           Project.status == "published",
@@ -76,6 +77,7 @@ def u_projects(
   u = _get_published_owner(db, slug)
   return (
       db.query(Project)
+      .options(selectinload(Project.media))
       .filter(Project.owner_id == u.id, Project.status == "published")
       .order_by(Project.display_order.asc(), Project.created_at.desc())
       .offset(skip)
