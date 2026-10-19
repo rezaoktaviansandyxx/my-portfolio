@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/network/api_config.dart';
+import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 
@@ -235,11 +236,17 @@ class DashboardShell extends ConsumerWidget {
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (wide) SizedBox(width: 272, child: _sidebar(context, ref, false)),
+          if (wide)
+            _DashboardRail(
+              selectedIndex: selectedIndex,
+              menu: menu,
+              onSelect: onSelect,
+              onLogout: () => _confirmLogout(context, ref),
+            ),
           Expanded(
             child: Column(
               children: [
-                _topbar(context, wide),
+                _topbar(context, ref, wide),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
@@ -465,7 +472,41 @@ class DashboardShell extends ConsumerWidget {
     );
   }
 
-  Widget _topbar(BuildContext context, bool wide) {
+  /// Pil status publish di topbar: hijau Live, kuning Draft.
+  Widget _statusPill(WidgetRef ref) {
+    final user = ref.watch(myProfileProvider).value;
+    final published = user?.isPublished ?? false;
+    final color = published ? AppColors.success : AppColors.warning;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            published ? 'Live' : 'Draft',
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 11.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _topbar(BuildContext context, WidgetRef ref, bool wide) {
     final bar = AppColors.glassFill;
     return Container(
       decoration: BoxDecoration(
@@ -512,6 +553,8 @@ class DashboardShell extends ConsumerWidget {
             ),
           ),
           const Spacer(),
+          _statusPill(ref),
+          const SizedBox(width: 12),
           _bellButton(context, bar),
           const SizedBox(width: 12),
           Container(
@@ -762,6 +805,99 @@ class DashboardShell extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Rail navigasi kiri yang bisa diciutkan. Stateful hanya untuk `extended`.
+class _DashboardRail extends StatefulWidget {
+  final int selectedIndex;
+  final List<SidebarItem> menu;
+  final ValueChanged<int> onSelect;
+  final VoidCallback onLogout;
+
+  const _DashboardRail({
+    required this.selectedIndex,
+    required this.menu,
+    required this.onSelect,
+    required this.onLogout,
+  });
+
+  @override
+  State<_DashboardRail> createState() => _DashboardRailState();
+}
+
+class _DashboardRailState extends State<_DashboardRail> {
+  bool _extended = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.bgAlt,
+        border: Border(right: BorderSide(color: AppColors.glassBorder)),
+      ),
+      child: SafeArea(
+        child: NavigationRail(
+          extended: _extended,
+          minExtendedWidth: 210,
+          backgroundColor: Colors.transparent,
+          indicatorColor: AppColors.indigo.withValues(alpha: 0.28),
+          selectedIconTheme: const IconThemeData(color: AppColors.ink),
+          unselectedIconTheme: const IconThemeData(color: AppColors.muted),
+          selectedLabelTextStyle: const TextStyle(
+            color: AppColors.ink,
+            fontWeight: FontWeight.w700,
+            fontSize: 12.5,
+          ),
+          unselectedLabelTextStyle: const TextStyle(
+            color: AppColors.muted,
+            fontSize: 12.5,
+          ),
+          groupAlignment: -0.85,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: IconButton(
+              onPressed: () => setState(() => _extended = !_extended),
+              icon: Icon(
+                _extended
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+              ),
+              color: AppColors.muted,
+              tooltip: _extended ? 'Ciutkan' : 'Lebarkan',
+            ),
+          ),
+          trailing: Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: IconButton(
+                  onPressed: widget.onLogout,
+                  icon: const Icon(Icons.logout_rounded),
+                  color: AppColors.muted,
+                  tooltip: 'Keluar',
+                ),
+              ),
+            ),
+          ),
+          selectedIndex: widget.selectedIndex,
+          onDestinationSelected: widget.onSelect,
+          destinations: [
+            for (final item in widget.menu)
+              NavigationRailDestination(
+                icon: Badge(
+                  isLabelVisible: item.badge != null,
+                  label: Text(item.badge ?? ''),
+                  backgroundColor: AppColors.danger,
+                  child: Icon(item.icon),
+                ),
+                label: Text(item.label),
+              ),
+          ],
+        ),
       ),
     );
   }

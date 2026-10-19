@@ -9,6 +9,8 @@ import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/core/theme/app_text.dart';
+import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
 import 'package:frontend/shared/widgets/errors.dart';
@@ -34,10 +36,42 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
   final TextEditingController _search = TextEditingController();
   String _query = '';
 
+  /// Urutan lokal proyek untuk drag-and-drop; diisi sekali dari provider lalu
+  /// di-update optimistis saat kartu digeser.
+  List<ProjectModel> _localOrder = [];
+  bool _orderSeeded = false;
+
   @override
   void dispose() {
     _search.dispose();
     super.dispose();
+  }
+
+  /// Tulis ulang `display_order` sesuai urutan baru. Optimistis: UI sudah
+  /// di-update sebelum PATCH; kalau gagal, provider di-refresh agar kembali
+  /// ke urutan server.
+  Future<void> _persistOrder(List<ProjectModel> ordered) async {
+    final api = ref.read(apiServiceProvider);
+    try {
+      for (var i = 0; i < ordered.length; i++) {
+        if (ordered[i].displayOrder == i) continue;
+        await api.updateMyProject(ordered[i].id, {'display_order': i});
+      }
+    } catch (e) {
+      _snack('Gagal menyimpan urutan: $e', error: true);
+    } finally {
+      ref.invalidate(myProjectsProvider);
+    }
+  }
+
+  void _moveProject(int from, int to) {
+    if (from == to || from < 0 || to < 0) return;
+    if (from >= _localOrder.length) return;
+    final list = List<ProjectModel>.from(_localOrder);
+    final moved = list.removeAt(from);
+    list.insert(to.clamp(0, list.length), moved);
+    setState(() => _localOrder = list);
+    _persistOrder(list);
   }
 
   /// Filter sederhana untuk search bar di topbar (case-insensitive).
@@ -768,8 +802,166 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
     }
   }
 
-  Widget _projectsTab() {
-    final projects = ref.watch(myProjectsProvider);
+  /// Grid drag-and-drop: kartu bisa digeser ke dropzone mana pun.
+  /// Index `i` kartu = posisi target; dropzone terakhir menaruh di ujung.
+  Widget _reorderGrid(List<ProjectModel> items) {
+    final reorderable = _query.isEmpty;
+    return Wrap(
+      spacing: 14,
+      runSpacing: 14,
+      children: [
+        for (var i = 0; i < items.length; i++)
+          if (reorderable)
+            DragTarget<int>(
+              onAcceptWithDetails: (d) => _moveProject(d.data, i),
+              builder: (_, candidate, __) => Draggable<int>(
+                data: i,
+                feedback: Material(
+                  color: Colors.transparent,
+                  child: SizedBox(width: 300, child: _projectCard(items[i], i)),
+                ),
+                childWhenDragging: Opacity(
+                  opacity: 0.3,
+                  child: _projectCard(items[i], i),
+                ),
+                child: _projectCard(items[i], i, highlighted: candidate.isNotEmpty),
+              ),
+            )
+          else
+            _projectCard(items[i], i),
+        if (reorderable) _dropzone(items.length),
+      ],
+    );
+  }
+
+  Widget _dropzone(int index) {
+    return DragTarget<int>(
+      onAcceptWithDetails: (d) => _moveProject(d.data, index),
+      builder: (_, candidate, __) {
+        final active = candidate.isNotEmpty;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          width: 240,
+          height: 132,
+          decoration: BoxDecoration(
+            color: active
+                ? AppColors.cyan.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: active ? AppColors.cyan : AppColors.glassBorder,
+              width: 1.4,
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.file_upload_outlined,
+                  size: 22,
+                  color: active ? AppColors.cyan : AppColors.muted,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Dropzones',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: active ? AppColors.cyan : AppColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _projectCard(ProjectModel p, int index, {bool highlighted = false}) {
+    return Container(
+      width: 300,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: highlighted
+            ? AppColors.cyan.withValues(alpha: 0.10)
+            : AppColors.glassFill,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: highlighted ? AppColors.cyan : AppColors.glassBorder,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AppNetworkImage(
+                url: p.coverImageUrl,
+                width: 40,
+                height: 40,
+                radius: 10,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      p.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      '${p.status ?? '-'} • ${(p.media ?? []).length} media',
+                      style: AppText.caption,
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert_rounded, size: 18),
+                color: const Color(0xFF171C28),
+                onSelected: (v) {
+                  if (v == 'edit') {
+                    _saveProject(existing: p);
+                  } else if (v == 'media') {
+                    _addProjectMedia(p);
+                  } else if (v == 'delete') {
+                    _deleteProject(p);
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  PopupMenuItem(value: 'media', child: Text('Tambah media')),
+                  PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                ],
+              ),
+            ],
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              Icon(
+                Icons.drag_indicator_rounded,
+                size: 15,
+                color: AppColors.muted,
+              ),
+              const SizedBox(width: 4),
+              Text('Urutan ${index + 1}', style: AppText.caption),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _projectsTab() {    final projects = ref.watch(myProjectsProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -794,42 +986,13 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
               }
               final filtered = _filterProjects(list);
               if (filtered.isEmpty) return _noResult('proyek');
-              return Column(
-                children: filtered
-                    .map(
-                      (p) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.image_outlined),
-                        title: Text(p.title),
-                        subtitle: Text(
-                          '${p.slug} • ${p.status ?? '-'} • ${(p.media ?? []).length} media',
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          icon: const Icon(Icons.more_vert),
-                          onSelected: (v) {
-                            if (v == 'edit') {
-                              _saveProject(existing: p);
-                            } else if (v == 'media') {
-                              _addProjectMedia(p);
-                            } else if (v == 'delete') {
-                              _deleteProject(p);
-                            }
-                          },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(
-                              value: 'media',
-                              child: Text('Tambah media'),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Text('Hapus'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
+              // Seed urutan lokal sekali, lalu jaga sinkron bila jumlah berubah.
+              if (!_orderSeeded || _localOrder.length != list.length) {
+                _orderSeeded = true;
+                _localOrder = List<ProjectModel>.from(list);
+              }
+              return _reorderGrid(
+                _query.isEmpty ? _localOrder : filtered,
               );
             },
             loading: () => const ListSkeleton(rows: 3),
