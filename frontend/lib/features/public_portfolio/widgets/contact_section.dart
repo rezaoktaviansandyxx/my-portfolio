@@ -4,6 +4,7 @@ import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/shared/widgets/errors.dart';
+import 'package:frontend/shared/widgets/glass_card.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
 
 /// Form kontak publik: sender_name/sender_email/subject/content
@@ -25,6 +26,8 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
   final _subjectCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
   bool _sending = false;
+  String? _notice;
+  bool _noticeIsError = false;
 
   @override
   void dispose() {
@@ -52,21 +55,23 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
         ),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pesan terkirim. Kreator akan membalas via email.'),
-        ),
-      );
       _formKey.currentState?.reset();
       _nameCtrl.clear();
       _emailCtrl.clear();
       _subjectCtrl.clear();
       _contentCtrl.clear();
+      setState(() {
+        _noticeIsError = false;
+        _notice = 'Pesan terkirim. Kreator akan membalas via email.';
+      });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(friendlyError(e, 'Gagal mengirim pesan'))),
-      );
+      setState(() {
+        _noticeIsError = true;
+        _notice = e is ApiException && e.isRateLimited
+            ? 'Batas 5 pesan per menit tercapai. Coba lagi sebentar.'
+            : friendlyError(e, 'Gagal mengirim pesan');
+      });
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -191,46 +196,85 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
       ],
     );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              header,
-              const SizedBox(height: 16),
-              if (wide) ...[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return GlassCard(
+      padding: const EdgeInsets.all(22),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            header,
+            const SizedBox(height: 16),
+            if (wide) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: nameField),
+                  const SizedBox(width: 12),
+                  Expanded(child: emailField),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ] else ...[
+              nameField,
+              const SizedBox(height: 12),
+              emailField,
+              const SizedBox(height: 12),
+            ],
+            subjectField,
+            const SizedBox(height: 12),
+            contentField,
+            if (_notice != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color:
+                      (_noticeIsError ? AppColors.danger : AppColors.success)
+                          .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color:
+                        (_noticeIsError ? AppColors.danger : AppColors.success)
+                            .withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Row(
                   children: [
-                    Expanded(child: nameField),
-                    const SizedBox(width: 12),
-                    Expanded(child: emailField),
+                    Icon(
+                      _noticeIsError
+                          ? Icons.error_outline_rounded
+                          : Icons.check_circle_outline_rounded,
+                      size: 16,
+                      color: _noticeIsError
+                          ? AppColors.danger
+                          : AppColors.success,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _notice!,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.4,
+                          color: _noticeIsError
+                              ? AppColors.danger
+                              : AppColors.success,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-              ] else ...[
-                nameField,
-                const SizedBox(height: 12),
-                emailField,
-                const SizedBox(height: 12),
-              ],
-              subjectField,
-              const SizedBox(height: 12),
-              contentField,
-              const SizedBox(height: 18),
-              submitBtn,
-              const SizedBox(height: 10),
-              rateNote,
-              if (wide)
-                Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: Divider(color: muted.withValues(alpha: 0.15)),
-                ),
+              ),
             ],
-          ),
+            const SizedBox(height: 18),
+            submitBtn,
+            const SizedBox(height: 10),
+            rateNote,
+          ],
         ),
       ),
     );
