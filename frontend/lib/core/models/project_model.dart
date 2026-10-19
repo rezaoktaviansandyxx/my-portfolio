@@ -21,6 +21,7 @@ class ProjectModel {
   @JsonKey(name: 'display_order') final int displayOrder;
   final List<ProjectMediaModel>? media;
   final List<SkillModel>? skills;
+  final ProjectOwnerModel? owner;
   @JsonKey(name: 'created_at') final DateTime? createdAt;
   @JsonKey(name: 'updated_at') final DateTime? updatedAt;
 
@@ -41,6 +42,7 @@ class ProjectModel {
     this.displayOrder = 0,
     this.media,
     this.skills,
+    this.owner,
     this.createdAt,
     this.updatedAt,
   });
@@ -71,4 +73,18 @@ class ProjectMediaModel {
 
   factory ProjectMediaModel.fromJson(Map<String, dynamic> json) => _$ProjectMediaModelFromJson(json);
   Map<String, dynamic> toJson() => _$ProjectMediaModelToJson(this);
+}
+
+/// Ringkasan pemilik proyek yang dikirim `ProjectListResponse` untuk galeri.
+@JsonSerializable()
+class ProjectOwnerModel {
+  @JsonKey(name: 'profile_slug') final String? profileSlug;
+  @JsonKey(name: 'full_name') final String? fullName;
+  @JsonKey(name: 'avatar_url') final String? avatarUrl;
+
+  ProjectOwnerModel({this.profileSlug, this.fullName, this.avatarUrl});
+
+  factory ProjectOwnerModel.fromJson(Map<String, dynamic> json) =>
+      _$ProjectOwnerModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ProjectOwnerModelToJson(this);
 }

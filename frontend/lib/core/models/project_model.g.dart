@@ -29,6 +29,9 @@ ProjectModel _$ProjectModelFromJson(Map<String, dynamic> json) => ProjectModel(
   skills: (json['skills'] as List<dynamic>?)
       ?.map((e) => SkillModel.fromJson(e as Map<String, dynamic>))
       .toList(),
+  owner: json['owner'] == null
+      ? null
+      : ProjectOwnerModel.fromJson(json['owner'] as Map<String, dynamic>),
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -55,6 +58,7 @@ Map<String, dynamic> _$ProjectModelToJson(ProjectModel instance) =>
       'display_order': instance.displayOrder,
       'media': instance.media,
       'skills': instance.skills,
+      'owner': instance.owner,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };
@@ -75,4 +79,18 @@ Map<String, dynamic> _$ProjectMediaModelToJson(ProjectMediaModel instance) =>
       'media_type': instance.mediaType,
       'caption': instance.caption,
       'display_order': instance.displayOrder,
+    };
+
+ProjectOwnerModel _$ProjectOwnerModelFromJson(Map<String, dynamic> json) =>
+    ProjectOwnerModel(
+      profileSlug: json['profile_slug'] as String?,
+      fullName: json['full_name'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+    );
+
+Map<String, dynamic> _$ProjectOwnerModelToJson(ProjectOwnerModel instance) =>
+    <String, dynamic>{
+      'profile_slug': instance.profileSlug,
+      'full_name': instance.fullName,
+      'avatar_url': instance.avatarUrl,
     };
