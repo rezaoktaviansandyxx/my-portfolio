@@ -248,8 +248,17 @@ the board, replacing the current list. Reordering persists via
 on `ProjectModel`.
 
 **Admin data table.** Columns `Name · Content Moderation · Draft/Live ·`
-(delete). Row switches call `PATCH /admin/users/{id}`, the trash icon calls
-`DELETE /admin/users/{id}`, and `+ Add User` opens the existing create dialog.
+(actions). Row switches call `PATCH /admin/users/{id}` with `is_active` and
+`is_published`; the actions menu toggles active/suspended and admin/user role.
+
+> The reference board shows a trash icon per row, but the backend has no
+> `DELETE /admin/users/{id}` endpoint and this change set is scoped to a single
+> additive schema change. Deleting users is therefore **not** implemented; the
+> actions column offers suspend/activate and role change instead. Adding real
+> user deletion would require a new endpoint plus a cascade decision about the
+> user's projects, media, and messages — out of scope here.
+
+`+ Add User` in the page header opens the existing create-user dialog.
 
 ---
 
