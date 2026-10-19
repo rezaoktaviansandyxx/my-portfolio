@@ -277,8 +277,8 @@ Add `cached_network_image`. Everything else already exists (`go_router`,
 
 ### 7.2 Ordering
 
-1. Theme tokens + `shared/widgets` kit + `usePathUrlStrategy`
-2. `lib/` restructure (pure file moves + import rewrites)
+1. `lib/` restructure (pure file moves + import rewrites) + `test/` scaffold
+2. Theme tokens + `shared/widgets` kit + `usePathUrlStrategy`
 3. Backend schema change (§5.2.1) + `selectinload`
 4. Auth screen
 5. Public portfolio
@@ -287,9 +287,9 @@ Add `cached_network_image`. Everything else already exists (`go_router`,
 8. Admin table
 9. Dark retint of all remaining skeletons
 
-Theme lands first because every later step depends on it; the restructure
-lands second so subsequent work happens in final locations. The backend change
-lands before the public portfolio, whose carousel depends on it.
+The restructure goes first, ahead of the theme, so that every file created
+after it lands in its final location. Doing it later would mean authoring new
+theme and widget files at their old paths and moving them a second time.
 
 ### 7.3 Skill chip gradients
 
