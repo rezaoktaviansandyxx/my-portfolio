@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/auth/auth_layout.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
 
@@ -140,7 +140,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: ElevatedButton(
                 onPressed: _loading ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: FolioColors.primary,
+                  backgroundColor: AppColors.indigo,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
@@ -156,7 +156,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('Sudah punya akun?',
-                    style: TextStyle(color: FolioColors.muted)),
+                    style: TextStyle(color: AppColors.muted)),
                 TextButton(
                   onPressed: () => context.go('/login'),
                   child: const Text('Login'),

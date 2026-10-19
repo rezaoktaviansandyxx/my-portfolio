@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 
 class SidebarItem {
   final IconData icon;
@@ -90,30 +90,29 @@ class DashboardShell extends ConsumerWidget {
   static _SidebarTokens _tokens(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
       ? const _SidebarTokens(
-          bgTop: FolioDarkColors.sbBgTop,
-          bgBottom: FolioDarkColors.sbBgBottom,
-          text: FolioDarkColors.sbText,
-          muted: FolioDarkColors.sbMuted,
-          badge: FolioDarkColors.sbBadge,
-          border: FolioDarkColors.sbBorder,
-          title: FolioDarkColors.sbTitle,
-          subtitle: FolioDarkColors.sbSubtitle,
-          active: FolioDarkColors.primaryDeep,
+          bgTop: AppColors.bgAlt,
+          bgBottom: AppColors.bg,
+          text: AppColors.body,
+          muted: AppColors.muted,
+          badge: AppColors.indigoSoft,
+          border: AppColors.glassBorder,
+          title: AppColors.ink,
+          subtitle: AppColors.muted,
+          active: AppColors.indigo,
         )
       : const _SidebarTokens(
-          bgTop: FolioColors.sbBgTop,
-          bgBottom: FolioColors.sbBgBottom,
-          text: FolioColors.sbText,
-          muted: FolioColors.sbMuted,
-          badge: FolioColors.sbBadge,
-          border: FolioColors.sbBorder,
-          title: FolioColors.sbTitle,
-          subtitle: FolioColors.sbSubtitle,
-          active: FolioColors.primary,
+          bgTop: AppColors.bgAlt,
+          bgBottom: AppColors.bg,
+          text: AppColors.body,
+          muted: AppColors.muted,
+          badge: AppColors.indigoSoft,
+          border: AppColors.glassBorder,
+          title: AppColors.ink,
+          subtitle: AppColors.muted,
+          active: AppColors.indigo,
         );
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showDialog<bool>(
       context: context,
       barrierColor: const Color(0xFF0F172A).withValues(alpha: 0.55),
@@ -149,7 +148,7 @@ class DashboardShell extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: dark ? FolioDarkColors.ink : FolioColors.ink,
+                    color: AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -160,7 +159,7 @@ class DashboardShell extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 14,
                     height: 1.5,
-                    color: dark ? FolioDarkColors.muted : FolioColors.muted,
+                    color: AppColors.muted,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -172,11 +171,9 @@ class DashboardShell extends ConsumerWidget {
                             Navigator.of(dialogContext).pop(false),
                         style: OutlinedButton.styleFrom(
                           foregroundColor:
-                              dark ? FolioDarkColors.ink : FolioColors.ink,
+                              AppColors.ink,
                           side: BorderSide(
-                            color: dark
-                                ? FolioDarkColors.border
-                                : FolioColors.border,
+                            color: AppColors.glassBorder,
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 13),
                           shape: RoundedRectangleBorder(
@@ -264,8 +261,7 @@ class DashboardShell extends ConsumerWidget {
 
   Widget _sidebar(BuildContext context, WidgetRef ref, bool inDrawer) {
     final t = _tokens(context);
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final danger = dark ? const Color(0xFFF97066) : const Color(0xFFB42318);
+    final danger = const Color(0xFFF97066);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -290,14 +286,14 @@ class DashboardShell extends ConsumerWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          FolioColors.primary,
+                          AppColors.indigo,
                           Color(0xFF6D63F0),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: FolioColors.primary.withValues(alpha: 0.35),
+                          color: AppColors.indigo.withValues(alpha: 0.35),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -470,14 +466,13 @@ class DashboardShell extends ConsumerWidget {
   }
 
   Widget _topbar(BuildContext context, bool wide) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final bar = dark ? FolioDarkColors.card : Colors.white;
+    final bar = AppColors.glassFill;
     return Container(
       decoration: BoxDecoration(
         color: bar,
         border: Border(
           bottom: BorderSide(
-            color: dark ? FolioDarkColors.border : FolioColors.border,
+            color: AppColors.glassBorder,
           ),
         ),
       ),
@@ -524,7 +519,7 @@ class DashboardShell extends ConsumerWidget {
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               border: Border.all(
-                color: dark ? FolioDarkColors.border : FolioColors.border,
+                color: AppColors.glassBorder,
               ),
               borderRadius: BorderRadius.circular(14),
             ),
@@ -533,15 +528,11 @@ class DashboardShell extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: dark
-                      ? FolioDarkColors.primarySoft
-                      : FolioColors.primarySoft,
+                  backgroundColor: AppColors.indigoSoft,
                   // Avatar foto user jika ada (dukung path relatif hasil
                   // upload), fallback ke inisial saat kosong/gagal dimuat.
                   child: ClipOval(
-                    child: _topbarAvatarImage(destColor: dark
-                            ? FolioDarkColors.primary
-                            : FolioColors.primary),
+                    child: _topbarAvatarImage(destColor: AppColors.indigo),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -557,15 +548,11 @@ class DashboardShell extends ConsumerWidget {
                           style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
-                              color: dark
-                                  ? FolioDarkColors.ink
-                                  : FolioColors.ink)),
+                              color: AppColors.ink)),
                     ),
                     Text(displayRole,
                         style: TextStyle(
-                            color: dark
-                                ? FolioDarkColors.muted
-                                : FolioColors.muted,
+                            color: AppColors.muted,
                             fontSize: 11)),
                   ],
                 ),
@@ -573,7 +560,7 @@ class DashboardShell extends ConsumerWidget {
                   icon: Icon(Icons.keyboard_arrow_down,
                       size: 18,
                       color:
-                          dark ? FolioDarkColors.muted : FolioColors.muted),
+                          AppColors.muted),
                   tooltip: 'Akun',
                   onSelected: (v) {
                     if (v == 'public') context.go('/');
@@ -602,16 +589,15 @@ class DashboardShell extends ConsumerWidget {
   /// daftar pesan belum dibaca. Item -> lompat ke tab Pesan; footer membuka
   /// semua pesan. Titik merah tetap mengikuti `unreadCount`.
   Widget _bellButton(BuildContext context, Color bar) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final accent = dark ? FolioDarkColors.primary : FolioColors.primary;
-    final soft = dark ? FolioDarkColors.primarySoft : FolioColors.primarySoft;
-    final ink = dark ? FolioDarkColors.ink : FolioColors.ink;
-    final muted = dark ? FolioDarkColors.muted : FolioColors.muted;
+    final accent = AppColors.indigo;
+    final soft = AppColors.indigoSoft;
+    final ink = AppColors.ink;
+    final muted = AppColors.muted;
     return PopupMenuButton<Map<String, dynamic>?>(
       tooltip: 'Notifikasi',
       position: PopupMenuPosition.under,
       offset: const Offset(0, 8),
-      color: dark ? const Color(0xFF171C28) : Colors.white,
+      color: const Color(0xFF171C28),
       onSelected: (m) {
         // NOTE: onSelected TIDAK terpanggil bila value PopupMenuItem null
         // (Flutter menganggap null = popup ditutup tanpa memilih). Karena itu

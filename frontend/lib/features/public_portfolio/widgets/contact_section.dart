@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/network/api_service.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
 
@@ -74,8 +74,7 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final muted = dark ? FolioDarkColors.muted : FolioColors.muted;
+    final muted = AppColors.muted;
     final wide = MediaQuery.sizeOf(context).width >= 700;
 
     final header = Row(
@@ -84,13 +83,7 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            gradient: dark
-                ? const LinearGradient(
-                    colors: [Color(0xFF2B2557), Color(0xFF4F46E5)],
-                  )
-                : const LinearGradient(
-                    colors: [Color(0xFF3730A3), Color(0xFF6D5BF0)],
-                  ),
+            gradient: AppColors.brandGradient,
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
@@ -171,11 +164,9 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
       child: ElevatedButton.icon(
         onPressed: _sending ? null : _submit,
         style: ElevatedButton.styleFrom(
-          backgroundColor: dark ? FolioDarkColors.primary : FolioColors.primary,
-          foregroundColor: dark ? const Color(0xFF16182B) : Colors.white,
-          disabledBackgroundColor: dark
-              ? FolioDarkColors.primary.withValues(alpha: 0.55)
-              : FolioColors.primary.withValues(alpha: 0.55),
+          backgroundColor: AppColors.indigo,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.indigo.withValues(alpha: 0.55),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
         icon: _sending

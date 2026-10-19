@@ -4,7 +4,7 @@ import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
 import 'package:frontend/shared/widgets/errors.dart';
@@ -186,29 +186,29 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   label: 'Total pengguna',
                   value: _fmt(totalUsers),
                   icon: Icons.group_outlined,
-                  iconBg: FolioColors.lilacBg,
-                  iconColor: FolioColors.primary,
+                  iconBg: AppColors.indigoSoft,
+                  iconColor: AppColors.indigo,
                 ),
                 StatCard(
                   label: 'Portofolio publik',
                   value: _fmt(publicCount),
                   icon: Icons.open_in_new_rounded,
-                  iconBg: FolioColors.mintBg,
-                  iconColor: FolioColors.green,
+                  iconBg: AppColors.successSoft,
+                  iconColor: AppColors.success,
                 ),
                 StatCard(
                   label: 'Total proyek',
                   value: _fmt(totalProjects),
                   icon: Icons.image_outlined,
-                  iconBg: FolioColors.orangeBg,
+                  iconBg: AppColors.warningSoft,
                   iconColor: Colors.orange,
                 ),
                 StatCard(
                   label: 'Pesan belum dibaca',
                   value: _fmt(unread),
                   icon: Icons.mail_outline,
-                  iconBg: FolioColors.lilacBg,
-                  iconColor: FolioColors.primary,
+                  iconBg: AppColors.indigoSoft,
+                  iconColor: AppColors.indigo,
                 ),
               ];
               if (!twoCol) {
@@ -290,26 +290,26 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             'Proyek published',
             publishedProjects,
             projects.length,
-            FolioColors.green,
+            AppColors.success,
           ),
           _barRow(
             'Proyek draft',
             draftProjects,
             projects.length,
-            FolioColors.muted,
+            AppColors.muted,
           ),
           const SizedBox(height: 6),
           _barRow(
             'Portofolio publik',
             publishedUsers,
             users.length,
-            FolioColors.primary,
+            AppColors.indigo,
           ),
           _barRow(
             'Portofolio draft',
             users.length - publishedUsers,
             users.length,
-            FolioColors.muted,
+            AppColors.muted,
           ),
         ],
       ),
@@ -328,7 +328,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               Text(
                 '$value dari $total',
                 style: const TextStyle(
-                  color: FolioColors.muted,
+                  color: AppColors.muted,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -340,7 +340,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 6,
-              backgroundColor: FolioColors.primarySoft,
+              backgroundColor: AppColors.indigoSoft,
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
@@ -357,12 +357,12 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     switch (health) {
       case AsyncData(:final value):
         if (value) {
-          badge = _pill('Terjangkau', FolioColors.greenBg, FolioColors.green);
+          badge = _pill('Terjangkau', AppColors.successSoft, AppColors.success);
           description = 'Backend merespons GET /health dengan status ok.';
         } else {
           badge = _pill(
             'Respons tidak dikenal',
-            FolioColors.orangeBg,
+            AppColors.warningSoft,
             Colors.orange.shade800,
           );
           description = 'Backend merespons, tetapi format tidak sesuai.';
@@ -376,7 +376,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         description =
             'Tidak dapat menghubungi backend. Periksa koneksi atau server.';
       default:
-        badge = _pill('Memeriksa…', const Color(0xFFF1F2F7), FolioColors.muted);
+        badge = _pill('Memeriksa…', const Color(0xFFF1F2F7), AppColors.muted);
         description = 'Sedang memeriksa status backend.';
     }
     return SectionCard(
@@ -390,7 +390,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: FolioColors.primarySoft,
+              color: AppColors.indigoSoft,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -404,7 +404,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                 Text(
                   description,
                   style: const TextStyle(
-                    color: FolioColors.muted,
+                    color: AppColors.muted,
                     fontSize: 12,
                   ),
                 ),
@@ -488,13 +488,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                     children: [
                       CircleAvatar(
                         radius: 15,
-                        backgroundColor: FolioColors.primarySoft,
+                        backgroundColor: AppColors.indigoSoft,
                         child: Text(
                           _initials(name),
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: FolioColors.primary,
+                            color: AppColors.indigo,
                           ),
                         ),
                       ),
@@ -576,13 +576,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                       (u) => ListTile(
                         leading: CircleAvatar(
                           radius: 16,
-                          backgroundColor: FolioColors.primarySoft,
+                          backgroundColor: AppColors.indigoSoft,
                           child: Text(
                             _initials(u.fullName ?? u.username),
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: FolioColors.primary,
+                              color: AppColors.indigo,
                             ),
                           ),
                         ),
@@ -874,7 +874,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                     .map(
                       (m) => ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: FolioColors.primarySoft,
+                          backgroundColor: AppColors.indigoSoft,
                           child: Text(
                             (m['sender_name']?.toString() ?? '?')
                                 .substring(0, 1)
@@ -891,7 +891,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                               _fmtDate(m['created_at']),
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: FolioColors.muted,
+                                color: AppColors.muted,
                               ),
                             ),
                           ],

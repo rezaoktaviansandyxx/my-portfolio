@@ -10,7 +10,7 @@ import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/api_service.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/public_portfolio/widgets/contact_section.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
 
@@ -90,10 +90,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(userProfileProvider(slug));
     final auth = ref.watch(authNotifierProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
-    final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: dark ? FolioDarkColors.bg : FolioColors.bg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -102,7 +101,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: dark ? FolioDarkColors.primary : FolioColors.primary,
+                color: AppColors.indigo,
                 borderRadius: BorderRadius.circular(9),
               ),
               alignment: Alignment.center,
@@ -139,9 +138,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: const Icon(Icons.lock_outline, size: 16),
                 label: const Text('Login'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: dark
-                      ? FolioDarkColors.primary
-                      : FolioColors.ink,
+                  backgroundColor: AppColors.indigo,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -178,7 +175,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         user: user,
                         name: name,
                         wide: wide,
-                        dark: dark,
+                        dark: true,
                         isAuthenticated: auth.isAuthenticated,
                         isAdmin: auth.isAdmin,
                         onContact: _scrollToContact,
@@ -186,7 +183,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 14),
                       _section(
-                        dark: dark,
+                        dark: true,
                         icon: Icons.bolt_rounded,
                         title: 'Keahlian',
                         subtitle: 'Teknologi dan tools yang dikuasai',
@@ -221,7 +218,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 14),
                       _section(
-                        dark: dark,
+                        dark: true,
                         icon: Icons.work_outline_rounded,
                         title: 'Pengalaman',
                         subtitle: 'Riwayat kerja dan organisasi',
@@ -248,7 +245,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 14),
                       _section(
-                        dark: dark,
+                        dark: true,
                         icon: Icons.folder_copy_outlined,
                         title: 'Proyek pilihan',
                         subtitle: 'Karya dan riset terbaik',
@@ -335,15 +332,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: dark
-                        ? FolioDarkColors.primarySoft
-                        : FolioColors.primarySoft,
+                    color: AppColors.indigoSoft,
                     borderRadius: BorderRadius.circular(11),
                   ),
                   child: Icon(
                     icon,
                     size: 19,
-                    color: dark ? FolioDarkColors.primary : FolioColors.primary,
+                    color: AppColors.indigo,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -361,9 +356,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: dark
-                              ? FolioDarkColors.muted
-                              : FolioColors.muted,
+                          color: AppColors.muted,
                           fontSize: 12.5,
                         ),
                       ),
@@ -406,11 +399,11 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = dark ? FolioDarkColors.card : FolioColors.card;
-    final borderColor = dark ? FolioDarkColors.border : FolioColors.border;
-    final ink = dark ? FolioDarkColors.ink : FolioColors.ink;
-    final muted = dark ? FolioDarkColors.muted : FolioColors.muted;
-    final body = dark ? FolioDarkColors.body : FolioColors.body;
+    final cardColor = AppColors.glassFill;
+    final borderColor = AppColors.glassBorder;
+    final ink = AppColors.ink;
+    final muted = AppColors.muted;
+    final body = AppColors.body;
 
     final header = ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
@@ -442,14 +435,12 @@ class _HeroCard extends StatelessWidget {
         backgroundImage: ApiConfig.resolveFileUrl(user.avatarUrl).isNotEmpty
             ? NetworkImage(ApiConfig.resolveFileUrl(user.avatarUrl))
             : null,
-        backgroundColor: dark
-            ? FolioDarkColors.primarySoft
-            : FolioColors.primarySoft,
+        backgroundColor: AppColors.indigoSoft,
         child: (user.avatarUrl ?? '').trim().isEmpty
             ? Icon(
                 Icons.person,
                 size: wide ? 52 : 44,
-                color: dark ? FolioDarkColors.primary : FolioColors.primary,
+                color: AppColors.indigo,
               )
             : null,
       ),
@@ -458,7 +449,7 @@ class _HeroCard extends StatelessWidget {
     final availableBadge = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: dark ? FolioDarkColors.greenBg : FolioColors.greenBg,
+        color: AppColors.successSoft,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -500,7 +491,7 @@ class _HeroCard extends StatelessWidget {
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: dark ? FolioDarkColors.primary : FolioColors.primary,
+        color: AppColors.indigo,
       ),
     );
 
@@ -529,10 +520,8 @@ class _HeroCard extends StatelessWidget {
           icon: const Icon(Icons.send_rounded, size: 16),
           label: const Text('Hubungi Saya'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: dark
-                ? FolioDarkColors.primary
-                : FolioColors.primary,
-            foregroundColor: dark ? const Color(0xFF16182B) : Colors.white,
+            backgroundColor: AppColors.indigo,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           ),
         ),
@@ -667,10 +656,9 @@ class _ExperienceTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final line = dark ? FolioDarkColors.border : FolioColors.border;
-    final muted = dark ? FolioDarkColors.muted : FolioColors.muted;
-    final body = dark ? FolioDarkColors.body : FolioColors.body;
+    final line = AppColors.glassBorder;
+    final muted = AppColors.muted;
+    final body = AppColors.body;
 
     return Column(
       children: [
@@ -688,9 +676,7 @@ class _ExperienceTimeline extends StatelessWidget {
                         width: 12,
                         height: 12,
                         decoration: BoxDecoration(
-                          color: dark
-                              ? FolioDarkColors.primary
-                              : FolioColors.primary,
+                          color: AppColors.indigo,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -717,7 +703,7 @@ class _ExperienceTimeline extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14.5,
-                          color: dark ? FolioDarkColors.ink : FolioColors.ink,
+                          color: AppColors.ink,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -767,7 +753,6 @@ class _ProjectGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return LayoutBuilder(
       builder: (context, c) {
         final cols = c.maxWidth >= 640 ? 2 : 1;
@@ -784,7 +769,7 @@ class _ProjectGrid extends StatelessWidget {
           itemBuilder: (_, i) => _ProjectCard(
             project: projects[i],
             onOpenUrl: onOpenUrl,
-            dark: dark,
+            dark: true,
           ),
         );
       },
@@ -805,17 +790,17 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = dark ? FolioDarkColors.ink : FolioColors.ink;
-    final muted = dark ? FolioDarkColors.muted : FolioColors.muted;
-    final soft = dark ? FolioDarkColors.primarySoft : FolioColors.primarySoft;
-    final primary = dark ? FolioDarkColors.primary : FolioColors.primary;
+    final ink = AppColors.ink;
+    final muted = AppColors.muted;
+    final soft = AppColors.indigoSoft;
+    final primary = AppColors.indigo;
 
     return Container(
       decoration: BoxDecoration(
-        color: dark ? FolioDarkColors.card : FolioColors.card,
+        color: AppColors.glassFill,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: dark ? FolioDarkColors.border : FolioColors.border,
+          color: AppColors.glassBorder,
         ),
       ),
       clipBehavior: Clip.antiAlias,

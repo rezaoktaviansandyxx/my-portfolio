@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/network/app_providers.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
 
@@ -18,7 +18,7 @@ class GalleryScreen extends ConsumerWidget {
     final wide = MediaQuery.sizeOf(context).width >= 900;
 
     return Scaffold(
-      backgroundColor: FolioColors.bg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text('Galeri Proyek'),
         leading: IconButton(
@@ -55,7 +55,7 @@ class GalleryScreen extends ConsumerWidget {
                       const SizedBox(height: 4),
                       const Text(
                         'Proyek published dari seluruh portofolio publik.',
-                        style: TextStyle(color: FolioColors.muted),
+                        style: TextStyle(color: AppColors.muted),
                       ),
                       const SizedBox(height: 16),
                       GridView.builder(
@@ -106,7 +106,7 @@ class GalleryScreen extends ConsumerWidget {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          color: FolioColors.muted,
+                                          color: AppColors.muted,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -137,6 +137,6 @@ class GalleryScreen extends ConsumerWidget {
   Widget _placeholder() => Container(
     color: const Color(0xFFEEF0F6),
     alignment: Alignment.center,
-    child: const Icon(Icons.image_outlined, size: 40, color: FolioColors.muted),
+    child: const Icon(Icons.image_outlined, size: 40, color: AppColors.muted),
   );
 }

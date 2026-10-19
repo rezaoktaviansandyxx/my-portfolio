@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 
 /// Layout auth FolioSpace: panel brand kiri (desktop), form kanan.
 class AuthLayout extends StatelessWidget {
@@ -25,7 +25,7 @@ class AuthLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 900;
     return Scaffold(
-      backgroundColor: FolioColors.bg,
+      backgroundColor: AppColors.bg,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -49,7 +49,7 @@ class AuthLayout extends StatelessWidget {
                                 colors: [
                                   Color(0xFF14142B),
                                   Color(0xFF3B34B8),
-                                  FolioColors.primary,
+                                  AppColors.indigo,
                                 ],
                               ),
                             ),
@@ -72,7 +72,7 @@ class AuthLayout extends StatelessWidget {
                                           style: TextStyle(
                                               fontWeight: FontWeight.w800,
                                               fontSize: 20,
-                                              color: FolioColors.ink)),
+                                              color: AppColors.ink)),
                                     ),
                                     const SizedBox(width: 10),
                                     const Column(
@@ -132,7 +132,7 @@ class AuthLayout extends StatelessWidget {
                             children: [
                               Text(eyebrow,
                                   style: const TextStyle(
-                                      color: FolioColors.primary,
+                                      color: AppColors.indigo,
                                       fontWeight: FontWeight.w700)),
                               const SizedBox(height: 6),
                               Text(title,
@@ -142,7 +142,7 @@ class AuthLayout extends StatelessWidget {
                               const SizedBox(height: 6),
                               Text(subtitle,
                                   style: const TextStyle(
-                                      color: FolioColors.muted)),
+                                      color: AppColors.muted)),
                               const SizedBox(height: 24),
                               form,
                             ],

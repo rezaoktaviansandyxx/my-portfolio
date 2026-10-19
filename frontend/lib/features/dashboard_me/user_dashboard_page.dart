@@ -8,7 +8,7 @@ import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
 import 'package:frontend/shared/widgets/errors.dart';
@@ -250,14 +250,14 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                 // saat kosong atau gagal dimuat.
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: FolioColors.primarySoft,
+                  backgroundColor: AppColors.indigoSoft,
                   child: ClipOval(
                     child: avatarUrl.isEmpty
                         ? Text(
                             initials,
                             style: const TextStyle(
                               fontWeight: FontWeight.w800,
-                              color: FolioColors.primary,
+                              color: AppColors.indigo,
                             ),
                           )
                         : Image.network(
@@ -269,7 +269,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                               initials,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w800,
-                                color: FolioColors.primary,
+                                color: AppColors.indigo,
                               ),
                             ),
                           ),
@@ -299,12 +299,12 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                       if ((u.headline ?? '').isNotEmpty)
                         Text(
                           u.headline!,
-                          style: const TextStyle(color: FolioColors.muted),
+                          style: const TextStyle(color: AppColors.muted),
                         ),
                       Text(
                         'foliospace.id/${u.profileSlug ?? u.username.toLowerCase()}',
                         style: const TextStyle(
-                          color: FolioColors.primary,
+                          color: AppColors.indigo,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -323,7 +323,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                     ElevatedButton(
                       onPressed: () => _togglePublish(u.isPublished),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: FolioColors.ink,
+                        backgroundColor: AppColors.ink,
                         foregroundColor: Colors.white,
                       ),
                       child: Text(u.isPublished ? 'Unpublish' : 'Buka situs'),
@@ -369,7 +369,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: FolioColors.border),
+                  border: Border.all(color: AppColors.glassBorder),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
@@ -378,12 +378,12 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: FolioColors.primarySoft,
+                        color: AppColors.indigoSoft,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.image_outlined,
-                        color: FolioColors.primary,
+                        color: AppColors.indigo,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -398,7 +398,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                           Text(
                             cat,
                             style: const TextStyle(
-                              color: FolioColors.muted,
+                              color: AppColors.muted,
                               fontSize: 12,
                             ),
                           ),
@@ -406,14 +406,14 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                           Text(
                             p.status ?? 'Aktif',
                             style: const TextStyle(
-                              color: FolioColors.muted,
+                              color: AppColors.muted,
                               fontSize: 12,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, color: FolioColors.muted),
+                    const Icon(Icons.chevron_right, color: AppColors.muted),
                   ],
                 ),
               );
@@ -467,12 +467,12 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           v,
           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
         ),
-        Text(l, style: const TextStyle(color: FolioColors.muted, fontSize: 12)),
+        Text(l, style: const TextStyle(color: AppColors.muted, fontSize: 12)),
       ],
     ),
   );
 
-  Widget _vdiv() => Container(width: 1, height: 36, color: FolioColors.border);
+  Widget _vdiv() => Container(width: 1, height: 36, color: AppColors.glassBorder);
 
   Widget _completeness() {
     final profile = ref.watch(myProfileProvider);
@@ -514,8 +514,8 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
             child: LinearProgressIndicator(
               value: pct / 100,
               minHeight: 7,
-              backgroundColor: FolioColors.primarySoft,
-              valueColor: const AlwaysStoppedAnimation(FolioColors.primary),
+              backgroundColor: AppColors.indigoSoft,
+              valueColor: const AlwaysStoppedAnimation(AppColors.indigo),
             ),
           ),
           const SizedBox(height: 12),
@@ -546,7 +546,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         Icon(
           done ? Icons.check_circle : Icons.radio_button_unchecked,
           size: 20,
-          color: done ? FolioColors.green : FolioColors.muted,
+          color: done ? AppColors.success : AppColors.muted,
         ),
         const SizedBox(width: 10),
         Text(t),
@@ -575,13 +575,13 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       leading: Stack(
         children: [
           CircleAvatar(
-            backgroundColor: FolioColors.primarySoft,
+            backgroundColor: AppColors.indigoSoft,
             child: Text(
               ini,
               style: const TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 12,
-                color: FolioColors.primary,
+                color: AppColors.indigo,
               ),
             ),
           ),
@@ -593,7 +593,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                 width: 10,
                 height: 10,
                 decoration: const BoxDecoration(
-                  color: FolioColors.primary,
+                  color: AppColors.indigo,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -613,7 +613,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           ),
           Text(
             date,
-            style: const TextStyle(color: FolioColors.muted, fontSize: 12),
+            style: const TextStyle(color: AppColors.muted, fontSize: 12),
           ),
         ],
       ),
@@ -629,7 +629,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: FolioColors.primarySoft,
+          color: AppColors.indigoSoft,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
@@ -637,7 +637,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
               ? '…'
               : '${_unreadCount(messages.asData?.value ?? const [])} belum dibaca',
           style: const TextStyle(
-            color: FolioColors.primary,
+            color: AppColors.indigo,
             fontWeight: FontWeight.w700,
             fontSize: 12,
           ),
@@ -1219,7 +1219,6 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   @override
   Widget build(BuildContext context) {
     final published = widget.user.isPublished;
-    final dark = Theme.of(context).brightness == Brightness.dark;
     final slug = _slug.text.trim();
     return SectionCard(
       title: 'Edit profil',
@@ -1286,7 +1285,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           const SizedBox(height: 12),
 
           // ---------- Publish ----------
-          _publishCard(context, published: published, dark: dark),
+          _publishCard(context, published: published, dark: true),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -1320,18 +1319,18 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     required bool dark,
   }) {
     final bg = published
-        ? (dark ? FolioDarkColors.greenBg : FolioColors.greenBg)
-        : (dark ? FolioDarkColors.bg : FolioColors.bg);
+        ? (AppColors.successSoft)
+        : (AppColors.bg);
     final border = published
-        ? ((dark ? FolioDarkColors.green : FolioColors.green)
+        ? ((AppColors.success)
               .withValues(alpha: 0.35))
-        : (dark ? FolioDarkColors.border : FolioColors.border);
+        : (AppColors.glassBorder);
     final iconBg =
-        dark ? FolioDarkColors.primarySoft : FolioColors.primarySoft;
+        AppColors.indigoSoft;
     final iconColor =
         published
-            ? (dark ? FolioDarkColors.green : FolioColors.green)
-            : (dark ? FolioDarkColors.primary : FolioColors.primary);
+            ? (AppColors.success)
+            : (AppColors.indigo);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1363,7 +1362,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color:
-                        dark ? FolioDarkColors.ink : FolioColors.ink,
+                        AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1374,7 +1373,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
                   style: TextStyle(
                     fontSize: 12.5,
                     color:
-                        dark ? FolioDarkColors.muted : FolioColors.muted,
+                        AppColors.muted,
                   ),
                 ),
               ],

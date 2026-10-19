@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 
 /// Semua efek shimmer berasal dari package `skeletonizer`.
 /// File ini hanya berisi susunan layout (Bone) agar bentuknya
@@ -303,7 +303,7 @@ class ErrorCard extends StatelessWidget {
         child: Column(
           children: [
             const Icon(Icons.cloud_off_outlined,
-                color: FolioColors.muted, size: 32),
+                color: AppColors.muted, size: 32),
             const SizedBox(height: 8),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
@@ -332,12 +332,12 @@ class EmptyCard extends StatelessWidget {
         child: Column(
           children: [
             const Icon(Icons.inbox_outlined,
-                color: FolioColors.muted, size: 32),
+                color: AppColors.muted, size: 32),
             const SizedBox(height: 8),
             Text(title,
                 style: const TextStyle(fontWeight: FontWeight.w700)),
             Text(subtitle,
-                style: const TextStyle(color: FolioColors.muted),
+                style: const TextStyle(color: AppColors.muted),
                 textAlign: TextAlign.center),
           ],
         ),

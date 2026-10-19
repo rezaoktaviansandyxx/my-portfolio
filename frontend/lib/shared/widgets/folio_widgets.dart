@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/theme/app_theme.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 
 class StatCard extends StatelessWidget {
   final String label;
@@ -38,11 +38,11 @@ class StatCard extends StatelessWidget {
                   child: Icon(icon, color: iconColor),
                 ),
                 const Spacer(),
-                const Icon(Icons.more_horiz, color: FolioColors.muted),
+                const Icon(Icons.more_horiz, color: AppColors.muted),
               ],
             ),
             const SizedBox(height: 18),
-            Text(label, style: const TextStyle(color: FolioColors.muted)),
+            Text(label, style: const TextStyle(color: AppColors.muted)),
             const SizedBox(height: 4),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -63,13 +63,13 @@ class StatCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: FolioColors.greenBg,
+                      color: AppColors.successSoft,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '↗ $delta',
                       style: const TextStyle(
-                        color: FolioColors.green,
+                        color: AppColors.success,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
@@ -124,7 +124,7 @@ class SectionCard extends StatelessWidget {
                         Text(
                           subtitle!,
                           style: const TextStyle(
-                            color: FolioColors.muted,
+                            color: AppColors.muted,
                             fontSize: 13,
                           ),
                         ),
@@ -152,8 +152,7 @@ class FormHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final color = dark ? FolioDarkColors.primary : FolioColors.primary;
+    final color = AppColors.indigo;
     return Padding(
       padding: const EdgeInsets.only(top: 2, bottom: 10),
       child: Row(
@@ -188,8 +187,8 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final published = text.toLowerCase() == 'published';
-    final bg = published ? FolioColors.greenBg : const Color(0xFFF1F2F7);
-    final fg = published ? FolioColors.green : FolioColors.muted;
+    final bg = published ? AppColors.successSoft : const Color(0xFFF1F2F7);
+    final fg = published ? AppColors.success : AppColors.muted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -232,7 +231,7 @@ class PageHeader extends StatelessWidget {
       icon: const Icon(Icons.add, size: 18),
       label: Text(actionLabel),
       style: ElevatedButton.styleFrom(
-        backgroundColor: FolioColors.primary,
+        backgroundColor: AppColors.indigo,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -244,7 +243,7 @@ class PageHeader extends StatelessWidget {
         Text(
           eyebrow,
           style: const TextStyle(
-            color: FolioColors.primary,
+            color: AppColors.indigo,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -257,7 +256,7 @@ class PageHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(color: FolioColors.muted)),
+        Text(subtitle, style: const TextStyle(color: AppColors.muted)),
       ],
     );
     if (narrow) {
