@@ -103,3 +103,53 @@ def test_non_admin_cannot_list_admin_skills():
   alice = _login("alice")
   r = get_client().get("/api/v1/admin/skills", headers=alice)
   assert r.status_code == 403
+
+
+def test_admin_can_create_skill_for_another_owner():
+  _reset_db()
+  _register("alice", "alice@x.com")
+  c = get_client()
+  admin = _login("admin", "admin123")
+  alice_id = next(
+      u["id"]
+      for u in c.get("/api/v1/admin/users", headers=admin).json()
+      if u["username"] == "alice"
+  )
+
+  r = c.post(
+      "/api/v1/admin/skills",
+      json={"name": "Go", "category": "Backend", "owner_id": alice_id},
+      headers=admin,
+  )
+  assert r.status_code == 201, r.text
+
+  alice = _login("alice")
+  mine = c.get("/api/v1/me/skills", headers=alice).json()
+  assert [s["name"] for s in mine] == ["Go"]
+
+
+def test_admin_create_skill_defaults_to_self():
+  _reset_db()
+  c = get_client()
+  admin = _login("admin", "admin123")
+  r = c.post(
+      "/api/v1/admin/skills",
+      json={"name": "Rust", "category": "Backend"},
+      headers=admin,
+  )
+  assert r.status_code == 201, r.text
+  assert [s["name"] for s in c.get("/api/v1/me/skills", headers=admin).json()] == [
+      "Rust"
+  ]
+
+
+def test_admin_create_for_unknown_owner_is_404():
+  _reset_db()
+  c = get_client()
+  admin = _login("admin", "admin123")
+  r = c.post(
+      "/api/v1/admin/skills",
+      json={"name": "Zig", "category": "Backend", "owner_id": 999999},
+      headers=admin,
+  )
+  assert r.status_code == 404, r.text

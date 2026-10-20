@@ -39,6 +39,20 @@ class AdminUserCreate(BaseModel):
   resume_url: Optional[str] = None
 
 
+def _resolve_owner(db: Session, current: User, owner_id: Optional[int]) -> int:
+  """owner_id eksplisit hanya boleh menunjuk user yang ada.
+
+  None = konten milik admin sendiri (perilaku lama dipertahankan).
+  """
+  if owner_id is None:
+    return current.id
+  if db.query(User).filter(User.id == owner_id).first() is None:
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, detail="Pemilik tidak ditemukan"
+    )
+  return owner_id
+
+
 @router.post(
     "/projects",
     response_model=ProjectDetailResponse,
@@ -49,11 +63,10 @@ def create_project(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_admin),
 ):
+  owner_id = _resolve_owner(db, current, payload.owner_id)
   existing = (
       db.query(Project)
-      .filter(
-          Project.owner_id == current.id, Project.slug == payload.slug
-      )
+      .filter(Project.owner_id == owner_id, Project.slug == payload.slug)
       .first()
   )
   if existing:
@@ -64,10 +77,14 @@ def create_project(
 
   skills = []
   if payload.skill_ids:
-    skills = db.query(Skill).filter(Skill.id.in_(payload.skill_ids)).all()
+    skills = (
+        db.query(Skill)
+        .filter(Skill.id.in_(payload.skill_ids), Skill.owner_id == owner_id)
+        .all()
+    )
 
-  project_data = payload.model_dump(exclude={"skill_ids"})
-  project = Project(**project_data, owner_id=current.id, skills=skills)
+  project_data = payload.model_dump(exclude={"skill_ids", "owner_id"})
+  project = Project(**project_data, owner_id=owner_id, skills=skills)
   db.add(project)
   try:
     db.commit()
@@ -193,11 +210,16 @@ def create_skill(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_admin),
 ):
-  if db.query(Skill).filter(Skill.name == payload.name).first():
+  owner_id = _resolve_owner(db, current, payload.owner_id)
+  if (
+      db.query(Skill)
+      .filter(Skill.owner_id == owner_id, Skill.name == payload.name)
+      .first()
+  ):
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Skill sudah ada"
     )
-  s = Skill(**payload.model_dump(), owner_id=current.id)
+  s = Skill(**payload.model_dump(exclude={"owner_id"}), owner_id=owner_id)
   db.add(s)
   db.commit()
   db.refresh(s)
@@ -250,7 +272,10 @@ def create_experience(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_admin),
 ):
-  e = Experience(**payload.model_dump(), owner_id=current.id)
+  owner_id = _resolve_owner(db, current, payload.owner_id)
+  e = Experience(
+      **payload.model_dump(exclude={"owner_id"}), owner_id=owner_id
+  )
   db.add(e)
   db.commit()
   db.refresh(e)

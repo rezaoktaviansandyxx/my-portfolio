@@ -18,7 +18,8 @@ class ExperienceBase(BaseModel):
 
 
 class ExperienceCreate(ExperienceBase):
-  pass
+  # Khusus admin: buat pengalaman atas nama kreator lain.
+  owner_id: Optional[int] = None
 
 
 class ExperienceUpdate(BaseModel):

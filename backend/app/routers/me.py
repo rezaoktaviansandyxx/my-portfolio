@@ -197,7 +197,7 @@ def me_create_project(
     )
   skills = _resolve_owned_skills(db, payload.skill_ids or [], current.id)
   p = Project(
-      **payload.model_dump(exclude={"skill_ids"}),
+      **payload.model_dump(exclude={"skill_ids", "owner_id"}),
       owner_id=current.id,
       skills=skills,
   )
@@ -324,7 +324,7 @@ def me_create_skill(
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT, detail="Skill sudah ada"
     )
-  s = Skill(**payload.model_dump(), owner_id=current.id)
+  s = Skill(**payload.model_dump(exclude={"owner_id"}), owner_id=current.id)
   db.add(s)
   try:
     db.commit()
@@ -403,7 +403,7 @@ def me_create_experience(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
-  e = Experience(**payload.model_dump(), owner_id=current.id)
+  e = Experience(**payload.model_dump(exclude={"owner_id"}), owner_id=current.id)
   db.add(e)
   db.commit()
   db.refresh(e)

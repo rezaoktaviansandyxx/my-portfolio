@@ -15,7 +15,8 @@ class SkillBase(BaseModel):
 
 
 class SkillCreate(SkillBase):
-  pass
+  # Khusus admin: buat skill atas nama kreator lain. None = milik pemanggil.
+  owner_id: Optional[int] = None
 
 
 class SkillUpdate(BaseModel):

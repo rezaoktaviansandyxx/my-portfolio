@@ -35,6 +35,8 @@ class ProjectBase(BaseModel):
 
 class ProjectCreate(ProjectBase):
   skill_ids: List[int] = []
+  # Khusus admin: buat proyek atas nama kreator lain.
+  owner_id: Optional[int] = None
 
 
 class ProjectUpdate(BaseModel):
