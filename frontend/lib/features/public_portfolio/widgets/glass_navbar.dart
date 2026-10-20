@@ -5,6 +5,7 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/shared/widgets/glow_button.dart';
+import 'package:frontend/shared/widgets/responsive_layout.dart';
 
 class NavTarget {
   final String label;
@@ -40,7 +41,7 @@ class GlassNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.sizeOf(context).width > 900;
+    final wide = MediaQuery.sizeOf(context).width > kDesktopBreakpoint;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),

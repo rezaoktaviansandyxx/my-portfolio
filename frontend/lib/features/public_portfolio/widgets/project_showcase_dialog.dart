@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_text.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/shared/widgets/glow_button.dart';
+import 'package:frontend/shared/widgets/responsive_layout.dart';
 
 class ProjectShowcaseDialog extends StatefulWidget {
   final ProjectModel project;
@@ -57,7 +58,7 @@ class _ProjectShowcaseDialogState extends State<ProjectShowcaseDialog> {
     final p = widget.project;
     final media = _media;
     final size = MediaQuery.sizeOf(context);
-    final wide = size.width > 900;
+    final wide = size.width > kDesktopBreakpoint;
 
     return Dialog(
       insetPadding: const EdgeInsets.all(20),

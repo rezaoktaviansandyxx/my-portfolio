@@ -372,13 +372,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       case AsyncError():
         badge = _pill(
           'Tidak terjangkau',
-          Colors.red.shade50,
-          Colors.red.shade700,
+          AppColors.dangerSoft,
+          AppColors.danger,
         );
         description =
             'Tidak dapat menghubungi backend. Periksa koneksi atau server.';
       default:
-        badge = _pill('Memeriksa…', const Color(0xFFF1F2F7), AppColors.muted);
+        badge = _pill('Memeriksa…', AppColors.glassFill, AppColors.body);
         description = 'Sedang memeriksa status backend.';
     }
     return SectionCard(
@@ -704,7 +704,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     );
   }
 
-  Widget _usersTab() {    final users = ref.watch(adminUsersProvider);
+  Widget _usersTab() {
+    final users = ref.watch(adminUsersProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

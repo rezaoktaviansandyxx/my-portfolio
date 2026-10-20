@@ -9,10 +9,10 @@ import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/core/theme/app_text.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
+import 'package:frontend/features/dashboard_me/project_reorder_card.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
 import 'package:frontend/shared/widgets/folio_widgets.dart';
@@ -294,18 +294,26 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                               color: AppColors.indigo,
                             ),
                           )
-                        : Image.network(
-                            avatarUrl,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Text(
-                              initials,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.indigo,
+                        : Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Inisial sebagai lapisan dasar: AppNetworkImage
+                              // menimpanya dengan foto, dan fallback-nya tampak
+                              // transparan sehingga inisial tetap terlihat saat
+                              // foto gagal dimuat.
+                              Text(
+                                initials,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.indigo,
+                                ),
                               ),
-                            ),
+                              AppNetworkImage(
+                                url: u.avatarUrl,
+                                width: 60,
+                                height: 60,
+                              ),
+                            ],
                           ),
                   ),
                 ),
@@ -875,7 +883,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Dropzones',
+                  'Zona drop',
                   style: TextStyle(
                     fontSize: 11.5,
                     color: active ? AppColors.cyan : AppColors.muted,
@@ -890,89 +898,21 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
   }
 
   Widget _projectCard(ProjectModel p, int index, {bool highlighted = false}) {
-    return Container(
-      width: 300,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: highlighted
-            ? AppColors.cyan.withValues(alpha: 0.10)
-            : AppColors.glassFill,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: highlighted ? AppColors.cyan : AppColors.glassBorder,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              AppNetworkImage(
-                url: p.coverImageUrl,
-                width: 40,
-                height: 40,
-                radius: 10,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    Text(
-                      '${p.status ?? '-'} • ${(p.media ?? []).length} media',
-                      style: AppText.caption,
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert_rounded, size: 18),
-                color: const Color(0xFF171C28),
-                onSelected: (v) {
-                  if (v == 'edit') {
-                    _saveProject(existing: p);
-                  } else if (v == 'media') {
-                    _addProjectMedia(p);
-                  } else if (v == 'delete') {
-                    _deleteProject(p);
-                  }
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'media', child: Text('Tambah media')),
-                  PopupMenuItem(value: 'delete', child: Text('Hapus')),
-                ],
-              ),
-            ],
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              Icon(
-                Icons.drag_indicator_rounded,
-                size: 15,
-                color: AppColors.muted,
-              ),
-              const SizedBox(width: 4),
-              Text('Urutan ${index + 1}', style: AppText.caption),
-            ],
-          ),
-        ],
-      ),
+    // Body kartu diekstrak ke ProjectReorderCard agar bisa dijaga test
+    // widget: kartu ini hidup langsung di dalam Wrap dengan tinggi tak
+    // terbatas, jadi tingginya harus tetap dibatasi (lihat C1).
+    return ProjectReorderCard(
+      project: p,
+      index: index,
+      highlighted: highlighted,
+      onEdit: () => _saveProject(existing: p),
+      onMedia: () => _addProjectMedia(p),
+      onDelete: () => _deleteProject(p),
     );
   }
 
-  Widget _projectsTab() {    final projects = ref.watch(myProjectsProvider);
+  Widget _projectsTab() {
+    final projects = ref.watch(myProjectsProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1459,7 +1399,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           const SizedBox(height: 12),
 
           // ---------- Publish ----------
-          _publishCard(context, published: published, dark: true),
+          _publishCard(context, published: published),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -1490,7 +1430,6 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   Widget _publishCard(
     BuildContext context, {
     required bool published,
-    required bool dark,
   }) {
     final bg = published
         ? (AppColors.successSoft)

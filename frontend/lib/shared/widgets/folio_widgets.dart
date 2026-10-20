@@ -187,7 +187,7 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final published = text.toLowerCase() == 'published';
-    final bg = published ? AppColors.successSoft : const Color(0xFFF1F2F7);
+    final bg = published ? AppColors.successSoft : AppColors.glassFill;
     final fg = published ? AppColors.success : AppColors.muted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

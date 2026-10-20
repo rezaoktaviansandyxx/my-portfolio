@@ -5,6 +5,8 @@ import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/shared/widgets/app_network_image.dart';
+import 'package:frontend/shared/widgets/responsive_layout.dart';
 
 class SidebarItem {
   final IconData icon;
@@ -74,16 +76,19 @@ class DashboardShell extends ConsumerWidget {
               fontWeight: FontWeight.w800,
               fontSize: 12));
     }
-    return Image.network(
-      url,
-      width: 32,
-      height: 32,
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Text(_initials,
-          style: TextStyle(
-              color: destColor,
-              fontWeight: FontWeight.w800,
-              fontSize: 12)),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Inisial sebagai lapisan dasar: AppNetworkImage menimpanya dengan
+        // foto, dan fallback-nya tampak transparan sehingga inisial tetap
+        // terlihat saat foto gagal dimuat.
+        Text(_initials,
+            style: TextStyle(
+                color: destColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 12)),
+        AppNetworkImage(url: avatarUrl, width: 32, height: 32),
+      ],
     );
   }
 
@@ -230,7 +235,7 @@ class DashboardShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wide = MediaQuery.sizeOf(context).width >= 960;
+    final wide = MediaQuery.sizeOf(context).width > kDesktopBreakpoint;
     return Scaffold(
       drawer: wide ? null : Drawer(child: _sidebar(context, ref, true)),
       body: Row(
@@ -266,6 +271,9 @@ class DashboardShell extends ConsumerWidget {
     );
   }
 
+  // Sidebar kustom dipertahankan khusus untuk Drawer mobile (Task 8):
+  // di desktop dipakai _DashboardRail, dan `wide ? null : Drawer(...)` di
+  // build() di atas adalah satu-satunya pemakai _sidebar/_SidebarTokens.
   Widget _sidebar(BuildContext context, WidgetRef ref, bool inDrawer) {
     final t = _tokens(context);
     final danger = const Color(0xFFF97066);
@@ -903,6 +911,8 @@ class _DashboardRailState extends State<_DashboardRail> {
   }
 }
 
+/// Token _sidebar di atas: hanya dipakai Drawer mobile (desktop memakai
+/// _DashboardRail; dipertahankan per Task 8, lihat komentar di _sidebar).
 class _SidebarTokens {
   final Color bgTop;
   final Color bgBottom;

@@ -205,10 +205,11 @@ class _Socials extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hanya email: model User belum punya field github/linkedin, jadi ikon
+    // sosial lain tidak dirender — URL dummy ke beranda platform akan terasa
+    // seperti bug. Tambahkan kembali begitu field sosial tersedia di model.
     final items = <(IconData, String)>[
       (Icons.mail_outline_rounded, 'mailto:$email'),
-      (Icons.code_rounded, 'https://github.com'),
-      (Icons.work_outline_rounded, 'https://linkedin.com'),
     ];
 
     return Row(
