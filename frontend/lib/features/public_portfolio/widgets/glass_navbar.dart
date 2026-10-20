@@ -23,6 +23,7 @@ class GlassNavbar extends StatelessWidget {
   final String? initials;
   final VoidCallback? onAvatarTap;
   final VoidCallback? onMenuTap;
+  final VoidCallback? onGalleryTap;
 
   const GlassNavbar({
     super.key,
@@ -34,6 +35,7 @@ class GlassNavbar extends StatelessWidget {
     this.initials,
     this.onAvatarTap,
     this.onMenuTap,
+    this.onGalleryTap,
   });
 
   @override
@@ -83,13 +85,13 @@ class GlassNavbar extends StatelessWidget {
                 ),
               ] else ...[
                 const Spacer(),
-                if (onAvatarTap != null)
-                  _Avatar(
-                    url: avatarUrl,
-                    initials: initials,
-                    onTap: onAvatarTap,
+                if (onGalleryTap != null)
+                  IconButton(
+                    onPressed: onGalleryTap,
+                    icon: const Icon(Icons.grid_view_rounded),
+                    color: AppColors.ink,
+                    tooltip: 'Galeri',
                   ),
-                const SizedBox(width: 8),
                 IconButton(
                   onPressed: onMenuTap,
                   icon: const Icon(Icons.menu_rounded),

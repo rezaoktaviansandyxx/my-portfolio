@@ -33,8 +33,32 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _scroll = ScrollController();
-  final _anchors = List.generate(5, (_) => GlobalKey());
+  final _anchors = List.generate(6, (_) => GlobalKey());
   int _active = 0;
+
+  /// Anchor 0..5: Home, About, Projects, Skills, Experience, Contact.
+  /// Skills & Experience dipisah agar bottom nav punya empat tujuan nyata.
+  static const _bottomAnchors = [0, 3, 2, 4];
+
+  /// Posisi item navbar desktop: Skills & Experience berbagi "Expertise".
+  int get _desktopActive {
+    if (_active <= 3) return _active;
+    return _active == 4 ? 3 : 4;
+  }
+
+  /// Indeks item bottom nav untuk anchor yang sedang aktif.
+  int get _bottomActive {
+    var best = 0;
+    var bestAnchor = -1;
+    for (var i = 0; i < _bottomAnchors.length; i++) {
+      final a = _bottomAnchors[i];
+      if (a <= _active && a > bestAnchor) {
+        bestAnchor = a;
+        best = i;
+      }
+    }
+    return best;
+  }
 
   @override
   void initState() {
@@ -105,7 +129,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = ref.watch(userProfileProvider(slug));
     final auth = ref.watch(authNotifierProvider);
 
+    final wide = MediaQuery.sizeOf(context).width > kDesktopBreakpoint;
     return Scaffold(
+      bottomNavigationBar: wide ? null : _mobileNav(),
       body: NeonBackground(
         child: SafeArea(
           bottom: false,
@@ -151,7 +177,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       NavTarget(label: 'About', anchor: _anchors[1]),
       NavTarget(label: 'Projects', anchor: _anchors[2]),
       NavTarget(label: 'Expertise', anchor: _anchors[3]),
-      NavTarget(label: 'Contact', anchor: _anchors[4]),
+      NavTarget(label: 'Contact', anchor: _anchors[5]),
     ];
 
     final body = CustomScrollView(
@@ -165,15 +191,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 constraints: const BoxConstraints(maxWidth: 1080),
                 child: GlassNavbar(
                   items: navItems,
-                  activeIndex: _active,
+                  activeIndex: _desktopActive,
                   onSelect: _goTo,
-                  onHireMe: () => _goTo(4),
+                  onHireMe: () => _goTo(5),
                   avatarUrl: user.avatarUrl,
                   initials: initials,
                   onAvatarTap: () =>
                       context.go(isAuth ? '/dashboard' : '/login'),
-                  onMenuTap: () =>
-                      _showSheet(navItems, isAuth),
+                  onGalleryTap: () => context.go('/gallery'),
+                  onMenuTap: () => _showSheet(isAuth),
                 ),
               ),
             ),
@@ -192,7 +218,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       key: _anchors[0],
                       child: HeroSection(
                         user: user,
-                        onHireMe: () => _goTo(4),
+                        onHireMe: () => _goTo(5),
                         onOpenUrl: _openUrl,
                       ),
                     ),
@@ -213,10 +239,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 26),
                     KeyedSubtree(key: _anchors[2], child: _projects(slug)),
                     const SizedBox(height: 26),
-                    KeyedSubtree(key: _anchors[3], child: _skills(slug)),
+                    _skills(slug),
                     const SizedBox(height: 26),
                     KeyedSubtree(
-                      key: _anchors[4],
+                      key: _anchors[5],
                       child: ContactSection(slug: slug),
                     ),
                   ],
@@ -290,25 +316,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          async.when(
-            data: (skills) => skills.isEmpty
-                ? const Text('Belum ada skill.', style: AppText.body)
-                : SkillsSection(skills: skills),
-            loading: () => const SkillChipsSkeleton(),
-            error: (e, _) =>
-                Text('Gagal memuat skill: $e', style: AppText.caption),
+          KeyedSubtree(
+            key: _anchors[3],
+            child: async.when(
+              data: (skills) => skills.isEmpty
+                  ? const Text('Belum ada skill.', style: AppText.body)
+                  : SkillsSection(skills: skills),
+              loading: () => const SkillChipsSkeleton(),
+              error: (e, _) =>
+                  Text('Gagal memuat skill: $e', style: AppText.caption),
+            ),
           ),
           const SizedBox(height: 22),
-          const Text('Experience Timeline', style: AppText.heading),
-          const SizedBox(height: 14),
-          expAsync.when(
-            data: (items) => items.isEmpty
-                ? const Text('Belum ada pengalaman.', style: AppText.body)
-                : ExperienceTimeline(experiences: items.take(10).toList()),
-            loading: () => const ListSkeleton(rows: 3),
-            error: (e, _) => Text(
-              'Gagal memuat pengalaman: $e',
-              style: AppText.caption,
+          KeyedSubtree(
+            key: _anchors[4],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Experience Timeline', style: AppText.heading),
+                const SizedBox(height: 14),
+                expAsync.when(
+                  data: (items) => items.isEmpty
+                      ? const Text(
+                          'Belum ada pengalaman.',
+                          style: AppText.body,
+                        )
+                      : ExperienceTimeline(
+                          experiences: items.take(10).toList(),
+                        ),
+                  loading: () => const ListSkeleton(rows: 3),
+                  error: (e, _) => Text(
+                    'Gagal memuat pengalaman: $e',
+                    style: AppText.caption,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -316,7 +358,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _showSheet(List<NavTarget> items, bool isAuth) {
+  /// Menu mobile hanya berisi aksi akun & galeri — navigasi antar-section
+  /// sudah ditangani bottom navigation bar.
+  void _showSheet(bool isAuth) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: const Color(0xFF0C1226),
@@ -327,15 +371,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (var i = 0; i < items.length; i++)
-              ListTile(
-                title: Text(items[i].label),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _goTo(i);
-                },
-              ),
-            const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.dashboard_outlined),
               title: Text(isAuth ? 'Dashboard' : 'Login pemilik'),
@@ -355,6 +390,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Bottom navigation bar khusus mobile (bukan drawer).
+  Widget _mobileNav() {
+    return NavigationBar(
+      selectedIndex: _bottomActive,
+      onDestinationSelected: (i) => _goTo(_bottomAnchors[i]),
+      backgroundColor: const Color(0xFF0A1020),
+      indicatorColor: AppColors.indigo.withValues(alpha: 0.35),
+      surfaceTintColor: Colors.transparent,
+      height: 68,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home_rounded),
+          label: 'Home',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.auto_awesome_outlined),
+          selectedIcon: Icon(Icons.auto_awesome_rounded),
+          label: 'Skills',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.grid_view_outlined),
+          selectedIcon: Icon(Icons.grid_view_rounded),
+          label: 'Projects',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.timeline_outlined),
+          selectedIcon: Icon(Icons.timeline_rounded),
+          label: 'Experience',
+        ),
+      ],
     );
   }
 }

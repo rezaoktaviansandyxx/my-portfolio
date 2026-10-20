@@ -357,8 +357,19 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
                     ElevatedButton(
                       onPressed: () => _togglePublish(u.isPublished),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.ink,
-                        foregroundColor: Colors.white,
+                        backgroundColor: u.isPublished
+                            ? Colors.transparent
+                            : AppColors.indigo,
+                        foregroundColor: u.isPublished
+                            ? AppColors.warning
+                            : Colors.white,
+                        side: u.isPublished
+                            ? const BorderSide(
+                                color: AppColors.warning,
+                                width: 1.2,
+                              )
+                            : null,
+                        elevation: 0,
                       ),
                       child: Text(u.isPublished ? 'Unpublish' : 'Buka situs'),
                     ),
