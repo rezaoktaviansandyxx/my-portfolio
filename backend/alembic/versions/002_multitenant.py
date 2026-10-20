@@ -8,10 +8,32 @@ Create Date: 2026-10-16
 from alembic import op
 import sqlalchemy as sa
 
+from app.core.config import settings
+
 revision = "002_multitenant"
 down_revision = "001_initial_schema"
 branch_labels = None
 depends_on = None
+
+
+def _select_admin_id(conn, admin_username: str = "admin"):
+  """Pilih user yang di-backfill jadi admin pemilik data lama.
+
+  Prioritas: user dengan username admin (kanonik dibuat seed_admin.py,
+  default dari settings.ADMIN_USERNAME — dikirim `admin` agar migration
+  tetap bisa diuji/pakai berdiri sendiri). Fallback terakhir user pertama
+  supaya upgrade database lama tetap berfungsi.
+  """
+  candidate = admin_username.strip().lower()
+  admin_id = conn.execute(
+      sa.text("SELECT id FROM users WHERE lower(username) = :u ORDER BY id ASC LIMIT 1")
+      .bindparams(u=candidate)
+  ).scalar()
+  if admin_id is None:
+    admin_id = conn.execute(
+        sa.text("SELECT id FROM users ORDER BY id ASC LIMIT 1")
+    ).scalar()
+  return admin_id
 
 
 def upgrade() -> None:
@@ -22,9 +44,10 @@ def upgrade() -> None:
   for tbl in ["projects", "skills", "experiences"]:
     op.add_column(tbl, sa.Column("owner_id", sa.Integer(), nullable=True))
   op.add_column("messages", sa.Column("recipient_id", sa.Integer(), nullable=True))
-  # backfill ke admin pertama
+  # backfill ke admin resmi (username settings.ADMIN_USERNAME), bukan
+  # user pertama yang kebetulan paling tua
   conn = op.get_bind()
-  admin_id = conn.execute(sa.text("SELECT id FROM users ORDER BY id ASC LIMIT 1")).scalar()
+  admin_id = _select_admin_id(conn, admin_username=settings.ADMIN_USERNAME)
   if admin_id is not None:
     conn.execute(sa.text("UPDATE users SET role='admin', profile_slug='admin', is_published=true WHERE id=:i").bindparams(i=admin_id))
     # spec: user lain tanpa slug dapat slug sementara user-{id}

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:frontend/core/models/user_model.dart';
@@ -26,25 +27,34 @@ class ApiException implements Exception {
 class ApiService {
   final Dio _dio;
 
-  ApiService(this._dio) {
+  ApiService(this._dio, {bool? debugLogging}) {
     _dio.options.baseUrl = ApiConfig.baseUrl;
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.options.headers['Accept'] = 'application/json';
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.followRedirects = true;
-    _dio.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      responseHeader: false,
-      error: true,
-      compact: true,
-      maxWidth: 100,
-    ));
+    // Logger hanya boleh hidup di debug. Header request berisi
+    // Authorization: Bearer dan body login/register berisi password —
+    // tidak boleh tercetak ke console browser di produksi.
+    if (debugLogging ?? kDebugMode) {
+      _dio.interceptors.add(PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: 100,
+      ));
+    }
     // Biarkan Dio throw untuk 4xx/5xx agar error 404 tidak masuk ke fromJson.
     // Default validateStatus sudah benar, jangan dilonggarkan ke <500.
   }
+
+  /// True bila logger traffic (header/body) aktif di Dio ini.
+  bool get logsTraffic =>
+      _dio.interceptors.any((index) => index is PrettyDioLogger);
 
   Never _throwApiError(DioException e, String fallback) {
     final data = e.response?.data;

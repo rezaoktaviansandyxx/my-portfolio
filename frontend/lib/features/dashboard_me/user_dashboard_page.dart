@@ -12,6 +12,7 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
+import 'package:frontend/features/dashboard_me/project_order.dart';
 import 'package:frontend/features/dashboard_me/project_reorder_card.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
@@ -937,11 +938,13 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
               }
               final filtered = _filterProjects(list);
               if (filtered.isEmpty) return _noResult('proyek');
-              // Seed urutan lokal sekali, lalu jaga sinkron bila jumlah berubah.
-              if (!_orderSeeded || _localOrder.length != list.length) {
-                _orderSeeded = true;
-                _localOrder = List<ProjectModel>.from(list);
-              }
+              // Gabung data terbaru dengan urutan custom: konten hasil edit()
+              // tampil segar, urutan drag tetap terjaga bila id tidak berubah.
+              _localOrder = mergeProjectOrder(
+                _orderSeeded ? _localOrder : const [],
+                list,
+              );
+              _orderSeeded = true;
               return _reorderGrid(
                 _query.isEmpty ? _localOrder : filtered,
               );
