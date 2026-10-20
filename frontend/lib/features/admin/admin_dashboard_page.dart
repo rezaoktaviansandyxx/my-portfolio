@@ -11,6 +11,7 @@ import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
 import 'package:frontend/features/dashboard_me/message_utils.dart';
+import 'package:frontend/features/dashboard_me/project_media_utils.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/folio_widgets.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
@@ -802,28 +803,24 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }
 
   Future<void> _addProjectMedia(ProjectModel p) async {
-    final data = await showProjectMediaDialog(
-      context,
-      uploadMedia: ref.read(apiServiceProvider).adminUploadProjectMedia,
+    final api = ref.read(apiServiceProvider);
+    await addProjectMediaFlow(
+      context: context,
+      project: p,
+      add: (url, type, caption) => api.adminAddProjectMedia(
+        p.id,
+        mediaUrl: url,
+        mediaType: type,
+        caption: caption,
+      ),
+      onChanged: () {
+        ref.invalidate(adminProjectsProvider);
+        ref.invalidate(adminProjectsFilteredProvider);
+      },
+      notify: _snack,
+      uploadMedia: api.adminUploadProjectMedia,
+      successMessage: 'Media ditambahkan',
     );
-    if (data == null) return;
-    try {
-      await ref
-          .read(apiServiceProvider)
-          .adminAddProjectMedia(
-            p.id,
-            mediaUrl: data['media_url']!,
-            mediaType: data['media_type'] ?? 'image',
-            caption: (data['caption']?.isEmpty ?? true)
-                ? null
-                : data['caption'],
-          );
-      ref.invalidate(adminProjectsProvider);
-      ref.invalidate(adminProjectsFilteredProvider);
-      _snack('Media ditambahkan');
-    } catch (e) {
-      _snack(friendlyError(e, 'Gagal tambah media'), error: true);
-    }
   }
 
   Widget _projectsTab() {

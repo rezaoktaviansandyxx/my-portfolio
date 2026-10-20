@@ -13,6 +13,7 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
+import 'package:frontend/features/dashboard_me/project_media_utils.dart';
 import 'package:frontend/features/dashboard_me/project_order.dart';
 import 'package:frontend/features/dashboard_me/project_reorder_card.dart';
 import 'package:frontend/shared/widgets/errors.dart';
@@ -791,25 +792,20 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
   }
 
   Future<void> _addProjectMedia(ProjectModel p) async {
-    final data = await showProjectMediaDialog(
-      context,
-      uploadMedia: ref.read(apiServiceProvider).uploadMyMedia,
+    final api = ref.read(apiServiceProvider);
+    await addProjectMediaFlow(
+      context: context,
+      project: p,
+      add: (url, type, caption) => api.addMyProjectMedia(
+        p.id,
+        mediaUrl: url,
+        mediaType: type,
+        caption: caption,
+      ),
+      onChanged: () => ref.invalidate(myProjectsProvider),
+      notify: _snack,
+      uploadMedia: api.uploadMyMedia,
     );
-    if (data == null) return;
-    try {
-      await ref
-          .read(apiServiceProvider)
-          .addMyProjectMedia(
-            p.id,
-            mediaUrl: data['media_url']!,
-            mediaType: data['media_type'] ?? 'image',
-            caption: (data['caption'] ?? '').isEmpty ? null : data['caption'],
-          );
-      ref.invalidate(myProjectsProvider);
-      _snack('Media ditambahkan ke "${p.title}"');
-    } catch (e) {
-      _snack(friendlyError(e, 'Gagal tambah media'), error: true);
-    }
   }
 
   /// Grid drag-and-drop: kartu bisa digeser ke dropzone mana pun.
