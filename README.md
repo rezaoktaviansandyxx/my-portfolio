@@ -48,6 +48,8 @@ flutter run -d chrome        # .env berisi API_BASE_URL
 ```
 
 - Salin `.env` bila belum ada: minimal `API_BASE_URL=http://127.0.0.1:8000/api/v1`.
+  File ini tidak di-commit tapi wajib ada sebelum build (terdaftar sebagai
+  asset Flutter); CI membuatnya otomatis.
 
 ### Test & analisis frontend
 

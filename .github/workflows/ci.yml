@@ -37,6 +37,8 @@ jobs:
           channel: stable
           flutter-version: 3.47.5
           cache: true
+      - name: "Create .env (asset wajib, di-gitignore)"
+        run: printf 'API_BASE_URL=%s\n' "${{ vars.API_BASE_URL || 'http://127.0.0.1:8000/api/v1' }}" > .env
       - name: Pub get
         run: flutter pub get
       - name: Analyze

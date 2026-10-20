@@ -30,7 +30,16 @@ flutter run -d chrome
 API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
-Tanpa `.env` aplikasi menolak start (`dotenv.load` di `main.dart`).
+File itu di-gitignore tetapi **wajib ada** karena terdaftar sebagai asset di
+`pubspec.yaml` (flutter_dotenv membacanya lewat `rootBundle`). Tanpa file
+tersebut `flutter analyze`/`flutter build` gagal dengan
+`asset_does_not_exist`, jadi salin dari `.env.example` sebelum build. Di CI,
+`.github/workflows/ci.yml` membuat file itu otomatis dari repository variable
+`API_BASE_URL` (default: `http://127.0.0.1:8000/api/v1`).
+
+Saat runtime, `Env.load()` di `lib/core/network/api_config.dart` memakai
+`isOptional: true`; kalau file kosong/hilang aplikasi tetap start dengan
+fallback URL di atas.
 
 ## Test
 

@@ -34,7 +34,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
+  # `.env` WAJIB terdaftar di sini: flutter_dotenv membaca file lewat
+  # `rootBundle`, yang hanya bisa mengakses asset yang dideklarasikan.
+  # File ini di-gitignore (lihat .gitignore root), jadi CI membuatnya lebih
+  # dulu di langkah "Create .env" (.github/workflows/ci.yml). Tanpa file itu,
+  # `flutter analyze`/`flutter build` gagal dengan `asset_does_not_exist`.
   assets:
     - .env
   #   - images/a_dot_burr.jpeg

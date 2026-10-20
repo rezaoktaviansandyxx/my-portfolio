@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/routes/app_router.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/shared/widgets/app_scroll_behavior.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  await Env.load();
   usePathUrlStrategy();
   runApp(const ProviderScope(child: MyApp()));
 }
