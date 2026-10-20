@@ -1,0 +1,13 @@
+# Menjaga .env/arsip lokal agar tidak masuk ke image Docker (audit):
+# COPY . . tanpa ini membocorkan SECRET_KEY & DATABASE_URL ke registry.
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+test.db
+static/
+docs/
+tests/

@@ -36,6 +36,9 @@ class Settings(BaseSettings):
       "http://localhost:63316",
   ]
   RATE_LIMIT_CONTACT: str = "5/minute"
+  # Batas untuk endpoint baca publik (anti scraping); satu halaman profil
+  # publik memuat ~5 request, 60/menit cukup longgar untuk manusia.
+  RATE_LIMIT_PUBLIC_READ: str = "60/minute"
 
   @field_validator("SECRET_KEY")
   @classmethod

@@ -5,10 +5,17 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: portofolio_db
+    # Bind 127.0.0.1 saja: DB tidak lagi terekspos se-network (audit), tapi
+    # developer di host tetap bisa akses untuk dev lokal.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d portofolio_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   api:
     build: .
     ports:
@@ -18,7 +25,9 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/portofolio_db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
     volumes:
       - ./static:/app/static
 

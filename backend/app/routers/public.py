@@ -1,4 +1,5 @@
 from typing import List
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.rate_limit import limiter
 from app.models.experience import Experience
@@ -38,7 +39,9 @@ def _get_published_owner(db: Session, slug: str) -> User:
 
 
 @router.get("/gallery/projects", response_model=List[ProjectListResponse])
+@limiter.limit(settings.RATE_LIMIT_PUBLIC_READ)
 def gallery_projects(
+    request: Request,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -63,12 +66,15 @@ def gallery_projects(
 
 
 @router.get("/u/{slug}/profile", response_model=UserResponse)
-def u_profile(slug: str, db: Session = Depends(get_db)):
+@limiter.limit(settings.RATE_LIMIT_PUBLIC_READ)
+def u_profile(request: Request, slug: str, db: Session = Depends(get_db)):
   return _get_published_owner(db, slug)
 
 
 @router.get("/u/{slug}/projects", response_model=List[ProjectListResponse])
+@limiter.limit(settings.RATE_LIMIT_PUBLIC_READ)
 def u_projects(
+    request: Request,
     slug: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -87,7 +93,9 @@ def u_projects(
 
 
 @router.get("/u/{slug}/skills", response_model=List[SkillResponse])
+@limiter.limit(settings.RATE_LIMIT_PUBLIC_READ)
 def u_skills(
+    request: Request,
     slug: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
@@ -105,7 +113,9 @@ def u_skills(
 
 
 @router.get("/u/{slug}/experiences", response_model=List[ExperienceResponse])
+@limiter.limit(settings.RATE_LIMIT_PUBLIC_READ)
 def u_experiences(
+    request: Request,
     slug: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),

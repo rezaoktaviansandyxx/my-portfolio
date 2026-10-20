@@ -1,4 +1,16 @@
 from slowapi import Limiter
-from slowapi.util import get_remote_address
+from fastapi import Request
 
-limiter = Limiter(key_func=get_remote_address)
+# Key sadar reverse proxy: X-Forwarded-For diisi oleh proxy (Nginx/Cloudflare).
+# Tanpa ini semua user tampak satu IP (IP proxy) → limit saling mengunci.
+def get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        first = forwarded.split(",")[0].strip()
+        if first:
+            return first
+    client = request.client
+    return client.host if client else ""
+
+
+limiter = Limiter(key_func=get_client_ip)

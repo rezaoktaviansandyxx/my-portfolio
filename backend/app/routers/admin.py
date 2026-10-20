@@ -22,6 +22,7 @@ from app.schemas.project import (
 from app.schemas.skill import SkillCreate, SkillResponse, SkillUpdate
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, EmailStr, Field
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/admin", tags=["Admin - CRUD"])
@@ -65,8 +66,17 @@ def create_project(
   project_data = payload.model_dump(exclude={"skill_ids"})
   project = Project(**project_data, owner_id=current.id, skills=skills)
   db.add(project)
-  db.commit()
-  db.refresh(project)
+  try:
+    db.commit()
+    db.refresh(project)
+  except IntegrityError:
+    # Race: cek lalu INSERT bisa dilewati dua request serentak; terjemahkan
+    # tabrakan constraint DB jadi 409 (bukan 500), pattern sama me_create_project.
+    db.rollback()
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Slug sudah digunakan oleh proyek lain",
+    )
   return project
 
 
@@ -105,8 +115,15 @@ def update_project(
         if payload.skill_ids
         else []
     )
-  db.commit()
-  db.refresh(project)
+  try:
+    db.commit()
+    db.refresh(project)
+  except IntegrityError:
+    db.rollback()
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Slug sudah digunakan oleh proyek lain",
+    )
   return project
 
 

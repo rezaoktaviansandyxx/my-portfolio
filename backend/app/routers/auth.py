@@ -15,6 +15,7 @@ from app.schemas.auth import (
 )
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -48,8 +49,17 @@ def register(
       is_active=True,
   )
   db.add(user)
-  db.commit()
-  db.refresh(user)
+  try:
+    db.commit()
+    db.refresh(user)
+  except IntegrityError:
+    # Race: dua register serentak lolos cek lalu tabrak constraint unique
+    # DB → terjemahkan ke 409 agar client tahu konflik, bukan server error.
+    db.rollback()
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Username atau email sudah dipakai",
+    )
   return {"id": user.id, "username": user.username}
 
 

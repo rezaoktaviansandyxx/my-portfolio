@@ -2,9 +2,13 @@
 
 Idempotent-ish: skips items that already exist (409/400). Placeholder cover
 URLs point at picsum.photos, which CachedNetworkImage can fetch directly.
+
+Kredensial admin WAJIB dari env (ADMIN_USERNAME/ADMIN_PASSWORD) — tidak ada
+password bawaan (audit): script berhenti dengan pesan jelas bila kosong.
 """
 
 import json
+import os
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -41,8 +45,21 @@ def login(username, password):
   return res["access_token"]
 
 
+def _demo_credentials() -> tuple[str, str]:
+  """Ambil kredensial admin dari env; tolak jalan bila tidak lengkap."""
+  username = os.getenv("ADMIN_USERNAME")
+  password = os.getenv("ADMIN_PASSWORD")
+  if not username or not password:
+    raise SystemExit(
+        "seed_demo butuh ADMIN_USERNAME dan ADMIN_PASSWORD di environment "
+        "— tidak ada password bawaan demi keamanan."
+    )
+  return username, password
+
+
 def main():
-  token = login("admin", "changeme123")
+  username, password = _demo_credentials()
+  token = login(username, password)
 
   call("PUT", "/me/profile", {
       "full_name": "Alex Rivera",
