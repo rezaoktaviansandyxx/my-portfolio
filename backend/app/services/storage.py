@@ -101,11 +101,34 @@ class LocalStorageService:
       raise _bad("Isi file bukan gambar yang valid")
 
   def delete_file(self, relative_path: str) -> bool:
-    clean_path = Path(relative_path.lstrip("/"))
+    if not relative_path:
+      return False
+    # Anchor selalu base_dir: path yang lolos ("../x", "/etc/passwd") tidak
+    # boleh menghapus file di luar folder upload.
+    clean_path = (self.base_dir / relative_path.lstrip("/")).resolve()
+    if self.base_dir.resolve() not in clean_path.parents:
+      return False
     if clean_path.exists() and clean_path.is_file():
       clean_path.unlink()
       return True
     return False
+
+
+def remove_project_files(relative_urls) -> None:
+  """Hapus file upload milik project (cover + media); remote URL diabaikan.
+
+  Dulu `delete_file` tak pernah dipanggil, sehingga file cover/media
+  menumpuk jadi orphan di disk setelah project dihapus.
+  """
+  for url in relative_urls:
+    if not url:
+      continue
+    if url.startswith(("http://", "https://")):
+      continue  # remote (mis. picsum) bukan milik disk kita
+    prefix = f"/{settings.UPLOAD_DIR}/"
+    if not url.startswith(prefix):
+      continue
+    storage_service.delete_file(url.lstrip("/"))
 
 
 storage_service = LocalStorageService()

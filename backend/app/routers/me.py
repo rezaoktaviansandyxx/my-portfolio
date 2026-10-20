@@ -8,7 +8,7 @@ from app.models.skill import Skill
 from app.models.user import User
 from app.routers.deps import get_current_user
 from app.schemas.auth import UserResponse
-from app.services.storage import storage_service
+from app.services.storage import remove_project_files, storage_service
 from app.schemas.experience import (
     ExperienceCreate,
     ExperienceResponse,
@@ -253,6 +253,10 @@ def me_delete_project(
     current: User = Depends(get_current_user),
 ):
   p = _owned_project(db, project_id, current.id)
+  # Bersihkan file upload terkait sebelum data project hilang (anti orphan).
+  media_urls = [p.cover_image_url]
+  media_urls += [m.media_url for m in p.media]
+  remove_project_files(media_urls)
   db.delete(p)
   db.commit()
   return None
@@ -265,7 +269,12 @@ def me_delete_project(
 )
 def me_add_project_media(
     project_id: int,
-    media_url: str,
+    media_url: str = Query(
+        ...,
+        max_length=255,
+        pattern=r"^(https?://|/static/)",
+        description="URL absolut atau path /static/ hasil upload",
+    ),
     media_type: str = "image",
     caption: Optional[str] = None,
     db: Session = Depends(get_db),

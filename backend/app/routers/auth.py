@@ -77,7 +77,9 @@ def logout(current: User = Depends(get_current_user)):
 
 
 @router.patch("/change-password")
+@limiter.limit("5/minute")  # bruteforce password lama tak boleh murah
 def change_password(
+    request: Request,
     payload: ChangePasswordRequest,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),

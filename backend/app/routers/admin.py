@@ -20,6 +20,7 @@ from app.schemas.project import (
     ProjectUpdate,
 )
 from app.schemas.skill import SkillCreate, SkillResponse, SkillUpdate
+from app.services.storage import remove_project_files
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.exc import IntegrityError
@@ -31,7 +32,7 @@ router = APIRouter(prefix="/admin", tags=["Admin - CRUD"])
 class AdminUserCreate(BaseModel):
   username: str = Field(pattern=r"^[a-z0-9_]{3,30}$")
   email: EmailStr
-  password: str = Field(min_length=8, max_length=128)
+  password: str = Field(min_length=8, max_length=72)  # batas bcrypt
   full_name: str = Field(min_length=2, max_length=100)
   role: Literal["admin", "user"] = "user"
 
@@ -138,6 +139,11 @@ def delete_project(
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="Proyek tidak ditemukan"
     )
+  # Bersihkan file upload terkait (cover + media) sebelum project hilang,
+  # agar disk tidak penuh file orphan.
+  media_urls = [project.cover_image_url]
+  media_urls += [m.media_url for m in project.media]
+  remove_project_files(media_urls)
   db.delete(project)
   db.commit()
   return None
@@ -148,7 +154,12 @@ def delete_project(
 )
 def add_project_media(
     project_id: int,
-    media_url: str,
+    media_url: str = Query(
+        ...,
+        max_length=255,
+        pattern=r"^(https?://|/static/)",
+        description="URL absolut atau path /static/ hasil upload",
+    ),
     media_type: str = "image",
     caption: Optional[str] = None,
     db: Session = Depends(get_db),

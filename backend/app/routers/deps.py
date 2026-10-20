@@ -31,7 +31,13 @@ def get_current_user(
   except JWTError:
     raise credentials_exception
 
-  user = db.query(User).filter(User.id == int(token_data.sub)).first()
+  try:
+    user_pk = int(token_data.sub)
+  except (TypeError, ValueError):
+    # Token dengan sub aneh (bukan angka) tetap 401, bukan ValueError → 500.
+    raise credentials_exception
+
+  user = db.query(User).filter(User.id == user_pk).first()
   if user is None or not user.is_active:
     raise credentials_exception
   return user
@@ -42,9 +48,9 @@ def get_current_admin(
 ) -> User:
   user = get_current_user(db, token)
   if user.role != "admin":
+    # 403 = sudah login tapi tak berhak (client bisa bedakan dari 401).
     raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Kredensial autentikasi tidak valid",
-        headers={"WWW-Authenticate": "Bearer"},
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Hanya admin yang bisa mengakses endpoint ini",
     )
   return user

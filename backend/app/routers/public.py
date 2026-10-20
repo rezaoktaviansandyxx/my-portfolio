@@ -7,7 +7,7 @@ from app.models.message import Message
 from app.models.project import Project
 from app.models.skill import Skill
 from app.models.user import User
-from app.schemas.auth import UserResponse
+from app.schemas.auth import PublicProfileResponse, UserResponse
 from app.schemas.experience import ExperienceResponse
 from app.schemas.message import MessageCreate, MessageResponse
 from app.schemas.project import ProjectDetailResponse, ProjectListResponse
@@ -65,7 +65,7 @@ def gallery_projects(
 # ---- Per-user pages ----
 
 
-@router.get("/u/{slug}/profile", response_model=UserResponse)
+@router.get("/u/{slug}/profile", response_model=PublicProfileResponse)
 @limiter.limit(settings.RATE_LIMIT_PUBLIC_READ)
 def u_profile(request: Request, slug: str, db: Session = Depends(get_db)):
   return _get_published_owner(db, slug)
@@ -144,15 +144,9 @@ def u_contact(
     payload: MessageCreate,
     db: Session = Depends(get_db),
 ):
-  u = (
-      db.query(User)
-      .filter(User.profile_slug == slug, User.is_active == True)  # noqa: E712
-      .first()
-  )
-  if not u:
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Profil tidak ditemukan"
-    )
+  # Profil harus benar-benar dipublish — dulu cukup is_active sehingga
+  # akun draft masih bisa menerima pesan visitor.
+  u = _get_published_owner(db, slug)
   client_ip = request.client.host if request.client else None
   msg = Message(
       **payload.model_dump(), recipient_id=u.id, ip_address=client_ip

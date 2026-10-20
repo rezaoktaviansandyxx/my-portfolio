@@ -69,7 +69,7 @@ def test_public_project_exposes_links_and_media():
       f"/api/v1/me/projects/{pid}/media",
       headers=headers,
       params={
-          "media_url": "/uploads/u/1/media/a.png",
+          "media_url": "/static/uploads/media/a.png",
           "media_type": "image",
       },
   )
@@ -84,7 +84,7 @@ def test_public_project_exposes_links_and_media():
   assert item["live_url"] == "https://example.com/live"
   assert item["github_url"] == "https://github.com/example/repo"
   assert len(item["media"]) == 1
-  assert item["media"][0]["media_url"] == "/uploads/u/1/media/a.png"
+  assert item["media"][0]["media_url"] == "/static/uploads/media/a.png"
 
 
 def test_gallery_project_exposes_media_too():
@@ -106,7 +106,7 @@ def test_gallery_project_exposes_media_too():
   client.post(
       f"/api/v1/me/projects/{pid}/media",
       headers=headers,
-      params={"media_url": "/uploads/u/1/media/g.png", "media_type": "image"},
+      params={"media_url": "/static/uploads/media/g.png", "media_type": "image"},
   )
 
   res = client.get("/api/v1/public/gallery/projects")

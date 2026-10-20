@@ -100,6 +100,8 @@ def test_same_slug_different_owner_ok():
 
 
 def test_cannot_touch_other_owner():
+  # Tidak reset di sini: test ini bergantung project alice/bob dari
+  # test_same_slug_different_owner_ok (reset justru menghapusnya).
   c = get_client()
   ta = _login("alice")
   tb = _login("bob")
@@ -114,12 +116,21 @@ def test_cannot_touch_other_owner():
   assert c.delete(f"/api/v1/me/projects/{bob_pid}", headers=_auth(ta)).status_code == 404
   # bob's own project still intact
   assert _my_project_id(tb, "proyek-x") == bob_pid
-  # inbox isolation: give alice a slug (unpublished is fine for contact),
-  # send her a message, bob must not see it
+  # inbox isolation: publish alice (profil dulu harus published) lalu kirim
+  # pesan; bob TIDAK boleh bisa melihat inbox milik alice.
   assert (
       c.put(
           "/api/v1/me/profile",
           json={"profile_slug": "alice", "full_name": "Alice"},
+          headers=_auth(ta),
+      ).status_code
+      == 200
+  )
+  # contact form hanya untuk profil yang benar-benar dipublish (keteguhan
+  # guard `_get_published_owner`) → publish alice dulu.
+  assert (
+      c.post(
+          "/api/v1/me/publish",
           headers=_auth(ta),
       ).status_code
       == 200
@@ -138,11 +149,27 @@ def test_cannot_touch_other_owner():
 
 
 def test_unpublished_hidden_then_visible():
+  _reset_db()
   c = get_client()
+  ta = _register_login("alice", "alice-2@x.com")
+  # alice mulai punya 1 project berstatus terpublikasi supaya keberadaannya
+  # bisa dibedakan di galeri (gallery menampilkan project, bukan user).
+  assert (
+      c.post(
+          "/api/v1/me/projects",
+          headers=_auth(ta),
+          json={
+              "title": "Proyek Alice 2",
+              "slug": "proyek-alice-2",
+              "summary": "Ringkasan yang cukup panjang untuk validasi.",
+              "status": "published",
+          },
+      ).status_code
+      == 201
+  )
   # alice has a slug but is not published yet
   assert c.get("/api/v1/public/u/alice/profile").status_code == 404
   assert "alice" not in _gallery_slugs()
-  ta = _login("alice")
   assert (
       c.put(
           "/api/v1/me/profile",
@@ -157,8 +184,27 @@ def test_unpublished_hidden_then_visible():
 
 
 def test_admin_takedown():
+  _reset_db()
   c = get_client()
-  tb = _login("bob")
+  tb = _register_login("bob", "bob-2@x.com")
+  ta = _register_login("alice", "alice-3@x.com")
+  for token, slug, title in (
+      (_auth(tb), "bob", "Proyek Bob 2"),
+      (_auth(ta), "alice", "Proyek Alice 3"),
+  ):
+    assert (
+        c.post(
+            "/api/v1/me/projects",
+            headers=token,
+            json={
+                "title": title,
+                "slug": f"proyek-{slug}",
+                "summary": "Ringkasan yang cukup panjang untuk validasi.",
+                "status": "published",
+            },
+        ).status_code
+        == 201
+    )
   # bob publishes first so he is visible, then admin takes him down
   assert (
       c.put(
@@ -182,5 +228,14 @@ def test_admin_takedown():
   assert r.status_code == 200
   assert c.get("/api/v1/public/u/bob/profile").status_code == 404
   assert "bob" not in _gallery_slugs()
-  # alice unaffected
+  # alice (akun lain) tidak ikut kena ngedak — tetap publik
+  assert (
+      c.put(
+          "/api/v1/me/profile",
+          json={"profile_slug": "alice", "full_name": "Alice"},
+          headers=_auth(ta),
+      ).status_code
+      == 200
+  )
+  assert c.post("/api/v1/me/publish", headers=_auth(ta)).status_code == 200
   assert c.get("/api/v1/public/u/alice/profile").status_code == 200
