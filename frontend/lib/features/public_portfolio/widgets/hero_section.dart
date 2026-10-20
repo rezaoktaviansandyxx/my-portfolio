@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_text.dart';
 import 'package:frontend/core/utils/validators.dart';
@@ -112,7 +113,8 @@ class HeroSection extends StatelessWidget {
             label: 'Download CV',
             icon: Icons.download_rounded,
             variant: GlowButtonVariant.glass,
-            onPressed: () => onOpenUrl(user.resumeUrl!),
+            onPressed: () =>
+                onOpenUrl(ApiConfig.resolveFileUrl(user.resumeUrl)),
             expand: true,
           ),
         ],
