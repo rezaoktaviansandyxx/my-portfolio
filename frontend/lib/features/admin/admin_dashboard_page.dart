@@ -805,6 +805,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                 ? null
                 : data['caption'],
           );
+      ref.invalidate(adminProjectsProvider);
+      ref.invalidate(adminProjectsFilteredProvider);
       _snack('Media ditambahkan');
     } catch (e) {
       _snack(friendlyError(e, 'Gagal tambah media'), error: true);
