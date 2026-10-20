@@ -633,15 +633,21 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
 final _usernamePattern = v.kUsernamePattern;
 
 /// Dialog buat user (admin) -> payload `adminCreateUser`.
-Future<Map<String, dynamic>?> showAdminUserDialog(BuildContext context) {
+/// `uploadResume` opsional: bila diisi, field resume punya tombol upload
+/// yang menulis ke `POST /admin/upload/resume`.
+Future<Map<String, dynamic>?> showAdminUserDialog(
+  BuildContext context, {
+  UploadFn? uploadResume,
+}) {
   return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (_) => const _AdminUserDialog(),
+    builder: (_) => _AdminUserDialog(uploadResume: uploadResume),
   );
 }
 
 class _AdminUserDialog extends StatefulWidget {
-  const _AdminUserDialog();
+  final UploadFn? uploadResume;
+  const _AdminUserDialog({this.uploadResume});
 
   @override
   State<_AdminUserDialog> createState() => _AdminUserDialogState();
@@ -652,6 +658,7 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _fullName = TextEditingController();
+  final _resume = TextEditingController();
   String _role = 'user';
 
   @override
@@ -660,6 +667,7 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
     _email.dispose();
     _password.dispose();
     _fullName.dispose();
+    _resume.dispose();
     super.dispose();
   }
 
@@ -687,6 +695,7 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
       'password': _password.text,
       'full_name': _fullName.text.trim(),
       'role': _role,
+      if (_resume.text.trim().isNotEmpty) 'resume_url': _resume.text.trim(),
     });
   }
 
@@ -712,6 +721,22 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
                 'Nama lengkap*',
                 hint: 'misal: Budi Santoso',
               ),
+              if (widget.uploadResume != null)
+                UploadField(
+                  controller: _resume,
+                  label: 'Resume URL',
+                  hint: 'https://... atau klik ikon upload',
+                  icon: Icons.description_outlined,
+                  document: true,
+                  upload: widget.uploadResume!,
+                )
+              else
+                folioField(
+                  _resume,
+                  'Resume URL',
+                  hint: 'opsional',
+                  keyboard: TextInputType.url,
+                ),
               folioField(_password, 'Password* (min 8)', obscureText: true),
               DropdownButtonFormField<String>(
                 initialValue: _role,

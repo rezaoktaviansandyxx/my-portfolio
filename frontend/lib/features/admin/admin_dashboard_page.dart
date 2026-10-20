@@ -535,7 +535,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }
 
   Future<void> _createUser() async {
-    final payload = await showAdminUserDialog(context);
+    final payload = await showAdminUserDialog(
+      context,
+      uploadResume: ref.read(apiServiceProvider).adminUploadResume,
+    );
     if (payload == null) return;
     try {
       await ref.read(apiServiceProvider).adminCreateUser(payload);
@@ -754,7 +757,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }
 
   Future<void> _createProject() async {
-    final payload = await showProjectDialog(context);
+    final payload = await showProjectDialog(
+      context,
+      uploadCover: ref.read(apiServiceProvider).adminUploadProjectCover,
+    );
     if (payload == null) return;
     try {
       await ref.read(apiServiceProvider).adminCreateProject(payload);
@@ -767,7 +773,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }
 
   Future<void> _editProject(ProjectModel p) async {
-    final payload = await showProjectDialog(context, project: p);
+    final payload = await showProjectDialog(
+      context,
+      project: p,
+      uploadCover: ref.read(apiServiceProvider).adminUploadProjectCover,
+    );
     if (payload == null) return;
     try {
       await ref.read(apiServiceProvider).adminUpdateProject(p.id, payload);
@@ -792,7 +802,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }
 
   Future<void> _addProjectMedia(ProjectModel p) async {
-    final data = await showProjectMediaDialog(context);
+    final data = await showProjectMediaDialog(
+      context,
+      uploadMedia: ref.read(apiServiceProvider).adminUploadProjectMedia,
+    );
     if (data == null) return;
     try {
       await ref

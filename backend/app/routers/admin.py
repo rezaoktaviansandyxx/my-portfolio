@@ -35,6 +35,8 @@ class AdminUserCreate(BaseModel):
   password: str = Field(min_length=8, max_length=72)  # batas bcrypt
   full_name: str = Field(min_length=2, max_length=100)
   role: Literal["admin", "user"] = "user"
+  # Diisi dari POST /admin/upload/resume bila admin mengunggah CV.
+  resume_url: Optional[str] = None
 
 
 @router.post(
@@ -365,6 +367,7 @@ def admin_create_user(
       role=payload.role,
       profile_slug=None,
       is_published=False,
+      resume_url=payload.resume_url,
       is_active=True,
   )
   db.add(u)
