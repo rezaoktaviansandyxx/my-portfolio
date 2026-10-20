@@ -415,3 +415,32 @@ def admin_list_projects(
   if owner_id is not None:
     q = q.filter(Project.owner_id == owner_id)
   return q.offset(skip).limit(limit).all()
+
+
+# --- Moderasi skills & experiences lintas user ---
+@router.get("/skills", response_model=List[SkillResponse])
+def admin_list_skills(
+    owner_id: Optional[int] = Query(default=None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+  q = db.query(Skill).order_by(Skill.id)
+  if owner_id is not None:
+    q = q.filter(Skill.owner_id == owner_id)
+  return q.offset(skip).limit(limit).all()
+
+
+@router.get("/experiences", response_model=List[ExperienceResponse])
+def admin_list_experiences(
+    owner_id: Optional[int] = Query(default=None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+  q = db.query(Experience).order_by(Experience.start_date.desc())
+  if owner_id is not None:
+    q = q.filter(Experience.owner_id == owner_id)
+  return q.offset(skip).limit(limit).all()
