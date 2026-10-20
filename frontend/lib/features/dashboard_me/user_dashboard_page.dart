@@ -200,10 +200,8 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
           msgList.where((m) => m['is_read'] != true).toList(),
       onOpenNotification: (_) => _goInbox(),
       onOpenInbox: _goInbox,
-      child: RefreshIndicator(
-        onRefresh: () async => _refreshAll(),
-        child: _body(first),
-      ),
+      onRefresh: () async => _refreshAll(),
+      child: _body(first),
     );
   }
 

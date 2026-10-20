@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 
 /// Membungkus child dengan kursor click + animasi naik saat hover.
+///
+/// Sekaligus fokusnya keyboard: Tab taruh fokus, Enter/Space menekan, dan
+/// role tombol dideklarasikan ke a11y tree. Tanpa ini tombol utama tak
+/// bisa dioperasikan tanpa mouse (audit Medium).
 class HoverScale extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -22,9 +27,19 @@ class HoverScale extends StatefulWidget {
 
 class _HoverScaleState extends State<HoverScale> {
   bool _hovered = false;
+  FocusNode? _focusNode;
+
+  FocusNode get _node => _focusNode ??= FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final actionable = widget.onTap != null;
     final body = AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
@@ -48,17 +63,40 @@ class _HoverScaleState extends State<HoverScale> {
           : widget.child,
     );
 
-    return MouseRegion(
-      cursor: widget.onTap == null
-          ? MouseCursor.defer
-          : SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        behavior: HitTestBehavior.opaque,
-        child: body,
+    final interactive = Semantics(
+      button: actionable,
+      enabled: actionable,
+      child: MouseRegion(
+        cursor: !actionable ? MouseCursor.defer : SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          behavior: HitTestBehavior.opaque,
+          child: body,
+        ),
       ),
+    );
+
+    if (!actionable) return interactive;
+
+    // FokusableActionDetector + shortcut eksplisit supaya Enter/Space
+    // deterministik di semua platform (tak bergantung shortcut aplikasi).
+    return FocusableActionDetector(
+      focusNode: _node,
+      shortcuts: {
+        const SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+        const SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+      },
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (intent) {
+            widget.onTap?.call();
+            return null;
+          },
+        ),
+      },
+      child: interactive,
     );
   }
 }

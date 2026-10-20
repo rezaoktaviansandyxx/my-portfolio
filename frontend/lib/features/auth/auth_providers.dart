@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/network/auth_service.dart';
 
 final dioProvider = Provider<Dio>((ref) {
@@ -49,10 +50,28 @@ class AuthNotifier extends Notifier<AuthState> {
       }
       final user = await service.me();
       state = AuthState(token: token, user: user, isLoading: false);
+    } on ApiException catch (e) {
+      await _restoreFailed(e);
     } catch (_) {
-      await service.logout();
-      state = const AuthState(isLoading: false);
+      // Error jaringan/transien (startup 500, timeout, offline): TIDAK logout
+      // paksa. Sesi tetap ada; hanya profile gagal tampil saat ini.
+      final token = await service.loadStoredToken();
+      state = AuthState(token: token, isLoading: false);
     }
+  }
+
+  /// Bila token benar-benar invalid (401/403) → bersihkan sesi.
+  /// Error lain dianggap kegagalan profil, bukan kegagalan sesi.
+  Future<void> _restoreFailed(ApiException e) async {
+    final service = ref.read(authServiceProvider);
+    final isAuthError = e.statusCode == 401 || e.statusCode == 403;
+    if (!isAuthError) {
+      final token = await service.loadStoredToken();
+      state = AuthState(token: token, isLoading: false);
+      return;
+    }
+    await service.logout();
+    state = const AuthState(isLoading: false);
   }
 
   Future<void> login(String username, String password) async {

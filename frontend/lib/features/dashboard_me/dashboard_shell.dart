@@ -40,6 +40,12 @@ class DashboardShell extends ConsumerWidget {
   final ValueChanged<Map<String, dynamic>>? onOpenNotification;
   final VoidCallback? onOpenInbox;
 
+  /// Bila diisi, pull-to-refresh di body dashboard memicu callback ini.
+  /// RefreshIndicator dipasang di shell agar gestur tak pernah mati —
+  /// dulu tiap halaman membungkus body non-scrollable sehingga pull
+  /// selalu sia-sia (audit Medium).
+  final Future<void> Function()? onRefresh;
+
   const DashboardShell({
     super.key,
     required this.selectedIndex,
@@ -56,6 +62,7 @@ class DashboardShell extends ConsumerWidget {
     this.unreadMessages = const [],
     this.onOpenNotification,
     this.onOpenInbox,
+    this.onRefresh,
   });
 
   String get _initials {
@@ -233,6 +240,35 @@ class DashboardShell extends ConsumerWidget {
     }
   }
 
+  /// Pull-to-refresh hanya dipasang bila onRefresh diisi. AlwaysScrollable
+  /// menjamin gestur pull tetap terdeteksi walau konten lebih pendek dari
+  /// viewport (physics default tidak overscroll).
+  Widget _refreshableChild() {
+    return LayoutBuilder(
+      builder: (context, viewport) {
+        final core = SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            // RefreshIndicator menaruh child-nya di Stack dengan loose
+            // constraint: konten pendek shrink-wrap → tak pernah overscroll
+            // → pull mati. minHeight mengisi viewport agar pull selalu bisa.
+            constraints: BoxConstraints(minHeight: viewport.maxHeight),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
+                child: child,
+              ),
+            ),
+          ),
+        );
+        final refresh = onRefresh;
+        if (refresh == null) return core;
+        return RefreshIndicator(onRefresh: refresh, child: core);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wide = MediaQuery.sizeOf(context).width > kDesktopBreakpoint;
@@ -253,15 +289,7 @@ class DashboardShell extends ConsumerWidget {
               children: [
                 _topbar(context, ref, wide),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1120),
-                        child: child,
-                      ),
-                    ),
-                  ),
+                  child: _refreshableChild(),
                 ),
               ],
             ),

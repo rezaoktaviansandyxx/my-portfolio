@@ -9,6 +9,7 @@ import 'package:frontend/core/theme/app_text.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
+import 'package:frontend/features/dashboard_me/message_utils.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/folio_widgets.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
@@ -143,15 +144,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
           msgList.where((m) => m['is_read'] != true).toList(),
       onOpenNotification: (_) => _goMessages(),
       onOpenInbox: _goMessages,
-      child: RefreshIndicator(
-        onRefresh: () async => _refreshAll(),
-        child: _body(
-          totalUsers: userList.length,
-          publicCount: publishedCount,
-          totalProjects: projList.length,
-          unread: unread,
-          isLoading: isLoading,
-        ),
+      onRefresh: () async => _refreshAll(),
+      child: _body(
+        totalUsers: userList.length,
+        publicCount: publishedCount,
+        totalProjects: projList.length,
+        unread: unread,
+        isLoading: isLoading,
       ),
     );
   }
@@ -913,7 +912,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     );
   }
 
-  Future<void> _markRead(int id) async {
+  Future<void> _markRead(int? id) async {
+    if (id == null) return; // id rusak: jangan crash, biarkan tetap unread
     try {
       await ref.read(apiServiceProvider).adminMarkMessageRead(id);
       ref.invalidate(adminMessagesProvider);
@@ -929,10 +929,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     )) {
       return;
     }
+    final id = parseMessageId(m['id']);
+    if (id == null) {
+      _snack('Pesan tidak valid, gagal dihapus', error: true);
+      return;
+    }
     try {
-      await ref
-          .read(apiServiceProvider)
-          .adminDeleteMessage((m['id'] as num).toInt());
+      await ref.read(apiServiceProvider).adminDeleteMessage(id);
       ref.invalidate(adminMessagesProvider);
       _snack('Pesan dihapus');
     } catch (e) {
@@ -972,11 +975,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                       (m) => ListTile(
                         leading: CircleAvatar(
                           backgroundColor: AppColors.indigoSoft,
-                          child: Text(
-                            (m['sender_name']?.toString() ?? '?')
-                                .substring(0, 1)
-                                .toUpperCase(),
-                          ),
+                          child:
+                              Text(messageInitial(m['sender_name']?.toString())),
                         ),
                         title: Text(m['sender_name']?.toString() ?? '-'),
                         subtitle: Column(
@@ -1004,7 +1004,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                                   Icons.mark_email_read_outlined,
                                 ),
                                 onPressed: () =>
-                                    _markRead((m['id'] as num).toInt()),
+                                    _markRead(parseMessageId(m['id'])),
                               ),
                             IconButton(
                               tooltip: 'Hapus',
