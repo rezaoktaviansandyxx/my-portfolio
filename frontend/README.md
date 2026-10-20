@@ -1,16 +1,53 @@
-# frontend
+# frontend — FolioSpace (Flutter Web)
 
-A new Flutter project.
+Klien web dari backend FastAPI. Setelah proses redesign, struktur kode:
 
-## Getting Started
+```
+lib/
+├── core/          # state & infrastruktur
+│   ├── models/    # UserModel, ProjectModel, SkillModel, ExperienceModel (.g.dart json)
+│   ├── network/   # api_config, api_service, auth_service, app_providers
+│   ├── routes/    # go_router + _AuthGate (gate token, guard admin)
+│   └── theme/     # app_colors, app_text, app_theme (dark glass)
+├── features/
+│   ├── admin/           # AdminDashboardPage
+│   ├── auth/            # auth_providers (Riverpod), layar login/registrasi
+│   ├── dashboard_me/    # dashboard user + shell + dialog CRUD
+│   └── public_portfolio/# profile_page public + widgets glass navbar dll
+└── shared/widgets/      # GlassCard, HoverScale, GlowButton, skeleton, dll
+```
 
-This project is a starting point for a Flutter application.
+## Menjalankan
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run -d chrome
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+`.env` (frontend) minimal berisi:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+API_BASE_URL=http://127.0.0.1:8000/api/v1
+```
+
+Tanpa `.env` aplikasi menolak start (`dotenv.load` di `main.dart`).
+
+## Test
+
+```bash
+flutter test      # seluruh suite (unit + widget)
+flutter analyze   # linter, harus "No issues found!"
+```
+
+Catatan: beberapa test mengganti `dotenv` via
+`dotenv.loadFromString(envString: 'API_BASE_URL=...')`, sehingga tidak butuh
+file `.env` fisik saat berjalan di CI.
+
+## Konvensi penting
+
+- Tema **dark only** (`AppTheme.dark`), warna di `core/theme/app_colors.dart`.
+- Breakpoint desktop = 900 logical px (`kDesktopBreakpoint`).
+- Semua gambar remote lewat `shared/widgets/app_network_image.dart` (bukan
+  `Image.network`), dengan fallback inisial.
+- Komponen interaktif memakai `HoverScale`/`GlowButton` — otomatis dapat
+  kursor click, fokus keyboard (Tab/Enter), dan role tombol a11y.

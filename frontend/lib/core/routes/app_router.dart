@@ -118,14 +118,19 @@ class _AuthGate extends ConsumerWidget {
       return const PageSkeleton();
     }
     if (!auth.isAuthenticated) {
-      // Gate: belum ada access_token -> ke login dulu
-      WidgetsBinding.instance.addPostFrameCallback((_) => context.go('/login'));
+      // Gate: belum ada access_token -> ke login dulu.
+      // Guard mounted: callback bisa jalan setelah widget sudah dispose.
+      final ctx = context;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (ctx.mounted) context.go('/login');
+      });
       return const PageSkeleton();
     }
     if (adminOnly && !auth.isAdmin) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => context.go('/dashboard'),
-      );
+      final ctx = context;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (ctx.mounted) context.go('/dashboard');
+      });
       return const Scaffold(body: Center(child: Text('Butuh role admin...')));
     }
     return child;

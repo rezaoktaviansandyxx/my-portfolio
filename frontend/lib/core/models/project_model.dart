@@ -47,10 +47,6 @@ class ProjectModel {
     this.updatedAt,
   });
 
-  // Kompatibilitas dengan widget lama
-  String? get coverImage => coverImageUrl;
-  String? get projectUrl => liveUrl;
-
   factory ProjectModel.fromJson(Map<String, dynamic> json) => _$ProjectModelFromJson(json);
   Map<String, dynamic> toJson() => _$ProjectModelToJson(this);
 }

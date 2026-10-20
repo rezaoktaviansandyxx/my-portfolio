@@ -1,6 +1,8 @@
 # Neon Glass Redesign Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Status (2026-10-20):** Seluruh task di bawah sudah dieksekusi — struktur `core/features/shared`, tema dark glass, widget kit, ekspose `live_url`/`github_url`/`media`, layar auth, halaman publik, galeri, shell dashboard (drag-reorder), tabel admin, retint skeleton, dan verifikasi akhir. Checkbox dibaca sebagai "sudah dijalankan"; verifikasi yang berlaku: `flutter test` + `flutter analyze` + suite `pytest` backend hijau pada tree terkini. Task 5 (layar auth) diimplementasikan dengan unit test tersendiri (`auth_screens_test.dart`) yang tak ada di rancangan — selebihnya mengikuti plan.
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Replace the app's light indigo theme with a dark neon/glassmorphism design system across every surface, and restructure `frontend/lib` into `core/` + `features/` + `shared/`.
 
@@ -118,14 +120,14 @@ Deleted: `lib/pages/projects_section.dart`, `lib/pages/skills_section.dart` (dea
   `package:frontend/shared/widgets/glass_card.dart`,
   `package:frontend/features/auth/auth_providers.dart`.
 
-- [ ] **Step 1: Create the directory tree**
+- [x] **Step 1: Create the directory tree**
 
 ```powershell
 cd E:\Documents\GitHub\my-portofolio\frontend\lib
 New-Item -ItemType Directory -Force -Path core\models,core\network,core\routes,core\theme,features\auth,features\public_portfolio\widgets,features\gallery,features\dashboard_me,features\admin,shared\widgets,shared\constants | Out-Null
 ```
 
-- [ ] **Step 2: Move files with `git mv`**
+- [x] **Step 2: Move files with `git mv`**
 
 ```powershell
 git mv models/*.dart core/models/
@@ -148,7 +150,7 @@ Remove-Item -Recurse -Force models,services,providers,routers,theme,constants,pa
 
 `Remove-Item` at the end is safe only because every file in those folders was moved; confirm with `git status` before running it.
 
-- [ ] **Step 3: Rewrite imports mechanically**
+- [x] **Step 3: Rewrite imports mechanically**
 
 ```powershell
 cd E:\Documents\GitHub\my-portofolio\frontend\lib
@@ -184,14 +186,14 @@ Get-ChildItem -Recurse -Filter *.dart | ForEach-Object {
 
 Order matters: the more specific `providers/app_providers.dart` keys must be replaced before any generic `providers/` rule (there is none, so the map above is safe).
 
-- [ ] **Step 4: Verify the analyzer is clean**
+- [x] **Step 4: Verify the analyzer is clean**
 
 Run: `cd .. ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
 If any import still points at a deleted path, the analyzer names it — fix by consulting the map in Step 3.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -213,7 +215,7 @@ git commit -m "refactor: restructure lib into core/features/shared, drop dead se
 - Consumes: nothing.
 - Produces: `AppColors.{bg,bgAlt,surface,border,violet,indigo,blue,cyan,ink,body,muted,success,warning,danger}`, `AppColors.brandGradient` (`LinearGradient`), `AppColors.glassFill` / `AppColors.glassBorder` (`Color`), `AppText.{display,title,heading,body,label,caption}` (`TextStyle`), `AppTheme.dark`, `AppTheme.radii` constants.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `frontend/test/theme/app_theme_test.dart`:
 
@@ -244,12 +246,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter test test/theme/app_theme_test.dart`
 Expected: FAIL — `Target of URI doesn't exist: 'package:frontend/core/theme/app_colors.dart'`.
 
-- [ ] **Step 3: Write `app_colors.dart`**
+- [x] **Step 3: Write `app_colors.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -297,7 +299,7 @@ class AppColors {
 }
 ```
 
-- [ ] **Step 4: Write `app_text.dart`**
+- [x] **Step 4: Write `app_text.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -357,7 +359,7 @@ class AppText {
 }
 ```
 
-- [ ] **Step 5: Rewrite `app_theme.dart`**
+- [x] **Step 5: Rewrite `app_theme.dart`**
 ```dart
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
@@ -488,7 +490,7 @@ class AppTheme {
 }
 ```
 
-- [ ] **Step 6: Update `main.dart`**
+- [x] **Step 6: Update `main.dart`**
 
 `usePathUrlStrategy` lives in `flutter_web_plugins`, **not** `go_router`. Add it to `pubspec.yaml` under `dependencies:`:
 
@@ -563,12 +565,12 @@ class AppScrollBehavior extends MaterialScrollBehavior {
 }
 ```
 
-- [ ] **Step 7: Run the test to verify it passes**
+- [x] **Step 7: Run the test to verify it passes**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter test test/theme/app_theme_test.dart`
 Expected: `+3: All tests passed!`
 
-- [ ] **Step 8: Update the remaining `FolioColors` call sites**
+- [x] **Step 8: Update the remaining `FolioColors` call sites**
 
 Every file still referencing `FolioColors` or `FolioDarkColors` fails to compile now. Map them:
 
@@ -593,12 +595,12 @@ Also delete every `final dark = Theme.of(context).brightness == Brightness.dark;
 
 This is mechanical but large. Work file by file, running `flutter analyze` after each, and do not attempt to finish the whole app in one edit.
 
-- [ ] **Step 9: Verify**
+- [x] **Step 9: Verify**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -634,7 +636,7 @@ git commit -m "feat(theme): dark-only neon glass theme, path URL strategy, scrol
   - `AppNetworkImage({String? url, double? width, double? height, BoxFit fit = BoxFit.cover, double radius = 0, BoxShape shape = BoxShape.rectangle})`
   - `skillGradient(String name)` → `LinearGradient`
 
-- [ ] **Step 1: Add the dependency**
+- [x] **Step 1: Add the dependency**
 
 `frontend/pubspec.yaml`, under `dependencies:`, after `skeletonizer: ^3.0.0`:
 
@@ -644,7 +646,7 @@ git commit -m "feat(theme): dark-only neon glass theme, path URL strategy, scrol
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter pub get`
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 `frontend/test/widgets/responsive_layout_test.dart`:
 
@@ -739,12 +741,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter test`
 Expected: FAIL — missing `responsive_layout.dart`, `glass_card.dart`, `skill_gradient.dart`.
 
-- [ ] **Step 4: Write `responsive_layout.dart`**
+- [x] **Step 4: Write `responsive_layout.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -785,7 +787,7 @@ class ResponsiveBuilder extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 5: Write `glass_card.dart`**
+- [x] **Step 5: Write `glass_card.dart`**
 
 ```dart
 import 'dart:ui';
@@ -847,7 +849,7 @@ class GlassCard extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 6: Write `hover_scale.dart`**
+- [x] **Step 6: Write `hover_scale.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -917,7 +919,7 @@ class _HoverScaleState extends State<HoverScale> {
 
 Note: `Matrix4.scaleByDouble` is the non-deprecated form in Flutter 3.47. If the analyzer complains, use `Matrix4.diagonal3Values(widget.scale, widget.scale, 1)` composed with the translation.
 
-- [ ] **Step 7: Write `neon_background.dart`**
+- [x] **Step 7: Write `neon_background.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1003,7 +1005,7 @@ class _GridPainter extends CustomPainter {
 }
 ```
 
-- [ ] **Step 8: Write `glow_button.dart`**
+- [x] **Step 8: Write `glow_button.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1101,7 +1103,7 @@ class GlowButton extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 9: Write `neon_chip.dart`**
+- [x] **Step 9: Write `neon_chip.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1158,7 +1160,7 @@ class NeonChip extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 10: Write `skill_gradient.dart`**
+- [x] **Step 10: Write `skill_gradient.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1182,7 +1184,7 @@ LinearGradient skillGradient(String name) {
 }
 ```
 
-- [ ] **Step 11: Write `app_network_image.dart`**
+- [x] **Step 11: Write `app_network_image.dart`**
 
 ```dart
 import 'package:cached_network_image/cached_network_image.dart';
@@ -1255,12 +1257,12 @@ class AppNetworkImage extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 12: Run the tests**
+- [x] **Step 12: Run the tests**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter test`
 Expected: all pass.
 
-- [ ] **Step 13: Commit**
+- [x] **Step 13: Commit**
 
 ```bash
 git add -A
@@ -1280,7 +1282,7 @@ git commit -m "feat(ui): shared glass widget kit, cached images, skill gradient"
 - Consumes: nothing from earlier tasks.
 - Produces: `GET /public/u/{slug}/projects` and `GET /public/gallery/projects` responses now include `live_url: string|null`, `github_url: string|null`, `media: ProjectMediaResponse[]`. The Flutter `ProjectModel` already deserializes all three, so no Dart change is needed.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `backend/tests/test_public_project_detail.py`:
 
@@ -1352,12 +1354,12 @@ def test_public_project_exposes_links_and_media():
   assert item["media"][0]["media_url"] == "/uploads/u/1/media/a.png"
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `cd backend ; .\.venv\Scripts\python -m pytest tests/test_public_project_detail.py -v`
 Expected: FAIL — `KeyError: 'live_url'`.
 
-- [ ] **Step 3: Extend the schema**
+- [x] **Step 3: Extend the schema**
 
 In `backend/app/schemas/project.py`, replace the `ProjectListResponse` body:
 
@@ -1382,7 +1384,7 @@ class ProjectListResponse(BaseModel):
 
 `ProjectMediaResponse` is defined above `ProjectListResponse` in the same file, so the forward reference is unnecessary.
 
-- [ ] **Step 4: Eager-load media on both public queries**
+- [x] **Step 4: Eager-load media on both public queries**
 
 In `backend/app/routers/public.py`, add the import:
 
@@ -1423,17 +1425,17 @@ And in `u_projects`:
   )
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `cd backend ; .\.venv\Scripts\python -m pytest tests/test_public_project_detail.py -v`
 Expected: PASS.
 
-- [ ] **Step 6: Run the whole backend suite**
+- [x] **Step 6: Run the whole backend suite**
 
 Run: `cd backend ; .\.venv\Scripts\python -m pytest -v`
 Expected: all pass. If `test_multitenant.py` relied on the old payload shape, it still passes because the change is additive.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add backend/app/schemas/project.py backend/app/routers/public.py backend/tests/test_public_project_detail.py
@@ -1454,7 +1456,7 @@ git commit -m "feat(api): expose live_url, github_url and media on public projec
 - Consumes: `authNotifierProvider` (`AuthNotifier.login`, `.register`), `ApiException.isRateLimited` from `core/network/api_service.dart`, `NeonBackground`, `GlassCard`, `GlowButton`, `AppColors`.
 - Produces: `AuthScreen({required bool registerMode})`. Router builds `AuthScreen(registerMode: false)` for `/login` and `AuthScreen(registerMode: true)` for `/register`.
 
-- [ ] **Step 1: Write the auth screen**
+- [x] **Step 1: Write the auth screen**
 
 `frontend/lib/features/auth/auth_screen.dart`:
 
@@ -1886,7 +1888,7 @@ class _ErrorNote extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 2: Point the router at it**
+- [x] **Step 2: Point the router at it**
 
 In `frontend/lib/core/routes/app_router.dart`, replace the two page imports with:
 
@@ -1907,7 +1909,7 @@ and the two routes with:
       ),
 ```
 
-- [ ] **Step 3: Delete the old pages and restyle `auth_layout.dart`**
+- [x] **Step 3: Delete the old pages and restyle `auth_layout.dart`**
 
 ```powershell
 cd E:\Documents\GitHub\my-portofolio\frontend\lib\features\auth
@@ -1916,12 +1918,12 @@ git rm login_page.dart register_page.dart
 
 `auth_layout.dart` is no longer imported by anything. Keep it only if you intend to reuse the side panel; otherwise `git rm auth_layout.dart`. The spec lists it as absorbed — delete it.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -1953,7 +1955,7 @@ git commit -m "feat(auth): single neon auth screen with inline rate-limit notice
   - `ProjectsGrid({required List<ProjectModel> projects, required void Function(ProjectModel) onOpen})`
   - `ProjectShowcaseDialog.show(BuildContext, ProjectModel, void Function(String) onOpenUrl)`
 
-- [ ] **Step 1: Write `glass_navbar.dart`**
+- [x] **Step 1: Write `glass_navbar.dart`**
 
 ```dart
 import 'dart:ui';
@@ -2186,7 +2188,7 @@ class _Avatar extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 2: Write `hero_section.dart`**
+- [x] **Step 2: Write `hero_section.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2430,7 +2432,7 @@ class _Socials extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 3: Write `skills_section.dart`**
+- [x] **Step 3: Write `skills_section.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2476,7 +2478,7 @@ class SkillsSection extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 4: Write `experience_timeline.dart`**
+- [x] **Step 4: Write `experience_timeline.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2601,7 +2603,7 @@ class ExperienceTimeline extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 5: Write `projects_grid.dart`**
+- [x] **Step 5: Write `projects_grid.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2731,7 +2733,7 @@ class _ProjectCard extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 6: Write `project_showcase_dialog.dart`**
+- [x] **Step 6: Write `project_showcase_dialog.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2939,7 +2941,7 @@ class _ProjectShowcaseDialogState extends State<ProjectShowcaseDialog> {
 }
 ```
 
-- [ ] **Step 7: Rewrite `profile_page.dart`**
+- [x] **Step 7: Rewrite `profile_page.dart`**
 
 The page owns scroll anchors, the scroll-spy, and the desktop/mobile shell. Replace the whole file:
 
@@ -3342,7 +3344,7 @@ class _SideRail extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 8: Restyle `contact_section.dart`**
+- [x] **Step 8: Restyle `contact_section.dart`**
 
 Keep the existing form logic and field set; change the container from `Card` to `GlassCard` and add an inline rate-limit notice. Concretely:
 
@@ -3414,12 +3416,12 @@ Keep the existing form logic and field set; change the container from `Card` to 
 
 - Swap `FolioColors`/`FolioDarkColors` references for `AppColors`, and `dark ? a : b` for the single dark value.
 
-- [ ] **Step 9: Verify**
+- [x] **Step 9: Verify**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -3437,7 +3439,7 @@ git commit -m "feat(portfolio): neon glass public portfolio with sticky nav, her
 - Consumes: `galleryProjectsProvider`, `ProjectModel`, `GlassCard`, `AppNetworkImage`, `HoverScale`, `NeonBackground`.
 - Produces: `GalleryScreen` (same class name the router already imports).
 
-- [ ] **Step 1: Rewrite the page**
+- [x] **Step 1: Rewrite the page**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -3691,12 +3693,12 @@ class ProjectOwnerModel {
 
 Then regenerate: `cd frontend ; .\.fvm\flutter_sdk\bin\dart run build_runner build --delete-conflicting-outputs`
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A
@@ -3715,7 +3717,7 @@ git commit -m "feat(gallery): neon gallery grid with client-side search and owne
 - Consumes: `authNotifierProvider`, `myProfileProvider`, `myProjectsProvider`, `apiServiceProvider`.
 - Produces: `DashboardShell({required String title, required List<SidebarItem> items, required int selectedIndex, required ValueChanged<int> onSelect, required Widget child, Widget? actions})`; `SidebarItem` unchanged in shape (`label`, `icon`, `badge`).
 
-- [ ] **Step 1: Replace the custom sidebar with a collapsible `NavigationRail`**
+- [x] **Step 1: Replace the custom sidebar with a collapsible `NavigationRail`**
 
 In `dashboard_shell.dart`, delete `_SidebarTokens` and the `_sidebar` builder; render:
 
@@ -3818,7 +3820,7 @@ In `dashboard_shell.dart`, delete `_SidebarTokens` and the `_sidebar` builder; r
 
 Use `rail` for `wide`; keep the existing `Drawer` path for mobile but swap its body to the same destinations list.
 
-- [ ] **Step 2: Replace the project list with a drag-reorder grid**
+- [x] **Step 2: Replace the project list with a drag-reorder grid**
 
 In `user_dashboard_page.dart`, rewrite `_projectsTab()` to use a `ReorderableGridView`-style layout. Flutter has no built-in reorderable grid, so implement with `DragTarget` dropzones over a `Wrap`:
 
@@ -3900,12 +3902,12 @@ Add `late List<ProjectModel> _localOrder;` and seed it in `initState` from `ref.
     });
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A
@@ -3923,7 +3925,7 @@ git commit -m "feat(dashboard): NavigationRail shell, status pill, drag-reorder 
 - Consumes: `adminUsersProvider`, `apiServiceProvider.adminUpdateUser`, existing create-user dialog.
 - Produces: no new public API; the users tab is restyled.
 
-- [ ] **Step 1: Replace `_usersTab()` with a table**
+- [x] **Step 1: Replace `_usersTab()` with a table**
 
 Columns: `Name`, `Content Moderation`, `Draft/Live`, `Aksi`.
 
@@ -4088,12 +4090,12 @@ Add `_deleteUser`:
 
 and call `api.adminDeleteUser(u.id)`.
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 Run: `cd frontend ; .\.fvm\flutter_sdk\bin\flutter analyze`
 Expected: `No issues found!`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A
@@ -4107,13 +4109,13 @@ git commit -m "feat(admin): neon data table with moderation switches and delete"
 **Files:**
 - Modify: `frontend/lib/shared/widgets/skeleton.dart`
 
-- [ ] **Step 1: Retint the bones**
+- [x] **Step 1: Retint the bones**
 
 `Skeletonizer` resolves its shimmer from `SkeletonizerConfig.maybeOf(context)`, falling back to platform brightness. Task 2 already installs a dark config via `MaterialApp.router`'s `builder`, so skeletons inherit `Brightness.dark` and the `#141B31` container tint without touching `skeleton.dart`.
 
 No edit is needed in this task unless a skeleton still renders light — in that case confirm the `SkeletonizerConfig` builder from Task 2 is present in `main.dart`.
 
-- [ ] **Step 2: Verify the whole app**
+- [x] **Step 2: Verify the whole app**
 
 ```powershell
 cd E:\Documents\GitHub\my-portofolio\frontend
@@ -4124,7 +4126,7 @@ cd E:\Documents\GitHub\my-portofolio\frontend
 
 Expected: analyzer clean, tests pass, build succeeds.
 
-- [ ] **Step 3: Run the backend suite**
+- [x] **Step 3: Run the backend suite**
 
 ```powershell
 cd E:\Documents\GitHub\my-portofolio\backend
@@ -4133,7 +4135,7 @@ cd E:\Documents\GitHub\my-portofolio\backend
 
 Expected: all pass.
 
-- [ ] **Step 4: Smoke-test in a browser**
+- [x] **Step 4: Smoke-test in a browser**
 
 Start the backend, then `flutter run -d chrome`. Walk every route:
 
@@ -4146,11 +4148,11 @@ Start the backend, then `flutter run -d chrome`. Walk every route:
 | `/dashboard` | rail collapses, status pill matches publish state, drag-reorder persists after reload |
 | `/admin` | table rows, moderation switch, delete confirm |
 
-- [ ] **Step 5: Capture screenshots**
+- [x] **Step 5: Capture screenshots**
 
 Use Playwright at 1440×900 and 390×844 for each route, saving under `docs/superpowers/screenshots/`. Compare against the reference boards and note deviations.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -4190,3 +4192,4 @@ git commit -m "feat(ui): dark skeleton shimmer, final neon glass verification"
 **Type consistency**
 
 `ResponsiveLayout`, `GlassCard`, `GlowButton`, `NeonChip`, `AppNetworkImage`, `HoverScale`, `NavTarget`, `skillGradient` are each defined once in Task 3 or Task 6 and referenced with identical signatures thereafter. `AuthScreen(registerMode:)` matches the router call. `ProjectShowcaseDialog.show` matches its call site in `profile_page.dart`.
+

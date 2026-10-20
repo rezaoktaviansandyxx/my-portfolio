@@ -6,6 +6,7 @@ import 'package:frontend/core/models/experience_model.dart';
 import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
@@ -161,7 +162,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
 
     final name =
         profile.asData?.value.fullName ?? auth.user?.username ?? 'Kreator';
-    final first = name.trim().split(RegExp(r'\s+')).first;
+    final first = firstWordOf(name);
     final msgList = messages.asData?.value ?? const [];
     final unread = _unreadCount(msgList);
     final projCount = projects.asData?.value.length ?? 0;
@@ -268,14 +269,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
         child: profile.when(
           data: (u) {
             final name = u.fullName ?? u.username;
-            final initials = name.trim().isEmpty
-                ? '?'
-                : name
-                      .trim()
-                      .split(RegExp(r'\s+'))
-                      .take(2)
-                      .map((e) => e[0].toUpperCase())
-                      .join();
+            final initials = initialsOf(name);
             final avatarUrl = ApiConfig.resolveFileUrl(u.avatarUrl);
             return Row(
               children: [
@@ -611,14 +605,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
     final content = m['content']?.toString() ?? '';
     final date = _fmtDate(m['created_at']);
     final unread = m['is_read'] != true;
-    final ini = name.trim().isEmpty
-        ? '?'
-        : name
-              .trim()
-              .split(RegExp(r'\s+'))
-              .take(2)
-              .map((e) => e[0].toUpperCase())
-              .join();
+    final ini = initialsOf(name);
     final preview = full
         ? content
         : (content.length > 42 ? '${content.substring(0, 42)}...' : content);

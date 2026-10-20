@@ -28,9 +28,6 @@ class ExperienceModel {
     this.technologiesUsed,
   });
 
-  // Kompatibilitas widget lama (title -> role)
-  String get title => role;
-
   factory ExperienceModel.fromJson(Map<String, dynamic> json) => _$ExperienceModelFromJson(json);
   Map<String, dynamic> toJson() => _$ExperienceModelToJson(this);
 }

@@ -121,7 +121,3 @@ class AuthNotifier extends Notifier<AuthState> {
 }
 
 final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
-
-// Kompatibilitas dengan kode lama yang masih memakai authStateProvider.
-final authStateProvider = Provider<AuthState>((ref) => ref.watch(authNotifierProvider));
-final isAuthProvider = Provider<bool>((ref) => ref.watch(authNotifierProvider).isAuthenticated);

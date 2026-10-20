@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_text.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/shared/widgets/glass_card.dart';
 import 'package:frontend/shared/widgets/glow_button.dart';
@@ -22,10 +23,7 @@ class HeroSection extends StatelessWidget {
   String get _name =>
       (user.fullName ?? '').trim().isEmpty ? user.username : user.fullName!.trim();
 
-  String get _initials {
-    final parts = _name.split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-    return parts.take(2).map((p) => p[0].toUpperCase()).join();
-  }
+  String get _initials => initialsOf(_name);
 
   @override
   Widget build(BuildContext context) {

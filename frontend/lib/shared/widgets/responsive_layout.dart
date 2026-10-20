@@ -20,17 +20,3 @@ class ResponsiveLayout extends StatelessWidget {
     );
   }
 }
-
-/// Varian builder untuk kasus yang butuh flag di dalam satu sub-tree.
-class ResponsiveBuilder extends StatelessWidget {
-  final Widget Function(BuildContext context, bool isDesktop) builder;
-
-  const ResponsiveBuilder({super.key, required this.builder});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (ctx, c) => builder(ctx, c.maxWidth > kDesktopBreakpoint),
-    );
-  }
-}

@@ -88,35 +88,6 @@ class StatCardsSkeleton extends StatelessWidget {
   }
 }
 
-class ChartSkeleton extends StatelessWidget {
-  const ChartSkeleton({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Skeletonizer(
-          enabled: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Bone(width: 200, height: 16),
-              const SizedBox(height: 8),
-              const Bone(width: 140, height: 12),
-              const SizedBox(height: 16),
-              Bone(
-                width: double.infinity,
-                height: 180,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class TableSkeleton extends StatelessWidget {
   final int rows;
   const TableSkeleton({super.key, this.rows = 5});

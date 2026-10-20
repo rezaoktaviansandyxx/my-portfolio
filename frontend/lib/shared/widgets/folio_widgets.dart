@@ -4,7 +4,6 @@ import 'package:frontend/core/theme/app_colors.dart';
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
-  final String? delta;
   final IconData icon;
   final Color iconBg;
   final Color iconColor;
@@ -12,7 +11,6 @@ class StatCard extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
-    this.delta,
     required this.icon,
     required this.iconBg,
     required this.iconColor,
@@ -56,25 +54,6 @@ class StatCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (delta != null && delta!.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.successSoft,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '↗ $delta',
-                      style: const TextStyle(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ],

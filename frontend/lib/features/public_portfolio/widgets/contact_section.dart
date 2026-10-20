@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/glass_card.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
@@ -137,7 +138,7 @@ class _ContactSectionState extends ConsumerState<ContactSection> {
       validator: (v) {
         final t = v?.trim() ?? '';
         if (t.isEmpty) return 'Email wajib diisi';
-        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)) {
+        if (!kEmailPattern.hasMatch(t)) {
           return 'Format email tidak valid';
         }
         return null;

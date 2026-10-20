@@ -5,6 +5,7 @@ import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/shared/widgets/responsive_layout.dart';
 
@@ -65,12 +66,7 @@ class DashboardShell extends ConsumerWidget {
     this.onRefresh,
   });
 
-  String get _initials {
-    final parts = displayName.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return 'U';
-    if (parts.length == 1) return parts.first[0].toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
+  String get _initials => initialsOf(displayName, fallback: 'U');
 
   /// Foto avatar di topbar: gambar full-bleed jika avatarUrl tersedia,
   /// fallback ke teks inisial saat URL kosong atau gagal dimuat.

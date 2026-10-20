@@ -101,7 +101,7 @@ class _ProjectCard extends StatelessWidget {
                           child: Text(
                             s.name,
                             style: const TextStyle(
-                              fontSize: 10.5,
+                              fontSize: 11.5,
                               fontWeight: FontWeight.w600,
                               color: AppColors.body,
                             ),

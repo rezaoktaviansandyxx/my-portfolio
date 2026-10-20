@@ -14,8 +14,6 @@ class AuthService {
   }
 
   String? _token;
-  String? get token => _token;
-  bool get isAuthenticated => _token != null;
 
   void _applyToken(String? token) {
     _token = token;
@@ -45,11 +43,18 @@ class AuthService {
 
   /// Backend memakai OAuth2PasswordRequestForm -> harus form-urlencoded, bukan JSON.
   Future<String> login(String username, String password) async {
-    final res = await _dio.post(
-      '/auth/login',
-      data: {'username': username.trim(), 'password': password},
-      options: Options(contentType: Headers.formUrlEncodedContentType),
-    );
+    final Response res;
+    try {
+      res = await _dio.post(
+        '/auth/login',
+        data: {'username': username.trim(), 'password': password},
+        options: Options(contentType: Headers.formUrlEncodedContentType),
+      );
+    } on DioException catch (e) {
+      // Konversi wajib: UI membaca ApiException (mis. isRateLimited) untuk
+      // memilih pesan; DioException mentah membuat branch 429 tak tercapai.
+      _throwApiError(e, 'Gagal masuk. Periksa koneksi lalu coba lagi');
+    }
     final token = res.data['access_token'] as String;
     _applyToken(token);
     await _persist(token);
@@ -57,7 +62,12 @@ class AuthService {
   }
 
   Future<UserModel> me() async {
-    final res = await _dio.get('/auth/me');
+    final Response res;
+    try {
+      res = await _dio.get('/auth/me');
+    } on DioException catch (e) {
+      _throwApiError(e, 'Gagal memuat profil');
+    }
     return UserModel.fromJson(res.data as Map<String, dynamic>);
   }
 
@@ -67,16 +77,20 @@ class AuthService {
     required String password,
     String? fullName,
   }) async {
-    await _dio.post(
-      '/auth/register',
-      data: {
-        'username': username.trim(),
-        'email': email.trim(),
-        'password': password,
-        if (fullName != null && fullName.trim().isNotEmpty)
-          'full_name': fullName.trim(),
-      },
-    );
+    try {
+      await _dio.post(
+        '/auth/register',
+        data: {
+          'username': username.trim(),
+          'email': email.trim(),
+          'password': password,
+          if (fullName != null && fullName.trim().isNotEmpty)
+            'full_name': fullName.trim(),
+        },
+      );
+    } on DioException catch (e) {
+      _throwApiError(e, 'Gagal registrasi');
+    }
   }
 
   Never _throwApiError(DioException e, String fallback) {
@@ -117,6 +131,4 @@ class AuthService {
     _applyToken(null);
     await _persist(null);
   }
-
-  Dio get dio => _dio;
 }

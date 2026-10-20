@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/features/auth/auth_widgets.dart';
 
@@ -79,7 +80,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             icon: Icons.person_outline_rounded,
             validator: (v) {
               final t = v?.trim() ?? '';
-              if (!RegExp(r'^[a-z0-9_]{3,30}$').hasMatch(t)) {
+              if (!kUsernamePattern.hasMatch(t)) {
                 return '3-30 karakter: huruf kecil, angka, underscore';
               }
               return null;
@@ -91,7 +92,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             icon: Icons.alternate_email_rounded,
             validator: (v) {
               final t = v?.trim() ?? '';
-              if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)) {
+              if (!kEmailPattern.hasMatch(t)) {
                 return 'Format email tidak valid';
               }
               return null;

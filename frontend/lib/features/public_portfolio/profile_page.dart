@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/network/app_providers.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_text.dart';
@@ -38,7 +39,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   /// Anchor 0..5: Home, About, Projects, Skills, Experience, Contact.
   /// Skills & Experience dipisah agar bottom nav punya empat tujuan nyata.
-  static const _bottomAnchors = [0, 3, 2, 4];
+  static const _bottomAnchors = [0, 2, 3, 4];
 
   /// Posisi item navbar desktop: Skills & Experience berbagi "Expertise".
   int get _desktopActive {
@@ -165,12 +166,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _content(UserModel user, bool isAuth) {
     final slug = widget.slug;
     final name = (user.fullName ?? user.username).trim();
-    final initials = name
-        .split(RegExp(r'\s+'))
-        .where((p) => p.isNotEmpty)
-        .take(2)
-        .map((p) => p[0].toUpperCase())
-        .join();
+    final initials = initialsOf(name);
 
     final navItems = [
       NavTarget(label: 'Home', anchor: _anchors[0]),
@@ -410,14 +406,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           label: 'Home',
         ),
         NavigationDestination(
-          icon: Icon(Icons.auto_awesome_outlined),
-          selectedIcon: Icon(Icons.auto_awesome_rounded),
-          label: 'Skills',
-        ),
-        NavigationDestination(
           icon: Icon(Icons.grid_view_outlined),
           selectedIcon: Icon(Icons.grid_view_rounded),
           label: 'Projects',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.auto_awesome_outlined),
+          selectedIcon: Icon(Icons.auto_awesome_rounded),
+          label: 'Skills',
         ),
         NavigationDestination(
           icon: Icon(Icons.timeline_outlined),

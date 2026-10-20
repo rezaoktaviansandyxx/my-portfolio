@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/models/experience_model.dart';
 import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
+import 'package:frontend/core/utils/validators.dart' as v;
 import 'package:frontend/shared/widgets/folio_field.dart';
 
 const _skillCategories = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 
 const _projectStatuses = ['draft', 'published'];
 
-final _slugPattern = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$');
+final _slugPattern = v.kSlugPattern;
 
 final _dateOk = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 
@@ -596,7 +597,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
   }
 }
 
-final _usernamePattern = RegExp(r'^[a-z0-9_]{3,30}$');
+final _usernamePattern = v.kUsernamePattern;
 
 /// Dialog buat user (admin) -> payload `adminCreateUser`.
 Future<Map<String, dynamic>?> showAdminUserDialog(BuildContext context) {

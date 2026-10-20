@@ -6,6 +6,7 @@ import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_text.dart';
+import 'package:frontend/core/utils/validators.dart';
 import 'package:frontend/shared/widgets/app_network_image.dart';
 import 'package:frontend/features/dashboard_me/dashboard_shell.dart';
 import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
@@ -131,7 +132,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         SidebarItem(
           icon: Icons.mail_outline,
           label: 'Pesan Masuk',
-          badge: messages.asData == null ? '…' : '${msgList.length}',
+          badge: messages.asData == null ? '…' : '$unread',
         ),
       ],
       displayName: auth.user?.fullName ?? auth.user?.username ?? 'Admin',
@@ -1029,15 +1030,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     );
   }
 
-  String _initials(String name) {
-    final parts = name
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((p) => p.isNotEmpty)
-        .toList();
-    if (parts.isEmpty) return '?';
-    return parts.take(2).map((e) => e[0].toUpperCase()).join();
-  }
+  String _initials(String name) => initialsOf(name);
 
   /// Format `created_at` ISO -> `d/m/yyyy`. Fallback: 10 char pertama.
   String _fmtDate(dynamic raw) {

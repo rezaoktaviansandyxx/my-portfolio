@@ -4,7 +4,6 @@
 *.log
 
 #Superpowers
-docs/
 .superpowers/
 
 # Python

@@ -42,24 +42,4 @@ void main() {
     expect(find.text('DESKTOP'), findsOneWidget);
     expect(find.text('MOBILE'), findsNothing);
   });
-
-  testWidgets('desktop wins above the breakpoint on a wide viewport', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1440, 900);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ResponsiveBuilder(
-            builder: (_, isDesktop) => Text(isDesktop ? 'WIDE' : 'NARROW'),
-          ),
-        ),
-      ),
-    );
-
-    expect(find.text('WIDE'), findsOneWidget);
-  });
 }
