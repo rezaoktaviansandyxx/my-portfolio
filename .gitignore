@@ -10,8 +10,11 @@ docs/
 # Python
 backend/__pycache__/
 backend/*/__pycache__/
+__pycache__/
+*.pyc
 backend/.venv/
 backend/venv/
+backend/test.db
 
 # Flutter
 frontend/.dart_tool/
@@ -22,7 +25,11 @@ frontend/build/
 frontend/.pub/
 frontend/.pub-cache/
 
+# Screenshots smoke pass (dev-only)
+.shots/
+
 # IDE
 .vscode/
 .idea/
 *.iml
+
