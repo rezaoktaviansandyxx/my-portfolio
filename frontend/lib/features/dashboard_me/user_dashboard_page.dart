@@ -19,6 +19,7 @@ import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
 import 'package:frontend/shared/widgets/folio_widgets.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
+import 'package:frontend/shared/widgets/upload_field.dart';
 
 /// Ubah status publish situs. Dipakai kartu profil dan form profil.
 Future<void> setSitePublished(WidgetRef ref, bool published) async {
@@ -1218,10 +1219,9 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
 }
 
 /// Form profil: full_name/headline/bio/profile_slug/avatar_url/resume_url
-/// + toggle publish + ganti password. Upload file biner memakai
-/// `uploadMyAvatar` (butuh MultipartFile/file-picker, belum diwired —
-/// kolom URL menerima hasil upload); resume juga via URL karena BE
-/// belum punya `POST /me/upload/resume` (hanya `/admin/upload/resume`).
+/// + toggle publish + ganti password. Avatar bisa di-upload langsung lewat
+/// `UploadField` (`uploadMyAvatar`); resume masih via URL karena BE belum
+/// punya `POST /me/upload/resume` (hanya `/admin/upload/resume`).
 class _ProfileForm extends ConsumerStatefulWidget {
   final UserModel user;
   final VoidCallback onSaved;
@@ -1370,12 +1370,12 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
 
           // ---------- Media ----------
           const FormHeading('Media'),
-          folioField(
-            _avatar,
-            'Avatar URL',
-            hint: 'https://... (hasil upload avatar)',
-            keyboard: TextInputType.url,
+          UploadField(
+            controller: _avatar,
+            label: 'Avatar URL',
+            hint: 'https://... atau klik ikon upload',
             icon: Icons.image_outlined,
+            upload: ref.read(apiServiceProvider).uploadMyAvatar,
           ),
           folioField(
             _resume,
