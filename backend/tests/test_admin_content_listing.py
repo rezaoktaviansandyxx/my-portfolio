@@ -153,3 +153,94 @@ def test_admin_create_for_unknown_owner_is_404():
       headers=admin,
   )
   assert r.status_code == 404, r.text
+
+
+def test_admin_create_project_for_unknown_owner_is_404():
+  _reset_db()
+  c = get_client()
+  admin = _login("admin", "admin123")
+  r = c.post(
+      "/api/v1/admin/projects",
+      json={
+          "title": "Proyek Gamma",
+          "slug": "proyek-gamma",
+          "summary": "Ringkasan yang cukup panjang untuk validasi.",
+          "owner_id": 999999,
+      },
+      headers=admin,
+  )
+  assert r.status_code == 404, r.text
+
+
+def test_admin_create_experience_for_unknown_owner_is_404():
+  _reset_db()
+  c = get_client()
+  admin = _login("admin", "admin123")
+  r = c.post(
+      "/api/v1/admin/experiences",
+      json={
+          "role": "Engineer",
+          "company": "Acme",
+          "start_date": "2023-01-01",
+          "owner_id": 999999,
+      },
+      headers=admin,
+  )
+  assert r.status_code == 404, r.text
+
+
+def test_same_skill_name_allowed_for_two_owners():
+  _reset_db()
+  _register("alice", "alice@x.com")
+  c = get_client()
+  admin = _login("admin", "admin123")
+  alice_id = next(
+      u["id"]
+      for u in c.get("/api/v1/admin/users", headers=admin).json()
+      if u["username"] == "alice"
+  )
+
+  # Constraint skill.UniqueConstraint hanya (owner_id, name): nama yang sama
+  # milik dua owner berbeda harus boleh hidup berdampingan.
+  first = c.post(
+      "/api/v1/admin/skills",
+      json={"name": "Go", "category": "Backend", "owner_id": alice_id},
+      headers=admin,
+  )
+  assert first.status_code == 201, first.text
+
+  second = c.post(
+      "/api/v1/admin/skills",
+      json={"name": "Go", "category": "Backend"},
+      headers=admin,
+  )
+  assert second.status_code == 201, second.text
+
+
+def test_admin_create_project_rejects_foreign_skill_ids():
+  _reset_db()
+  _register("alice", "alice@x.com")
+  c = get_client()
+  alice = _login("alice")
+  skill = c.post(
+      "/api/v1/me/skills",
+      json={"name": "Flutter", "category": "Frontend"},
+      headers=alice,
+  )
+  assert skill.status_code == 201, skill.text
+  skill_id = skill.json()["id"]
+
+  # Proyek milik admin (tanpa owner_id) tidak boleh attaches skill milik alice:
+  # diam-diam hilang hanya menghasilkan konten portofolio yang salah.
+  admin = _login("admin", "admin123")
+  r = c.post(
+      "/api/v1/admin/projects",
+      json={
+          "title": "Proyek Delta",
+          "slug": "proyek-delta",
+          "summary": "Ringkasan yang cukup panjang untuk validasi.",
+          "skill_ids": [skill_id],
+      },
+      headers=admin,
+  )
+  assert r.status_code == 422, r.text

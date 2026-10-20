@@ -7,6 +7,7 @@ from app.models.project import Project, ProjectMedia
 from app.models.skill import Skill
 from app.models.user import User
 from app.routers.deps import get_current_admin
+from app.routers.me import _resolve_owned_skills
 from app.schemas.auth import AdminUserUpdate, UserResponse
 from app.schemas.experience import (
     ExperienceCreate,
@@ -75,13 +76,9 @@ def create_project(
         detail="Slug sudah digunakan oleh proyek lain",
     )
 
-  skills = []
-  if payload.skill_ids:
-    skills = (
-        db.query(Skill)
-        .filter(Skill.id.in_(payload.skill_ids), Skill.owner_id == owner_id)
-        .all()
-    )
+  # Skill milik owner lain yang diam-diam hilang = konten portofolio salah;
+  # pakai helper yang sama dengan jalur /me agar menolak (422), bukan membuang.
+  skills = _resolve_owned_skills(db, payload.skill_ids or [], owner_id)
 
   project_data = payload.model_dump(exclude={"skill_ids", "owner_id"})
   project = Project(**project_data, owner_id=owner_id, skills=skills)
