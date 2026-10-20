@@ -53,6 +53,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(received?.filename, 'a.png');
+    expect(received!.contentType.toString(), 'image/png');
     expect(controller.text, '/static/uploads/u/1/avatars/a.png');
   });
 

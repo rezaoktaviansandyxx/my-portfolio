@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/shared/widgets/errors.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
 
 /// Fungsi upload yang disuntikkan dari pemanggil, mis.
@@ -115,10 +116,10 @@ class _UploadFieldState extends State<UploadField> {
       );
       if (!mounted) return;
       setState(() => widget.controller.text = url);
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal upload file')),
+        SnackBar(content: Text(friendlyError(e, 'Gagal upload file'))),
       );
     } finally {
       if (mounted) setState(() => _busy = false);
