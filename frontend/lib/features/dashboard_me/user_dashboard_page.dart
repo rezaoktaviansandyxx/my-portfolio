@@ -761,6 +761,7 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
       context,
       project: existing,
       allSkills: skills,
+      uploadCover: ref.read(apiServiceProvider).uploadMyCover,
     );
     if (payload == null) return;
     try {
@@ -790,7 +791,10 @@ class _UserDashboardState extends ConsumerState<UserDashboard> {
   }
 
   Future<void> _addProjectMedia(ProjectModel p) async {
-    final data = await showProjectMediaDialog(context);
+    final data = await showProjectMediaDialog(
+      context,
+      uploadMedia: ref.read(apiServiceProvider).uploadMyMedia,
+    );
     if (data == null) return;
     try {
       await ref

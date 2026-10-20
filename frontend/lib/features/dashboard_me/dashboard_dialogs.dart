@@ -4,6 +4,7 @@ import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/utils/validators.dart' as v;
 import 'package:frontend/shared/widgets/folio_field.dart';
+import 'package:frontend/shared/widgets/upload_field.dart';
 
 const _skillCategories = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 
@@ -46,18 +47,28 @@ Future<Map<String, dynamic>?> showProjectDialog(
   BuildContext context, {
   ProjectModel? project,
   List<SkillModel> allSkills = const [],
+  UploadFn? uploadCover,
 }) {
   return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (_) => _ProjectDialog(project: project, allSkills: allSkills),
+    builder: (_) => _ProjectDialog(
+      project: project,
+      allSkills: allSkills,
+      uploadCover: uploadCover,
+    ),
   );
 }
 
 class _ProjectDialog extends StatefulWidget {
   final ProjectModel? project;
   final List<SkillModel> allSkills;
+  final UploadFn? uploadCover;
 
-  const _ProjectDialog({required this.project, required this.allSkills});
+  const _ProjectDialog({
+    required this.project,
+    required this.allSkills,
+    this.uploadCover,
+  });
 
   @override
   State<_ProjectDialog> createState() => _ProjectDialogState();
@@ -173,12 +184,21 @@ class _ProjectDialogState extends State<_ProjectDialog> {
                 hint: 'https://github.com/...',
                 keyboard: TextInputType.url,
               ),
-              folioField(
-                _coverUrl,
-                'Cover image URL',
-                hint: 'https://.../cover.png (hasil upload cover)',
-                keyboard: TextInputType.url,
-              ),
+              if (widget.uploadCover != null)
+                UploadField(
+                  controller: _coverUrl,
+                  label: 'Cover image URL',
+                  hint: 'https://... atau klik ikon upload',
+                  icon: Icons.image_outlined,
+                  upload: widget.uploadCover!,
+                )
+              else
+                folioField(
+                  _coverUrl,
+                  'Cover image URL',
+                  hint: 'https://.../cover.png (hasil upload cover)',
+                  keyboard: TextInputType.url,
+                ),
               folioField(
                 _skillIds,
                 'Skill IDs (koma)',
@@ -448,15 +468,19 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
 }
 
 /// Dialog tambah media proyek -> dipakai `addMyProjectMedia`.
-Future<Map<String, String>?> showProjectMediaDialog(BuildContext context) {
+Future<Map<String, String>?> showProjectMediaDialog(
+  BuildContext context, {
+  UploadFn? uploadMedia,
+}) {
   return showDialog<Map<String, String>>(
     context: context,
-    builder: (_) => const _ProjectMediaDialog(),
+    builder: (_) => _ProjectMediaDialog(uploadMedia: uploadMedia),
   );
 }
 
 class _ProjectMediaDialog extends StatefulWidget {
-  const _ProjectMediaDialog();
+  final UploadFn? uploadMedia;
+  const _ProjectMediaDialog({this.uploadMedia});
 
   @override
   State<_ProjectMediaDialog> createState() => _ProjectMediaDialogState();
@@ -495,12 +519,21 @@ class _ProjectMediaDialogState extends State<_ProjectMediaDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            folioField(
-              _url,
-              'Media URL*',
-              hint: 'https://... (hasil upload media)',
-              keyboard: TextInputType.url,
-            ),
+            if (widget.uploadMedia != null)
+              UploadField(
+                controller: _url,
+                label: 'Media URL*',
+                hint: 'https://... atau klik ikon upload',
+                icon: Icons.add_photo_alternate_outlined,
+                upload: widget.uploadMedia!,
+              )
+            else
+              folioField(
+                _url,
+                'Media URL*',
+                hint: 'https://... (hasil upload media)',
+                keyboard: TextInputType.url,
+              ),
             DropdownButtonFormField<String>(
               initialValue: _type,
               decoration: const InputDecoration(
