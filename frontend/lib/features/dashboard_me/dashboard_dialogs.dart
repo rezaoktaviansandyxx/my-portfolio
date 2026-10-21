@@ -634,9 +634,9 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            folioField(_current, 'Password saat ini', obscureText: true),
-            folioField(_fresh, 'Password baru (min 8)', obscureText: true),
-            folioField(_confirm, 'Ulangi password baru', obscureText: true),
+            folioPasswordField(_current, 'Password saat ini'),
+            folioPasswordField(_fresh, 'Password baru (min 8)'),
+            folioPasswordField(_confirm, 'Ulangi password baru'),
           ],
         ),
       ),
@@ -758,7 +758,7 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
                   hint: 'opsional',
                   keyboard: TextInputType.url,
                 ),
-              folioField(_password, 'Password* (min 8)', obscureText: true),
+              folioPasswordField(_password, 'Password* (min 8)'),
               DropdownButtonFormField<String>(
                 initialValue: _role,
                 decoration: const InputDecoration(

@@ -6,6 +6,7 @@ import 'package:frontend/core/theme/app_text.dart';
 import 'package:frontend/shared/widgets/glass_card.dart';
 import 'package:frontend/shared/widgets/glow_button.dart';
 import 'package:frontend/shared/widgets/neon_background.dart';
+import 'package:frontend/shared/widgets/password_visibility.dart';
 
 /// Shell halaman auth: latar neon + brand FolioSpace + satu kartu di tengah.
 /// Dipakai bersama LoginScreen dan RegisterScreen agar tampilan konsisten.
@@ -107,7 +108,7 @@ class AuthField {
   });
 }
 
-class AuthCard extends StatelessWidget {
+class AuthCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final String? error;
@@ -130,43 +131,64 @@ class AuthCard extends StatelessWidget {
   });
 
   @override
+  State<AuthCard> createState() => _AuthCardState();
+}
+
+class _AuthCardState extends State<AuthCard> {
+  /// Field password yang isinya sedang ditampilkan. Dikunci pada controller
+  /// (bukan index) supaya tetap benar walau urutan field berubah.
+  final Set<TextEditingController> _revealed = {};
+
+  @override
   Widget build(BuildContext context) {
+    final fields = widget.fields;
     return GlassCard(
       padding: const EdgeInsets.all(24),
       child: Form(
-        key: formKey,
+        key: widget.formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(title, style: AppText.title.copyWith(fontSize: 24)),
+            Text(widget.title, style: AppText.title.copyWith(fontSize: 24)),
             const SizedBox(height: 4),
-            Text(subtitle, style: AppText.caption),
+            Text(widget.subtitle, style: AppText.caption),
             const SizedBox(height: 20),
             for (var i = 0; i < fields.length; i++) ...[
               if (i > 0) const SizedBox(height: 12),
               TextFormField(
                 controller: fields[i].controller,
-                obscureText: fields[i].obscure,
+                obscureText:
+                    fields[i].obscure && !_revealed.contains(fields[i].controller),
                 validator: fields[i].validator,
                 decoration: InputDecoration(
                   hintText: fields[i].hint,
                   prefixIcon: Icon(fields[i].icon, size: 19),
+                  suffixIcon: fields[i].obscure
+                      ? PasswordVisibilityButton(
+                          visible: _revealed.contains(fields[i].controller),
+                          onPressed: () => setState(() {
+                            if (!_revealed.remove(fields[i].controller)) {
+                              _revealed.add(fields[i].controller);
+                            }
+                          }),
+                        )
+                      : null,
                 ),
               ),
             ],
-            if (error != null) ...[
+            if (widget.error != null) ...[
               const SizedBox(height: 14),
-              AuthErrorNote(message: error!),
+              AuthErrorNote(message: widget.error!),
             ],
             const SizedBox(height: 20),
             GlowButton(
-              label: ctaLabel,
-              onPressed: onCta,
+              label: widget.ctaLabel,
+              onPressed: widget.onCta,
               expand: true,
               icon: Icons.arrow_forward_rounded,
             ),
             const SizedBox(height: 6),
-            Center(child: footer),
+            Center(child: widget.footer),
           ],
         ),
       ),

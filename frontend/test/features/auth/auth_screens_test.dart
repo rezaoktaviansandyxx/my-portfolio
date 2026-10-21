@@ -21,6 +21,24 @@ void main() {
     expect(find.text('Jelajahi galeri tanpa akun'), findsOneWidget);
   });
 
+  testWidgets('LoginScreen menampilkan tombol mata pada field password', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(const LoginScreen()));
+
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.pump();
+
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byType(TextField).last).obscureText,
+      isFalse,
+      reason: 'password harus terlihat setelah tombol mata ditekan',
+    );
+  });
+
   testWidgets('LoginScreen memvalidasi isian kosong', (tester) async {
     await tester.pumpWidget(_wrap(const LoginScreen()));
     // "Login" muncul dua kali: judul kartu dan tombol CTA. Tap yang terakhir.
@@ -45,6 +63,24 @@ void main() {
     // Tautan silang ke login dan pintu keluar ke galeri.
     expect(find.text('Sudah punya akun? Login'), findsOneWidget);
     expect(find.text('Jelajahi galeri tanpa akun'), findsOneWidget);
+  });
+
+  testWidgets('RegisterScreen menampilkan tombol mata pada field password', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(const RegisterScreen()));
+
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.pump();
+
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byType(TextField).last).obscureText,
+      isFalse,
+      reason: 'password harus terlihat setelah tombol mata ditekan',
+    );
   });
 
   testWidgets('RegisterScreen menolak password pendek', (tester) async {
