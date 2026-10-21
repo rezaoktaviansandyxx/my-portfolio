@@ -530,3 +530,15 @@ async def me_upload_avatar(
           file, subfolder=f"u/{current.id}/avatars"
       )
   }
+
+
+@router.post("/upload/resume")
+async def me_upload_resume(
+    file: UploadFile = File(...),
+    current: User = Depends(get_current_user),
+):
+  return {
+      "url": await storage_service.save_file(
+          file, subfolder=f"u/{current.id}/resumes", is_document=True
+      )
+  }

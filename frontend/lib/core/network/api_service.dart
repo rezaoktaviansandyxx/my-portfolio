@@ -416,6 +416,10 @@ class ApiService {
   Future<String> uploadMyAvatar(MultipartFile file) =>
       _uploadMultipart('/me/upload/avatar', file);
 
+  /// POST /me/upload/resume (multipart FormData, PDF).
+  Future<String> uploadMyResume(MultipartFile file) =>
+      _uploadMultipart('/me/upload/resume', file);
+
   // ---- Admin (/admin/*) ----
   Future<List<UserModel>> adminListUsers() async {
     try {

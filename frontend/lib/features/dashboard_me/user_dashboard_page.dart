@@ -1377,12 +1377,13 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
             icon: Icons.image_outlined,
             upload: ref.read(apiServiceProvider).uploadMyAvatar,
           ),
-          folioField(
-            _resume,
-            'Resume URL',
-            hint: 'https://... (hasil upload resume)',
-            keyboard: TextInputType.url,
+          UploadField(
+            controller: _resume,
+            label: 'Resume URL',
+            hint: 'PDF maks 5 MB, atau klik ikon upload',
             icon: Icons.description_outlined,
+            document: true,
+            upload: ref.read(apiServiceProvider).uploadMyResume,
           ),
           const SizedBox(height: 12),
 
