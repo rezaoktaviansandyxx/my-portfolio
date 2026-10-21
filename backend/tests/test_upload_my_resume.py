@@ -2,9 +2,11 @@
 
 import io
 
+import pytest
 from sqlalchemy import text
 
 from app.models.user import User
+from app.services.storage import storage_service
 from tests.conftest import TestingSession, get_client
 
 # PNG 1x1 valid (magic header + IHDR + IDAT + IEND).
@@ -13,6 +15,17 @@ _PNG_1PX = bytes.fromhex(
     "1f15c4890000000a49444154789c6300010000050001"
     "0d0a2db40000000049454e44ae426082"
 )
+
+
+@pytest.fixture(autouse=True)
+def _uploads_to_tmp(tmp_path, monkeypatch):
+  """Jangan tulis artefak ke repo — hanya ke tmp_path.
+
+  Endpoint-nya memakai singleton `storage_service` yang diimpor router,
+  jadi mengganti `base_dir` di sini mengalihkan seluruh penulisan.
+  URL balasan tetap dari `settings.UPLOAD_DIR`, jadi tidak ikut berubah.
+  """
+  monkeypatch.setattr(storage_service, "base_dir", tmp_path / "uploads")
 
 
 def _reset_db():
@@ -58,13 +71,21 @@ def test_user_uploads_own_resume():
   url = r.json()["url"]
   assert url.startswith("/static/")
   assert url.endswith(".pdf")
+  # Subfolder wajib per-user — kalau regresi ke "resumes" bersama, dua user
+  # akan saling menimpa file dan URL ini tetap lolos cek prefix/suffix di atas.
+  me = get_client().get("/api/v1/me/profile", headers=auth)
+  assert me.status_code == 200, me.text
+  assert f"/u/{me.json()['id']}/resumes/" in url
 
 
 def test_resume_upload_rejects_non_pdf():
   _reset_db()
   auth = _register_login("alice", "alice@x.com")
-  # PNG asli (magic header + IHDR valid) supaya yang ditolak adalah aturan
-  # "dokumen harus PDF", bukan cek magic-bytes.
+  # PNG asli (byte-valid, bukan magic header terpotong) supaya test ini gagal
+  # kalau `is_document=True` sampai hilang: tanpa flag itu PNG ini lolos sebagai
+  # gambar dan jawabannya 200. Penolakan yang benar-benar terjadi di sini adalah
+  # allowlist Content-Type dokumen (`image/png` bukan `application/pdf`), yang
+  # dijalankan sebelum `_verify_content` dan sebelum cabang magic `%PDF-`.
   r = get_client().post(
       "/api/v1/me/upload/resume",
       files={"file": ("x.png", io.BytesIO(_PNG_1PX), "image/png")},
@@ -78,4 +99,4 @@ def test_resume_upload_requires_auth():
       "/api/v1/me/upload/resume",
       files={"file": ("cv.pdf", io.BytesIO(b"%PDF-1.4\n"), "application/pdf")},
   )
-  assert r.status_code == 401
+  assert r.status_code == 401, r.text
