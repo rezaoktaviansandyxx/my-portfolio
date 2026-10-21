@@ -572,6 +572,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     }
   }
 
+  Future<void> _editUser(UserModel u) async {
+    final payload = await showAdminUserEditDialog(
+      context,
+      user: u,
+      uploadAvatar: ref.read(apiServiceProvider).adminUploadAvatar,
+    );
+    if (payload == null) return;
+    await _setUserField(u.id, payload);
+    _snack('Avatar diperbarui');
+  }
+
   Widget _userTableHeader() {
     const style = TextStyle(
       fontSize: 11,
@@ -705,6 +716,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             icon: const Icon(Icons.more_vert_rounded, size: 18),
             color: const Color(0xFF171C28),
             onSelected: (v) {
+              if (v == 'edit') {
+                _editUser(u);
+              }
               if (v == 'active') {
                 _setUserField(u.id, {'is_active': !u.isActive});
               }
@@ -713,6 +727,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               }
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Text('Edit avatar'),
+              ),
               PopupMenuItem(
                 value: 'active',
                 child: Text(

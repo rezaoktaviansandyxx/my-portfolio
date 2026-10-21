@@ -244,3 +244,26 @@ def test_admin_create_project_rejects_foreign_skill_ids():
       headers=admin,
   )
   assert r.status_code == 422, r.text
+
+
+def test_admin_can_set_avatar_url_for_user():
+  # Upload avatar admin hanya berguna kalau URL hasilnya bisa dipersistenkan;
+  # tanpa `avatar_url` di AdminUserUpdate, `POST /admin/upload/avatar` tak punya
+  # tujuan dan hasil upload hilang begitu tab ditutup.
+  _reset_db()
+  _register("alice", "alice@x.com")
+  c = get_client()
+  admin = _login("admin", "admin123")
+  alice_id = next(
+      u["id"]
+      for u in c.get("/api/v1/admin/users", headers=admin).json()
+      if u["username"] == "alice"
+  )
+
+  r = c.patch(
+      f"/api/v1/admin/users/{alice_id}",
+      json={"avatar_url": "/static/uploads/avatars/x.png"},
+      headers=admin,
+  )
+  assert r.status_code == 200, r.text
+  assert r.json()["avatar_url"] == "/static/uploads/avatars/x.png"

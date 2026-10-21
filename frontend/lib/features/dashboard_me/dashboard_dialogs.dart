@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/models/experience_model.dart';
 import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
+import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/utils/validators.dart' as v;
 import 'package:frontend/shared/widgets/folio_field.dart';
 import 'package:frontend/shared/widgets/upload_field.dart';
@@ -772,6 +773,84 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
           child: const Text('Batal'),
         ),
         ElevatedButton(onPressed: _submit, child: const Text('Simpan')),
+      ],
+    );
+  }
+}
+
+/// Dialog edit user (admin) -> payload `adminUpdateUser`.
+/// `uploadAvatar` opsional: menulis ke `POST /admin/upload/avatar`.
+Future<Map<String, dynamic>?> showAdminUserEditDialog(
+  BuildContext context, {
+  required UserModel user,
+  UploadFn? uploadAvatar,
+}) {
+  return showDialog<Map<String, dynamic>>(
+    context: context,
+    builder: (_) => _AdminUserEditDialog(user: user, uploadAvatar: uploadAvatar),
+  );
+}
+
+class _AdminUserEditDialog extends StatefulWidget {
+  final UserModel user;
+  final UploadFn? uploadAvatar;
+  const _AdminUserEditDialog({required this.user, this.uploadAvatar});
+
+  @override
+  State<_AdminUserEditDialog> createState() => _AdminUserEditDialogState();
+}
+
+class _AdminUserEditDialogState extends State<_AdminUserEditDialog> {
+  late final _avatar = TextEditingController(
+    text: widget.user.avatarUrl ?? '',
+  );
+
+  @override
+  void dispose() {
+    _avatar.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Edit ${widget.user.fullName ?? widget.user.username}'),
+      content: SizedBox(
+        width: 380,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.uploadAvatar != null)
+              UploadField(
+                controller: _avatar,
+                label: 'Avatar URL',
+                hint: 'https://... atau klik ikon upload',
+                icon: Icons.image_outlined,
+                upload: widget.uploadAvatar!,
+              )
+            else
+              folioField(
+                _avatar,
+                'Avatar URL',
+                hint: 'https://...',
+                keyboard: TextInputType.url,
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, {
+            'avatar_url': _avatar.text.trim().isEmpty
+                ? null
+                : _avatar.text.trim(),
+          }),
+          child: const Text('Simpan'),
+        ),
       ],
     );
   }

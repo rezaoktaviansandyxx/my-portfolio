@@ -65,3 +65,5 @@ class AdminUserUpdate(BaseModel):
   is_active: Optional[bool] = None
   is_published: Optional[bool] = None
   role: Optional[Literal["admin", "user"]] = None
+  # Tanpa field ini hasil `POST /admin/upload/avatar` tidak bisa dipersistenkan.
+  avatar_url: Optional[str] = None
