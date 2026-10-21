@@ -106,3 +106,15 @@ final adminProjectsFilteredProvider =
       final api = ref.read(apiServiceProvider);
       return api.adminListProjectsFiltered(ownerId: ownerId);
     });
+
+/// GET /admin/skills?owner_id
+final adminSkillsProvider =
+    FutureProvider.family<List<SkillModel>, int?>((ref, ownerId) async {
+      return ref.read(apiServiceProvider).adminListSkills(ownerId: ownerId);
+    });
+
+/// GET /admin/experiences?owner_id
+final adminExperiencesProvider =
+    FutureProvider.family<List<ExperienceModel>, int?>((ref, ownerId) async {
+      return ref.read(apiServiceProvider).adminListExperiences(ownerId: ownerId);
+    });

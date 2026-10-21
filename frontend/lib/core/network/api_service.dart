@@ -505,6 +505,36 @@ class ApiService {
     }
   }
 
+  /// GET /admin/skills?owner_id — daftar skill lintas user (admin only).
+  Future<List<SkillModel>> adminListSkills({int? ownerId}) async {
+    try {
+      final res = await _dio.get(
+        '/admin/skills',
+        queryParameters: {if (ownerId != null) 'owner_id': ownerId},
+      );
+      return (res.data as List)
+          .map((e) => SkillModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      _throwApiError(e, 'Gagal memuat skill (admin only)');
+    }
+  }
+
+  /// GET /admin/experiences?owner_id — daftar pengalaman lintas user.
+  Future<List<ExperienceModel>> adminListExperiences({int? ownerId}) async {
+    try {
+      final res = await _dio.get(
+        '/admin/experiences',
+        queryParameters: {if (ownerId != null) 'owner_id': ownerId},
+      );
+      return (res.data as List)
+          .map((e) => ExperienceModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      _throwApiError(e, 'Gagal memuat pengalaman (admin only)');
+    }
+  }
+
   Future<ProjectModel> adminCreateProject(Map<String, dynamic> payload) async {
     try {
       final res = await _dio.post('/admin/projects', data: payload);
