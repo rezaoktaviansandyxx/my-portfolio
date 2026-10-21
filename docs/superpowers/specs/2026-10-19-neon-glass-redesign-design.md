@@ -156,13 +156,22 @@ listener over section keys. Right side: gallery icon → `/gallery`, plus avatar
 or a login button when unauthenticated.
 
 **Hero.** One wide glass card laid out horizontally:
-`avatar in a glowing gradient ring` → `name + headline + bio + social icons`
-→ three stacked CTAs at the far right: **Hire Me** (scrolls to contact),
-**Download CV** (opens `resume_url`, hidden when absent), **Email**
-(`mailto:` the owner's address).
+`avatar in a glowing gradient ring` → `name + headline + bio`
+→ stacked CTAs at the far right: **Hire Me** (scrolls to contact) and
+**Download CV** (opens `resume_url`, hidden when absent).
 
-`GET /public/u/{slug}/profile` returns `UserResponse`, which includes `email`,
-so the address is always available — the Email button needs no fallback.
+`GET /public/u/{slug}/profile` returns `PublicProfileResponse` — **not**
+`UserResponse`. The public schema intentionally omits `id`, `email`, `role`,
+`is_active`, and `is_published` so internal fields never leak to visitors
+(enforced by `backend/tests/test_low_items.py::test_public_profile_hides_internal_fields`).
+The Flutter side therefore parses it with `PublicProfileModel`, not
+`UserModel` — `UserModel` requires `id` and `email` and would throw a
+`TypeError` on a public payload.
+
+Because the owner's email is no longer public, there is **no Email
+(`mailto:`) button and no social icon row** in the hero. The single contact
+channel is the **Hire Me** CTA, which scrolls to the contact form (which
+posts to `POST /public/u/{slug}/contact`).
 
 Below 900px this collapses to the mobile variant.
 

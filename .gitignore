@@ -14,6 +14,8 @@ __pycache__/
 backend/.venv/
 backend/venv/
 backend/test.db
+# File yang di-upload user (avatar, CV, media proyek) — jangan ikut ter-commit.
+backend/static/uploads/
 
 # Flutter
 frontend/.dart_tool/

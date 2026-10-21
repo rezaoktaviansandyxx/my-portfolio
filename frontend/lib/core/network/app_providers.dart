@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/models/public_profile_model.dart';
 import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/experience_model.dart';
@@ -12,7 +13,7 @@ final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(dio);
 });
 
-final userProfileProvider = FutureProvider.family<UserModel, String>((
+final userProfileProvider = FutureProvider.family<PublicProfileModel, String>((
   ref,
   slug,
 ) async {

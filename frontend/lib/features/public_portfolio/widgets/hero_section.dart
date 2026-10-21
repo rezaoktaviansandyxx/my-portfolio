@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/models/public_profile_model.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_text.dart';
@@ -10,7 +10,7 @@ import 'package:frontend/shared/widgets/glow_button.dart';
 import 'package:frontend/shared/widgets/responsive_layout.dart';
 
 class HeroSection extends StatelessWidget {
-  final UserModel user;
+  final PublicProfileModel user;
   final VoidCallback onHireMe;
   final void Function(String url) onOpenUrl;
 
@@ -87,12 +87,6 @@ class HeroSection extends StatelessWidget {
             style: AppText.body,
           ),
         ],
-        const SizedBox(height: 14),
-        _Socials(
-          email: user.email,
-          onOpenUrl: onOpenUrl,
-          centered: compact,
-        ),
       ],
     );
   }
@@ -118,14 +112,6 @@ class HeroSection extends StatelessWidget {
             expand: true,
           ),
         ],
-        const SizedBox(height: 10),
-        GlowButton(
-          label: 'Email',
-          icon: Icons.mail_outline_rounded,
-          variant: GlowButtonVariant.ghost,
-          onPressed: () => onOpenUrl('mailto:${user.email}'),
-          expand: true,
-        ),
       ],
     );
   }
@@ -188,55 +174,6 @@ class _Avatar extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
       ),
-    );
-  }
-}
-
-class _Socials extends StatelessWidget {
-  final String email;
-  final void Function(String) onOpenUrl;
-  final bool centered;
-
-  const _Socials({
-    required this.email,
-    required this.onOpenUrl,
-    required this.centered,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Hanya email: model User belum punya field github/linkedin, jadi ikon
-    // sosial lain tidak dirender — URL dummy ke beranda platform akan terasa
-    // seperti bug. Tambahkan kembali begitu field sosial tersedia di model.
-    final items = <(IconData, String)>[
-      (Icons.mail_outline_rounded, 'mailto:$email'),
-    ];
-
-    return Row(
-      mainAxisAlignment:
-          centered ? MainAxisAlignment.center : MainAxisAlignment.start,
-      children: [
-        for (final (icon, url) in items)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () => onOpenUrl(url),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(9),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: Icon(icon, size: 15, color: AppColors.body),
-                ),
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

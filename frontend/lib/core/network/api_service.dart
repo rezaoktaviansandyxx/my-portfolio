@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/models/public_profile_model.dart';
 import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/experience_model.dart';
@@ -86,15 +87,29 @@ class ApiService {
   }
 
   // Public endpoints
-  Future<UserModel> getProfile(String slug) async {
+  /// GET /public/u/{slug}/profile — profil publik.
+  ///
+  /// Backend memakai schema `PublicProfileResponse` yang TIDAK mengirim
+  /// `id`/`email`/`role` (field internal sengaja disembunyikan dari
+  /// pengunjung). Karena itu parse memakai [PublicProfileModel], bukan
+  /// [UserModel] — `UserModel` mewajibkan `id` & `email` dan akan
+  /// melempar TypeError pada respons publik.
+  Future<PublicProfileModel> getProfile(String slug) async {
     try {
       final res = await _dio.get('/public/u/$slug/profile');
       if (res.data is! Map<String, dynamic>) {
         throw ApiException('Respons profil tidak valid');
       }
-      return UserModel.fromJson(res.data as Map<String, dynamic>);
+      return PublicProfileModel.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       _throwApiError(e, 'Profil tidak ditemukan');
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      // Respons 200 tapi bentuknya tidak dikenal (mis. backend ganti
+      // schema). Tanpa penangkapan ini error akan lolos sebagai TypeError
+      // mentah dan UI tidak bisa menampilkan pesan yang tepat.
+      throw ApiException('Respons profil tidak valid: $e');
     }
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
-import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/models/public_profile_model.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/core/utils/validators.dart';
@@ -163,7 +163,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _content(UserModel user, bool isAuth) {
+  Widget _content(PublicProfileModel user, bool isAuth) {
     final slug = widget.slug;
     final name = (user.fullName ?? user.username).trim();
     final initials = initialsOf(name);
