@@ -66,4 +66,9 @@ class AdminUserUpdate(BaseModel):
   is_published: Optional[bool] = None
   role: Optional[Literal["admin", "user"]] = None
   # Tanpa field ini hasil `POST /admin/upload/avatar` tidak bisa dipersistenkan.
-  avatar_url: Optional[str] = None
+  # Pola `^(https?://|/static/)` mencegah skema berbahaya ikut tersimpan:
+  # avatar dirender lewat `AppNetworkImage`, dan nilai yang lolos ke API publik
+  # (`PublicProfileResponse.avatar_url`) tidak disaring di sisi Flutter.
+  avatar_url: Optional[str] = Field(
+      default=None, pattern=r"^(https?://|/static/)"
+  )

@@ -37,7 +37,12 @@ class AdminUserCreate(BaseModel):
   full_name: str = Field(min_length=2, max_length=100)
   role: Literal["admin", "user"] = "user"
   # Diisi dari POST /admin/upload/resume bila admin mengunggah CV.
-  resume_url: Optional[str] = None
+  # Pola sama dengan `media_url` di `add_project_media`: nilai ini berakhir di
+  # tombol CTA publik (`hero_section` -> `launchUrl`) tanpa allowlist skema di
+  # sisi Flutter, jadi `javascript:` harus ditolak di pintu masuk.
+  resume_url: Optional[str] = Field(
+      default=None, pattern=r"^(https?://|/static/)"
+  )
 
 
 def _resolve_owner(db: Session, current: User, owner_id: Optional[int]) -> int:
