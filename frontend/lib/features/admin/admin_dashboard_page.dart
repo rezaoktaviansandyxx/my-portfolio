@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/models/experience_model.dart';
 import 'package:frontend/core/models/project_model.dart';
+import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/features/auth/auth_providers.dart';
 import 'package:frontend/core/network/app_providers.dart';
@@ -80,7 +82,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     _search.clear();
     setState(() {
       _query = '';
-      tab = 3;
+      tab = 4;
     });
   }
 
@@ -99,6 +101,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     ref.invalidate(adminMessagesProvider);
     ref.invalidate(adminProjectsProvider);
     ref.invalidate(adminProjectsFilteredProvider);
+    ref.invalidate(adminSkillsProvider);
+    ref.invalidate(adminExperiencesProvider);
     ref.invalidate(adminHealthProvider);
   }
 
@@ -130,6 +134,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
           badge: users.asData == null ? '…' : '${userList.length}',
         ),
         const SidebarItem(icon: Icons.work_outline, label: 'Semua Proyek'),
+        const SidebarItem(
+          icon: Icons.school_outlined,
+          label: 'Skill & Pengalaman',
+        ),
         SidebarItem(
           icon: Icons.mail_outline,
           label: 'Pesan Masuk',
@@ -166,7 +174,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }) {
     if (tab == 1) return _usersTab();
     if (tab == 2) return _projectsTab();
-    if (tab == 3) return _messagesTab();
+    if (tab == 3) return _contentTab();
+    if (tab == 4) return _messagesTab();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -918,6 +927,223 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                 ref.invalidate(adminProjectsProvider);
                 ref.invalidate(adminProjectsFilteredProvider);
               },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------- Tab: Skill & Pengalaman ----------
+
+  Future<void> _saveSkill({SkillModel? existing}) async {
+    final payload = await showSkillDialog(
+      context,
+      skill: existing,
+      // owner_id hanya relevan saat CREATE; PATCH tidak menerima field ini.
+      ownerId: existing == null ? _ownerFilter : null,
+    );
+    if (payload == null) return;
+    try {
+      final api = ref.read(apiServiceProvider);
+      if (existing == null) {
+        await api.adminCreateSkill(payload);
+        _snack('Skill dibuat');
+      } else {
+        await api.adminUpdateSkill(existing.id, payload);
+        _snack('Skill diperbarui');
+      }
+      ref.invalidate(adminSkillsProvider);
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal simpan skill'), error: true);
+    }
+  }
+
+  Future<void> _deleteSkill(SkillModel s) async {
+    if (!await confirmDelete(context, 'Skill "${s.name}"')) return;
+    try {
+      await ref.read(apiServiceProvider).adminDeleteSkill(s.id);
+      ref.invalidate(adminSkillsProvider);
+      _snack('Skill dihapus');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal hapus skill'), error: true);
+    }
+  }
+
+  Future<void> _saveExperience({ExperienceModel? existing}) async {
+    final payload = await showExperienceDialog(
+      context,
+      experience: existing,
+      ownerId: existing == null ? _ownerFilter : null,
+    );
+    if (payload == null) return;
+    try {
+      final api = ref.read(apiServiceProvider);
+      if (existing == null) {
+        await api.adminCreateExperience(payload);
+        _snack('Pengalaman dibuat');
+      } else {
+        await api.adminUpdateExperience(existing.id, payload);
+        _snack('Pengalaman diperbarui');
+      }
+      ref.invalidate(adminExperiencesProvider);
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal simpan pengalaman'), error: true);
+    }
+  }
+
+  Future<void> _deleteExperience(ExperienceModel e) async {
+    if (!await confirmDelete(context, '"${e.role} @ ${e.company}"')) return;
+    try {
+      await ref.read(apiServiceProvider).adminDeleteExperience(e.id);
+      ref.invalidate(adminExperiencesProvider);
+      _snack('Pengalaman dihapus');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal hapus pengalaman'), error: true);
+    }
+  }
+
+  Widget _contentTab() {
+    final users = ref.watch(adminUsersProvider).asData?.value ?? [];
+    final skills = ref.watch(adminSkillsProvider(_ownerFilter));
+    final exps = ref.watch(adminExperiencesProvider(_ownerFilter));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PageHeader(
+          eyebrow: 'Admin Console',
+          title: 'Skill & Pengalaman',
+          subtitle: 'Kelola keahlian dan riwayat kerja kreator.',
+          actionLabel: 'Tambah skill',
+          onAction: () => _saveSkill(),
+        ),
+        const SizedBox(height: 16),
+        SectionCard(
+          title: 'Filter kreator',
+          subtitle: 'Pilih kreator agar skill/pengalaman baru tercatat atas namanya.',
+          child: DropdownButtonFormField<int?>(
+            initialValue: _ownerFilter,
+            decoration: const InputDecoration(
+              labelText: 'Pemilik konten',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            items: [
+              const DropdownMenuItem<int?>(
+                value: null,
+                child: Text('Semua kreator (konten baru milik saya)'),
+              ),
+              ...users.map(
+                (u) => DropdownMenuItem<int?>(
+                  value: u.id,
+                  child: Text(u.fullName ?? u.username),
+                ),
+              ),
+            ],
+            onChanged: (v) => setState(() => _ownerFilter = v),
+          ),
+        ),
+        const SizedBox(height: 14),
+        SectionCard(
+          title: 'Skill',
+          subtitle: 'Keahlian lintas kreator.',
+          trailing: TextButton.icon(
+            onPressed: () => _saveSkill(),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Tambah'),
+          ),
+          child: skills.when(
+            data: (list) {
+              if (list.isEmpty) {
+                return const EmptyCard(
+                  title: 'Belum ada skill',
+                  subtitle: 'Skill kreator akan tampil di sini.',
+                );
+              }
+              return Column(
+                children: list
+                    .map(
+                      (s) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(s.name),
+                        subtitle: Text(s.category ?? 'Other'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Edit',
+                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              onPressed: () => _saveSkill(existing: s),
+                            ),
+                            IconButton(
+                              tooltip: 'Hapus',
+                              icon: const Icon(Icons.delete_outline, size: 20),
+                              onPressed: () => _deleteSkill(s),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+            loading: () => const ListSkeleton(rows: 3),
+            error: (e, _) => ErrorCard(
+              message: friendlyError(e, 'Gagal memuat skill'),
+              onRetry: () => ref.invalidate(adminSkillsProvider),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        SectionCard(
+          title: 'Pengalaman',
+          subtitle: 'Riwayat kerja lintas kreator.',
+          trailing: TextButton.icon(
+            onPressed: () => _saveExperience(),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Tambah'),
+          ),
+          child: exps.when(
+            data: (list) {
+              if (list.isEmpty) {
+                return const EmptyCard(
+                  title: 'Belum ada pengalaman',
+                  subtitle: 'Riwayat kerja kreator akan tampil di sini.',
+                );
+              }
+              return Column(
+                children: list
+                    .map(
+                      (e) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text('${e.role} @ ${e.company}'),
+                        subtitle: Text(e.location ?? '-'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Edit',
+                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              onPressed: () => _saveExperience(existing: e),
+                            ),
+                            IconButton(
+                              tooltip: 'Hapus',
+                              icon: const Icon(Icons.delete_outline, size: 20),
+                              onPressed: () => _deleteExperience(e),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+            loading: () => const ListSkeleton(rows: 3),
+            error: (e, _) => ErrorCard(
+              message: friendlyError(e, 'Gagal memuat pengalaman'),
+              onRetry: () => ref.invalidate(adminExperiencesProvider),
             ),
           ),
         ),

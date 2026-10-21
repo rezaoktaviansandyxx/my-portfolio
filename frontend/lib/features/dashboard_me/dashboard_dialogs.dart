@@ -221,20 +221,24 @@ class _ProjectDialogState extends State<_ProjectDialog> {
 }
 
 /// Dialog tambah/edit skill -> payload `createMySkill` / `updateMySkill`.
+/// `ownerId` diisi admin saat membuat skill atas nama kreator lain; hanya
+/// berlaku untuk CREATE karena PATCH tidak menerima `owner_id`.
 Future<Map<String, dynamic>?> showSkillDialog(
   BuildContext context, {
   SkillModel? skill,
+  int? ownerId,
 }) {
   return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (_) => _SkillDialog(skill: skill),
+    builder: (_) => _SkillDialog(skill: skill, ownerId: ownerId),
   );
 }
 
 class _SkillDialog extends StatefulWidget {
   final SkillModel? skill;
+  final int? ownerId;
 
-  const _SkillDialog({required this.skill});
+  const _SkillDialog({required this.skill, this.ownerId});
 
   @override
   State<_SkillDialog> createState() => _SkillDialogState();
@@ -271,6 +275,7 @@ class _SkillDialogState extends State<_SkillDialog> {
       'name': _name.text.trim(),
       'category': _category,
       'proficiency_level': level,
+      if (widget.ownerId != null) 'owner_id': widget.ownerId,
     });
   }
 
@@ -322,20 +327,24 @@ String _fmtDate(DateTime? d) =>
 
 /// Dialog tambah/edit experience -> payload `createMyExperience` /
 /// `updateMyExperience`. Tanggal format `YYYY-MM-DD`.
+/// `ownerId` diisi admin saat membuat pengalaman atas nama kreator lain;
+/// hanya berlaku untuk CREATE karena PATCH tidak menerima `owner_id`.
 Future<Map<String, dynamic>?> showExperienceDialog(
   BuildContext context, {
   ExperienceModel? experience,
+  int? ownerId,
 }) {
   return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (_) => _ExperienceDialog(experience: experience),
+    builder: (_) => _ExperienceDialog(experience: experience, ownerId: ownerId),
   );
 }
 
 class _ExperienceDialog extends StatefulWidget {
   final ExperienceModel? experience;
+  final int? ownerId;
 
-  const _ExperienceDialog({required this.experience});
+  const _ExperienceDialog({required this.experience, this.ownerId});
 
   @override
   State<_ExperienceDialog> createState() => _ExperienceDialogState();
@@ -406,6 +415,7 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
       'is_current': _isCurrent,
       'description': _nullIfEmpty(_description.text),
       'technologies_used': techs,
+      if (widget.ownerId != null) 'owner_id': widget.ownerId,
     });
   }
 
