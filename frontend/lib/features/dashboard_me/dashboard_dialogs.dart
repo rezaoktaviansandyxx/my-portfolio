@@ -220,9 +220,10 @@ class _ProjectDialogState extends State<_ProjectDialog> {
   }
 }
 
-/// Dialog tambah/edit skill -> payload `createMySkill` / `updateMySkill`.
-/// `ownerId` diisi admin saat membuat skill atas nama kreator lain; hanya
-/// berlaku untuk CREATE karena PATCH tidak menerima `owner_id`.
+/// Dialog tambah/edit skill -> payload `createMySkill` / `updateMySkill`,
+/// atau `adminCreateSkill` / `adminUpdateSkill` bila dipanggil dari admin.
+/// `ownerId` (khusus admin) menambahkan `owner_id` ke payload dan hanya
+/// berlaku saat create — PATCH tidak menerima field itu.
 Future<Map<String, dynamic>?> showSkillDialog(
   BuildContext context, {
   SkillModel? skill,
@@ -326,9 +327,10 @@ String _fmtDate(DateTime? d) =>
     d == null ? '' : d.toIso8601String().substring(0, 10);
 
 /// Dialog tambah/edit experience -> payload `createMyExperience` /
-/// `updateMyExperience`. Tanggal format `YYYY-MM-DD`.
-/// `ownerId` diisi admin saat membuat pengalaman atas nama kreator lain;
-/// hanya berlaku untuk CREATE karena PATCH tidak menerima `owner_id`.
+/// `updateMyExperience`, atau `adminCreateExperience` /
+/// `adminUpdateExperience` bila dipanggil dari admin. Tanggal format
+/// `YYYY-MM-DD`. `ownerId` (khusus admin) menambahkan `owner_id` ke payload
+/// dan hanya berlaku saat create — PATCH tidak menerima field itu.
 Future<Map<String, dynamic>?> showExperienceDialog(
   BuildContext context, {
   ExperienceModel? experience,

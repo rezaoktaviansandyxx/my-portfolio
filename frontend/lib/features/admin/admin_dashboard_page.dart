@@ -71,6 +71,19 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   ]))
               .toList(growable: false);
 
+  List<SkillModel> _filterSkills(List<SkillModel> list) => _query.isEmpty
+      ? list
+      : list
+          .where((s) => _hit([s.name, s.category]))
+          .toList(growable: false);
+
+  List<ExperienceModel> _filterExperiences(List<ExperienceModel> list) =>
+      _query.isEmpty
+          ? list
+          : list
+              .where((e) => _hit([e.role, e.company, e.location]))
+              .toList(growable: false);
+
   Widget _noResult(String what) => EmptyCard(
         title: 'Tidak ada hasil',
         subtitle: 'Tidak ada $what yang cocok dengan pencarian "$_query".',
@@ -1060,8 +1073,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   subtitle: 'Skill kreator akan tampil di sini.',
                 );
               }
+              final filtered = _filterSkills(list);
+              if (filtered.isEmpty) return _noResult('skill');
               return Column(
-                children: list
+                children: filtered
                     .map(
                       (s) => ListTile(
                         contentPadding: EdgeInsets.zero,
@@ -1112,8 +1127,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   subtitle: 'Riwayat kerja kreator akan tampil di sini.',
                 );
               }
+              final filtered = _filterExperiences(list);
+              if (filtered.isEmpty) return _noResult('pengalaman');
               return Column(
-                children: list
+                children: filtered
                     .map(
                       (e) => ListTile(
                         contentPadding: EdgeInsets.zero,
