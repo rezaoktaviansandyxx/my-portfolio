@@ -267,3 +267,34 @@ def test_admin_can_set_avatar_url_for_user():
   )
   assert r.status_code == 200, r.text
   assert r.json()["avatar_url"] == "/static/uploads/avatars/x.png"
+
+
+def test_admin_can_clear_avatar_url_for_user():
+  # `admin_update_user` memakai `exclude_unset=True`: key yang DIKIRIM tetap
+  # di-setattr, termasuk null. Kalau null ikut terbuang, avatar yang sudah
+  # terpasang tidak bisa dihapus admin — dialog edit harus bisa mengosongkan.
+  _reset_db()
+  _register("alice", "alice@x.com")
+  c = get_client()
+  admin = _login("admin", "admin123")
+  alice_id = next(
+      u["id"]
+      for u in c.get("/api/v1/admin/users", headers=admin).json()
+      if u["username"] == "alice"
+  )
+
+  seeded = c.patch(
+      f"/api/v1/admin/users/{alice_id}",
+      json={"avatar_url": "/static/uploads/avatars/y.png"},
+      headers=admin,
+  )
+  assert seeded.status_code == 200, seeded.text
+  assert seeded.json()["avatar_url"] == "/static/uploads/avatars/y.png"
+
+  cleared = c.patch(
+      f"/api/v1/admin/users/{alice_id}",
+      json={"avatar_url": None},
+      headers=admin,
+  )
+  assert cleared.status_code == 200, cleared.text
+  assert cleared.json()["avatar_url"] is None

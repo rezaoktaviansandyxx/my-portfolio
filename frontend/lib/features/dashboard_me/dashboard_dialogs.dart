@@ -814,7 +814,11 @@ class _AdminUserEditDialogState extends State<_AdminUserEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit ${widget.user.fullName ?? widget.user.username}'),
+      // Judul menyebut avatar, bukan "Edit <nama>": payload dialog ini hanya
+      // memuat `avatar_url`, jadi harus cocok dengan label menu "Edit avatar".
+      title: Text(
+        'Edit avatar — ${widget.user.fullName ?? widget.user.username}',
+      ),
       content: SizedBox(
         width: 380,
         child: Column(
@@ -845,6 +849,10 @@ class _AdminUserEditDialogState extends State<_AdminUserEditDialog> {
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, {
+            // Kolom kosong dikirim sebagai `null` EKSPLISIT, bukan key yang
+            // diabaikan: `admin_update_user` pakai `exclude_unset=True`, jadi
+            // key yang tidak dikirim tidak melakukan apa-apa. Tanpa null
+            // eksplisit di sini, admin tidak akan bisa menghapus avatar.
             'avatar_url': _avatar.text.trim().isEmpty
                 ? null
                 : _avatar.text.trim(),

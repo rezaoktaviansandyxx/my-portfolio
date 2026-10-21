@@ -579,8 +579,18 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       uploadAvatar: ref.read(apiServiceProvider).adminUploadAvatar,
     );
     if (payload == null) return;
-    await _setUserField(u.id, payload);
-    _snack('Avatar diperbarui');
+    // Sengaja TIDAK lewat `_setUserField`: fungsi itu menelan error-nya
+    // sendiri lalu return normal, sehingga snack "Avatar diperbarui" di
+    // bawahnya tetap muncul walau PATCH gagal. Avatar cuma satu baris di
+    // tabel user, jadi try/catch sendiri lebih jujur daripada menunggu
+    // return value yang sudah ditelan.
+    try {
+      await ref.read(apiServiceProvider).adminUpdateUser(u.id, payload);
+      ref.invalidate(adminUsersProvider);
+      _snack('Avatar diperbarui');
+    } catch (e) {
+      _snack(friendlyError(e, 'Gagal update user'), error: true);
+    }
   }
 
   Widget _userTableHeader() {
