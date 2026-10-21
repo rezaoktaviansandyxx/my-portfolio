@@ -811,6 +811,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     final payload = await showProjectDialog(
       context,
       uploadCover: ref.read(apiServiceProvider).adminUploadProjectCover,
+      // Filter kreator harus ikut menentukan owner, kalau tidak proyek yang
+      // baru dibuat diam-diam milik admin dan tidak muncul di daftar terfilter.
+      ownerId: _ownerFilter,
     );
     if (payload == null) return;
     try {
@@ -828,6 +831,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       context,
       project: p,
       uploadCover: ref.read(apiServiceProvider).adminUploadProjectCover,
+      // owner_id hanya relevan saat CREATE; PATCH tidak menerima field ini.
+      // Sama seperti `existing == null ? _ownerFilter : null` di tab konten.
+      ownerId: null,
     );
     if (payload == null) return;
     try {

@@ -43,12 +43,16 @@ Future<bool> confirmDelete(BuildContext context, String label) async {
 }
 
 /// Dialog tambah/edit proyek. Mengembalikan payload siap kirim ke
-/// `createMyProject` / `updateMyProject`, atau null bila dibatalkan.
+/// `createMyProject` / `updateMyProject`, atau `adminCreateProject` /
+/// `adminUpdateProject` bila dipanggil dari admin. `ownerId` (khusus admin)
+/// menambahkan `owner_id` ke payload dan hanya berlaku saat create —
+/// PATCH tidak menerima field itu.
 Future<Map<String, dynamic>?> showProjectDialog(
   BuildContext context, {
   ProjectModel? project,
   List<SkillModel> allSkills = const [],
   UploadFn? uploadCover,
+  int? ownerId,
 }) {
   return showDialog<Map<String, dynamic>>(
     context: context,
@@ -56,6 +60,7 @@ Future<Map<String, dynamic>?> showProjectDialog(
       project: project,
       allSkills: allSkills,
       uploadCover: uploadCover,
+      ownerId: ownerId,
     ),
   );
 }
@@ -64,11 +69,13 @@ class _ProjectDialog extends StatefulWidget {
   final ProjectModel? project;
   final List<SkillModel> allSkills;
   final UploadFn? uploadCover;
+  final int? ownerId;
 
   const _ProjectDialog({
     required this.project,
     required this.allSkills,
     this.uploadCover,
+    this.ownerId,
   });
 
   @override
@@ -133,6 +140,7 @@ class _ProjectDialogState extends State<_ProjectDialog> {
       'live_url': _nullIfEmpty(_liveUrl.text),
       'github_url': _nullIfEmpty(_githubUrl.text),
       'cover_image_url': _nullIfEmpty(_coverUrl.text),
+      if (widget.ownerId != null) 'owner_id': widget.ownerId,
     });
   }
 
