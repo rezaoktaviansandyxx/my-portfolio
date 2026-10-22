@@ -73,11 +73,14 @@ class DashboardShell extends ConsumerWidget {
   Widget _topbarAvatarImage({required Color destColor}) {
     final url = ApiConfig.resolveFileUrl(avatarUrl);
     if (url.isEmpty) {
-      return Text(_initials,
-          style: TextStyle(
-              color: destColor,
-              fontWeight: FontWeight.w800,
-              fontSize: 12));
+      return Text(
+        _initials,
+        style: TextStyle(
+          color: destColor,
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+      );
     }
     return Stack(
       alignment: Alignment.center,
@@ -85,11 +88,14 @@ class DashboardShell extends ConsumerWidget {
         // Inisial sebagai lapisan dasar: AppNetworkImage menimpanya dengan
         // foto, dan fallback-nya tampak transparan sehingga inisial tetap
         // terlihat saat foto gagal dimuat.
-        Text(_initials,
-            style: TextStyle(
-                color: destColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 12)),
+        Text(
+          _initials,
+          style: TextStyle(
+            color: destColor,
+            fontWeight: FontWeight.w800,
+            fontSize: 12,
+          ),
+        ),
         AppNetworkImage(url: avatarUrl, width: 32, height: 32),
       ],
     );
@@ -126,9 +132,7 @@ class DashboardShell extends ConsumerWidget {
       context: context,
       barrierColor: const Color(0xFF0F172A).withValues(alpha: 0.55),
       builder: (dialogContext) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 380),
           child: Padding(
@@ -176,21 +180,19 @@ class DashboardShell extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(false),
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor:
-                              AppColors.ink,
-                          side: BorderSide(
-                            color: AppColors.glassBorder,
-                          ),
+                          foregroundColor: AppColors.ink,
+                          side: BorderSide(color: AppColors.glassBorder),
                           padding: const EdgeInsets.symmetric(vertical: 13),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Batal',
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Batal',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -204,10 +206,11 @@ class DashboardShell extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(true),
-                        child: const Text('Keluar',
-                            style: TextStyle(fontWeight: FontWeight.w700)),
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text(
+                          'Keluar',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                   ],
@@ -229,9 +232,9 @@ class DashboardShell extends ConsumerWidget {
     } finally {
       if (context.mounted) {
         context.go('/login');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Logout berhasil')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Logout berhasil')));
       }
     }
   }
@@ -284,9 +287,7 @@ class DashboardShell extends ConsumerWidget {
             child: Column(
               children: [
                 _topbar(context, ref, wide),
-                Expanded(
-                  child: _refreshableChild(),
-                ),
+                Expanded(child: _refreshableChild()),
               ],
             ),
           ),
@@ -324,10 +325,7 @@ class DashboardShell extends ConsumerWidget {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.indigo,
-                          Color(0xFF6D63F0),
-                        ],
+                        colors: [AppColors.indigo, Color(0xFF6D63F0)],
                       ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
@@ -339,25 +337,32 @@ class DashboardShell extends ConsumerWidget {
                       ],
                     ),
                     alignment: Alignment.center,
-                    child: const Text('F',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20)),
+                    child: const Text(
+                      'F',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('FolioSpace',
-                            style: TextStyle(
-                                color: t.title,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16)),
-                        Text('Portfolio builder',
-                            style: TextStyle(
-                                color: t.subtitle, fontSize: 12)),
+                        Text(
+                          'FolioSpace',
+                          style: TextStyle(
+                            color: t.title,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Portfolio builder',
+                          style: TextStyle(color: t.subtitle, fontSize: 12),
+                        ),
                       ],
                     ),
                   ),
@@ -374,20 +379,25 @@ class DashboardShell extends ConsumerWidget {
             const SizedBox(height: 14),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-              child: Text('MENU UTAMA',
-                  style: TextStyle(
-                      color: t.muted,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1)),
+              child: Text(
+                'MENU UTAMA',
+                style: TextStyle(
+                  color: t.muted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
             ),
             const SizedBox(height: 8),
             ...List.generate(menu.length, (i) {
               final m = menu[i];
               final active = i == selectedIndex;
               return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 3,
+                ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
@@ -396,11 +406,11 @@ class DashboardShell extends ConsumerWidget {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: active
-                          ? t.active
-                          : Colors.transparent,
+                      color: active ? t.active : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: active
                           ? [
@@ -414,39 +424,43 @@ class DashboardShell extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(m.icon,
-                            size: 20,
-                            color: active
-                                ? Colors.white
-                                : t.text),
+                        Icon(
+                          m.icon,
+                          size: 20,
+                          color: active ? Colors.white : t.text,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(m.label,
-                              style: TextStyle(
-                                  fontWeight: active
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                                  color: active
-                                      ? Colors.white
-                                      : t.text)),
+                          child: Text(
+                            m.label,
+                            style: TextStyle(
+                              fontWeight: active
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: active ? Colors.white : t.text,
+                            ),
+                          ),
                         ),
                         if (m.badge != null)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: active
                                   ? Colors.white.withValues(alpha: 0.2)
                                   : t.badge,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(m.badge!,
-                                style: TextStyle(
-                                    color: active
-                                        ? Colors.white
-                                        : t.text,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700)),
+                            child: Text(
+                              m.badge!,
+                              style: TextStyle(
+                                color: active ? Colors.white : t.text,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -460,40 +474,43 @@ class DashboardShell extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    height: 1,
-                    color: t.border,
-                  ),
+                  Container(height: 1, color: t.border),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () => _confirmLogout(context, ref),
                     icon: const Icon(Icons.logout_rounded, size: 18),
-                    label: const Text('Logout',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: danger.withValues(alpha: 0.5)),
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ).copyWith(
-                      // Aksi destruktif: selalu merah, bukan hanya saat
-                      // hover/tekan. Hover hanya memberi efek latar tipis.
-                      foregroundColor: WidgetStateProperty.resolveWith(
-                        (states) {
-                          if (states.contains(WidgetState.disabled)) {
-                            return t.muted;
-                          }
-                          return danger;
-                        },
-                      ),
-                      overlayColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.hovered) ||
-                                states.contains(WidgetState.pressed)
-                            ? danger.withValues(alpha: 0.08)
-                            : Colors.transparent,
-                      ),
+                    label: const Text(
+                      'Logout',
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
+                    style:
+                        OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: danger.withValues(alpha: 0.5),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ).copyWith(
+                          // Aksi destruktif: selalu merah, bukan hanya saat
+                          // hover/tekan. Hover hanya memberi efek latar tipis.
+                          foregroundColor: WidgetStateProperty.resolveWith((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.disabled)) {
+                              return t.muted;
+                            }
+                            return danger;
+                          }),
+                          overlayColor: WidgetStateProperty.resolveWith(
+                            (states) =>
+                                states.contains(WidgetState.hovered) ||
+                                    states.contains(WidgetState.pressed)
+                                ? danger.withValues(alpha: 0.08)
+                                : Colors.transparent,
+                          ),
+                        ),
                   ),
                 ],
               ),
@@ -543,11 +560,7 @@ class DashboardShell extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: bar,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.glassBorder,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.glassBorder)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
@@ -590,12 +603,9 @@ class DashboardShell extends ConsumerWidget {
           _bellButton(context, bar),
           const SizedBox(width: 12),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.glassBorder,
-              ),
+              border: Border.all(color: AppColors.glassBorder),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -616,26 +626,29 @@ class DashboardShell extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ConstrainedBox(
-                      constraints:
-                          const BoxConstraints(maxWidth: 140),
-                      child: Text(displayName,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: AppColors.ink)),
-                    ),
-                    Text(displayRole,
+                      constraints: const BoxConstraints(maxWidth: 140),
+                      child: Text(
+                        displayName,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            color: AppColors.muted,
-                            fontSize: 11)),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      displayRole,
+                      style: TextStyle(color: AppColors.muted, fontSize: 11),
+                    ),
                   ],
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.keyboard_arrow_down,
-                      size: 18,
-                      color:
-                          AppColors.muted),
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: AppColors.muted,
+                  ),
                   tooltip: 'Akun',
                   onSelected: (v) {
                     if (v == 'public') context.go('/');
@@ -644,12 +657,15 @@ class DashboardShell extends ConsumerWidget {
                   // dengan dua tombol logout.
                   itemBuilder: (_) => const [
                     PopupMenuItem(
-                        value: 'public',
-                        child: Row(children: [
+                      value: 'public',
+                      child: Row(
+                        children: [
                           Icon(Icons.public, size: 16),
                           SizedBox(width: 8),
-                          Text('Lihat situs publik')
-                        ])),
+                          Text('Lihat situs publik'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -816,11 +832,7 @@ class DashboardShell extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: Icon(
-              Icons.notifications_outlined,
-              size: 22,
-              color: accent,
-            ),
+            child: Icon(Icons.notifications_outlined, size: 22, color: accent),
           ),
           if (unreadCount > 0)
             Positioned(
@@ -863,6 +875,11 @@ class _DashboardRail extends StatefulWidget {
 class _DashboardRailState extends State<_DashboardRail> {
   bool _extended = true;
 
+  /// Lebar rail saat label penuh; sama dengan minExtendedWidth NavigationRail.
+  /// Dipakai juga untuk lebar tombol logout supaya keduanya sejajar.
+  static const _extendedWidth = 210.0;
+  static const _gutter = 12.0;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -873,7 +890,7 @@ class _DashboardRailState extends State<_DashboardRail> {
       child: SafeArea(
         child: NavigationRail(
           extended: _extended,
-          minExtendedWidth: 210,
+          minExtendedWidth: _extendedWidth,
           backgroundColor: Colors.transparent,
           indicatorColor: AppColors.indigo.withValues(alpha: 0.28),
           selectedIconTheme: const IconThemeData(color: AppColors.ink),
@@ -905,12 +922,22 @@ class _DashboardRailState extends State<_DashboardRail> {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: IconButton(
+                padding: EdgeInsets.fromLTRB(
+                  _extended ? _gutter : 0,
+                  0,
+                  _extended ? _gutter : 0,
+                  16,
+                ),
+                // Rail expanded memakai tombol penuh (ikon + teks "Logout")
+                // agar aksinya terbaca, bukan cuma simbol. Saat rail dicabut
+                // ruangnya sempit, ikon tetap jadi tombol dengan label kecil
+                // di bawahnya supaya makna "keluar" tidak hilang.
+                child: _LogoutButton(
                   onPressed: widget.onLogout,
-                  icon: const Icon(Icons.logout_rounded),
-                  color: AppColors.muted,
-                  tooltip: 'Keluar',
+                  extended: _extended,
+                  // Tombol tidak otomatis melar; lebarkan sesuai lebar rail
+                  // supaya rata dengan item menu di atasnya.
+                  width: _extended ? _extendedWidth - _gutter * 2 : null,
                 ),
               ),
             ),
@@ -932,6 +959,83 @@ class _DashboardRailState extends State<_DashboardRail> {
         ),
       ),
     );
+  }
+}
+
+/// Tombol keluar di rail desktop: expanded → ikon + teks "Logout" dalam
+/// outline merah, collapsed → ikon dengan label "Logout" kecil di bawahnya.
+/// Mengganti IconButton telanjang supaya aksi destruktif selalu terbaca teks.
+class _LogoutButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final bool extended;
+
+  /// Lebar eksplisit saat rail extended; null → shrink-wrap (rail tercabut).
+  final double? width;
+
+  const _LogoutButton({
+    required this.onPressed,
+    required this.extended,
+    required this.width,
+  });
+
+  static const _danger = Color(0xFFF97066);
+
+  @override
+  Widget build(BuildContext context) {
+    if (!extended) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: onPressed,
+            icon: const Icon(Icons.logout_rounded),
+            color: _danger,
+            tooltip: 'Keluar',
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Logout',
+            style: const TextStyle(
+              color: _danger,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    }
+    final button = OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.logout_rounded, size: 18),
+      label: const Text(
+        'Logout',
+        style: TextStyle(fontWeight: FontWeight.w600),
+      ),
+      style:
+          OutlinedButton.styleFrom(
+            side: BorderSide(color: _danger.withValues(alpha: 0.5)),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ).copyWith(
+            // Aksi destruktif: merah terus-menerus, bukan hanya saat hover/tekan.
+            foregroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.disabled)
+                  ? AppColors.muted
+                  : _danger,
+            ),
+            overlayColor: WidgetStateProperty.resolveWith(
+              (states) =>
+                  states.contains(WidgetState.hovered) ||
+                      states.contains(WidgetState.pressed)
+                  ? _danger.withValues(alpha: 0.08)
+                  : Colors.transparent,
+            ),
+          ),
+    );
+    final w = width;
+    return w == null ? button : SizedBox(width: w, child: button);
   }
 }
 

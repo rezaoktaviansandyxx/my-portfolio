@@ -167,6 +167,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final slug = widget.slug;
     final name = (user.fullName ?? user.username).trim();
     final initials = initialsOf(name);
+    final wide = MediaQuery.sizeOf(context).width > kDesktopBreakpoint;
 
     final navItems = [
       NavTarget(label: 'Home', anchor: _anchors[0]),
@@ -179,25 +180,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final body = CustomScrollView(
       controller: _scroll,
       slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-          sliver: SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1080),
-                child: GlassNavbar(
-                  items: navItems,
-                  activeIndex: _desktopActive,
-                  onSelect: _goTo,
-                  onHireMe: () => _goTo(5),
-                  avatarUrl: user.avatarUrl,
-                  initials: initials,
-                  onAvatarTap: () =>
-                      context.go(isAuth ? '/dashboard' : '/login'),
-                  onGalleryTap: () => context.go('/gallery'),
-                  onMenuTap: () => _showSheet(isAuth),
-                ),
-              ),
+        // Navbar sticky: tetap tampil di atas saat halaman discroll.
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _StickyNavbarDelegate(
+            height: MediaQuery.textScalerOf(context)
+                .scale(wide ? 68.0 : 64.0),
+            navbar: GlassNavbar(
+              items: navItems,
+              activeIndex: _desktopActive,
+              onSelect: _goTo,
+              onHireMe: () => _goTo(5),
+              avatarUrl: user.avatarUrl,
+              initials: initials,
+              onAvatarTap: () =>
+                  context.go(isAuth ? '/dashboard' : '/login'),
+              onGalleryTap: () => context.go('/gallery'),
+              onMenuTap: () => _showSheet(isAuth),
             ),
           ),
         ),
@@ -470,4 +469,45 @@ class _SideRail extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Delegate header navbar sticky. Saat discroll, jarak atas 16px menyusut
+/// hingga navbar menempel rapi di tepi atas lalu tetap tersemat (pinned).
+class _StickyNavbarDelegate extends SliverPersistentHeaderDelegate {
+  _StickyNavbarDelegate({required this.navbar, required this.height});
+
+  final Widget navbar;
+
+  /// Tinggi navbar; dipakai sebagai extent minimum saat sudah tersemat.
+  final double height;
+
+  static const _topGap = 16.0;
+
+  @override
+  double get maxExtent => height + _topGap;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1080),
+          child: navbar,
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_StickyNavbarDelegate oldDelegate) =>
+      navbar != oldDelegate.navbar || height != oldDelegate.height;
 }

@@ -58,5 +58,7 @@ file `.env` fisik saat berjalan di CI.
 - Breakpoint desktop = 900 logical px (`kDesktopBreakpoint`).
 - Semua gambar remote lewat `shared/widgets/app_network_image.dart` (bukan
   `Image.network`), dengan fallback inisial.
+- Input tanggal memakai `shared/widgets/folio_date_field.dart` (date picker
+  Syncfusion) — user memilih tanggal lewat kalender, tidak mengetik manual.
 - Komponen interaktif memakai `HoverScale`/`GlowButton` — otomatis dapat
   kursor click, fokus keyboard (Tab/Enter), dan role tombol a11y.

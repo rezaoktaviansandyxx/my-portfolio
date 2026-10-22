@@ -23,6 +23,11 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_web_plugins:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  syncfusion_flutter_datepicker: ^35.1.41
+  syncfusion_localizations: ^35.1.41
+  cupertino_icons: ^2.0.0
 
 dev_dependencies:
   flutter_test:

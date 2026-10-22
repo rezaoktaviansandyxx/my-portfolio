@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/routes/app_router.dart';
 import 'package:frontend/core/theme/app_theme.dart';
@@ -25,6 +27,14 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       themeMode: ThemeMode.dark,
+      locale: const Locale('id'),
+      supportedLocales: const [Locale('id'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        SfGlobalLocalizations.delegate,
+      ],
       scrollBehavior: const AppScrollBehavior(),
       builder: (context, child) => SkeletonizerConfig(
         data: const SkeletonizerConfigData(

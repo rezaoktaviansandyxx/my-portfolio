@@ -4,6 +4,7 @@ import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/utils/validators.dart' as v;
+import 'package:frontend/shared/widgets/folio_date_field.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
 import 'package:frontend/shared/widgets/upload_field.dart';
 
@@ -12,8 +13,6 @@ const _skillCategories = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 const _projectStatuses = ['draft', 'published'];
 
 final _slugPattern = v.kSlugPattern;
-
-final _dateOk = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 
 String? _nullIfEmpty(String v) => v.trim().isEmpty ? null : v.trim();
 
@@ -332,14 +331,12 @@ class _SkillDialogState extends State<_SkillDialog> {
   }
 }
 
-String _fmtDate(DateTime? d) =>
-    d == null ? '' : d.toIso8601String().substring(0, 10);
-
 /// Dialog tambah/edit experience -> payload `createMyExperience` /
 /// `updateMyExperience`, atau `adminCreateExperience` /
-/// `adminUpdateExperience` bila dipanggil dari admin. Tanggal format
-/// `YYYY-MM-DD`. `ownerId` (khusus admin) menambahkan `owner_id` ke payload
-/// dan hanya berlaku saat create — PATCH tidak menerima field itu.
+/// `adminUpdateExperience` bila dipanggil dari admin. Tanggal dikirim dengan
+/// format `YYYY-MM-DD` dan dipilih lewat date picker, bukan diketik.
+/// `ownerId` (khusus admin) menambahkan `owner_id` ke payload dan hanya
+/// berlaku saat create — PATCH tidak menerima field itu.
 Future<Map<String, dynamic>?> showExperienceDialog(
   BuildContext context, {
   ExperienceModel? experience,
@@ -369,12 +366,8 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
   late final _location = TextEditingController(
     text: widget.experience?.location ?? '',
   );
-  late final _start = TextEditingController(
-    text: _fmtDate(widget.experience?.startDate),
-  );
-  late final _end = TextEditingController(
-    text: _fmtDate(widget.experience?.endDate),
-  );
+  late DateTime? _startDate = widget.experience?.startDate;
+  late DateTime? _endDate = widget.experience?.endDate;
   late final _description = TextEditingController(
     text: widget.experience?.description ?? '',
   );
@@ -388,27 +381,21 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
     _role.dispose();
     _company.dispose();
     _location.dispose();
-    _start.dispose();
-    _end.dispose();
     _description.dispose();
     _tech.dispose();
     super.dispose();
   }
 
   void _submit() {
-    final start = _start.text.trim();
-    final end = _end.text.trim();
-    if (_role.text.trim().length < 2 ||
-        _company.text.trim().length < 2 ||
-        !_dateOk.hasMatch(start) ||
-        (end.isNotEmpty && !_dateOk.hasMatch(end))) {
-      _warn(
-        context,
-        'Role, perusahaan (min 2), dan tanggal (YYYY-MM-DD) wajib valid',
-      );
+    if (_role.text.trim().length < 2 || _company.text.trim().length < 2) {
+      _warn(context, 'Role dan perusahaan minimal 2 karakter');
       return;
     }
-    if (!_isCurrent && end.isNotEmpty && end.compareTo(start) < 0) {
+    if (_startDate == null) {
+      _warn(context, 'Tanggal mulai wajib dipilih');
+      return;
+    }
+    if (!_isCurrent && _endDate != null && _endDate!.isBefore(_startDate!)) {
       _warn(context, 'Tanggal selesai tidak boleh sebelum mulai');
       return;
     }
@@ -421,8 +408,10 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
       'role': _role.text.trim(),
       'company': _company.text.trim(),
       'location': _nullIfEmpty(_location.text),
-      'start_date': start,
-      'end_date': _isCurrent ? null : _nullIfEmpty(_end.text),
+      'start_date': folioIsoDate(_startDate!),
+      'end_date': _isCurrent || _endDate == null
+          ? null
+          : folioIsoDate(_endDate!),
       'is_current': _isCurrent,
       'description': _nullIfEmpty(_description.text),
       'technologies_used': techs,
@@ -445,22 +434,30 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
               folioField(_role, 'Role*', hint: 'misal: Frontend Engineer'),
               folioField(_company, 'Perusahaan*', hint: 'misal: FolioSpace'),
               folioField(_location, 'Lokasi', hint: 'misal: Jakarta'),
-              folioField(
-                _start,
-                'Mulai* (YYYY-MM-DD)',
-                hint: 'misal: 2023-01-15',
+              folioDateField(
+                label: 'Mulai*',
+                value: _startDate,
+                onChanged: (d) => setState(() => _startDate = d),
+                firstDate: DateTime(1900),
+                lastDate: DateTime(2100, 12, 31),
               ),
-              folioField(
-                _end,
-                'Selesai (YYYY-MM-DD, kosong jika kini)',
-                hint: 'misal: 2024-06-30',
+              folioDateField(
+                label: 'Selesai',
+                value: _endDate,
+                enabled: !_isCurrent,
+                onChanged: (d) => setState(() => _endDate = d),
+                firstDate: _startDate ?? DateTime(1900),
+                lastDate: DateTime(2100, 12, 31),
               ),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 dense: true,
                 title: const Text('Masih bekerja di sini'),
                 value: _isCurrent,
-                onChanged: (v) => setState(() => _isCurrent = v ?? false),
+                onChanged: (v) => setState(() {
+                  _isCurrent = v ?? false;
+                  if (_isCurrent) _endDate = null;
+                }),
               ),
               folioField(
                 _description,
@@ -795,7 +792,8 @@ Future<Map<String, dynamic>?> showAdminUserEditDialog(
 }) {
   return showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (_) => _AdminUserEditDialog(user: user, uploadAvatar: uploadAvatar),
+    builder: (_) =>
+        _AdminUserEditDialog(user: user, uploadAvatar: uploadAvatar),
   );
 }
 
@@ -809,9 +807,7 @@ class _AdminUserEditDialog extends StatefulWidget {
 }
 
 class _AdminUserEditDialogState extends State<_AdminUserEditDialog> {
-  late final _avatar = TextEditingController(
-    text: widget.user.avatarUrl ?? '',
-  );
+  late final _avatar = TextEditingController(text: widget.user.avatarUrl ?? '');
 
   @override
   void dispose() {
