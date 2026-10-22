@@ -3,6 +3,7 @@ import 'package:frontend/core/models/experience_model.dart';
 import 'package:frontend/core/models/project_model.dart';
 import 'package:frontend/core/models/skill_model.dart';
 import 'package:frontend/core/models/user_model.dart';
+import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/validators.dart' as v;
 import 'package:frontend/shared/widgets/folio_date_field.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
@@ -96,9 +97,17 @@ class _ProjectDialogState extends State<_ProjectDialog> {
   late final _coverUrl = TextEditingController(
     text: widget.project?.coverImageUrl ?? '',
   );
-  late final _skillIds = TextEditingController(
-    text: (widget.project?.skills ?? []).map((s) => '${s.id}').join(', '),
-  );
+  /// Skill dipilih sebagai set supaya toggle O(1); payload tetap [List<int>]
+  /// dengan format yang sama seperti versi ketik-ID-manual dulu.
+  /// Nama skill disimpan juga agar chip skill tertaut yang sudah tidak ada
+  /// di daftar [allSkills] (mis. skill dihapus) tetap punya label.
+  late final Set<int> _selectedSkillIds = {
+    for (final s in widget.project?.skills ?? const <SkillModel>[]) s.id,
+  };
+  late final Map<int, String> _linkedSkillNames = {
+    for (final s in widget.project?.skills ?? const <SkillModel>[])
+      s.id: s.name,
+  };
   late String _status = widget.project?.status ?? 'published';
 
   @override
@@ -109,7 +118,6 @@ class _ProjectDialogState extends State<_ProjectDialog> {
     _liveUrl.dispose();
     _githubUrl.dispose();
     _coverUrl.dispose();
-    _skillIds.dispose();
     super.dispose();
   }
 
@@ -125,17 +133,12 @@ class _ProjectDialogState extends State<_ProjectDialog> {
       );
       return;
     }
-    final ids = _skillIds.text
-        .split(',')
-        .map((e) => int.tryParse(e.trim()))
-        .whereType<int>()
-        .toList();
     Navigator.pop(context, <String, dynamic>{
       'title': _title.text.trim(),
       'slug': _slug.text.trim(),
       'summary': _summary.text.trim(),
       'status': _status,
-      'skill_ids': ids,
+      'skill_ids': _selectedSkillIds.toList(),
       'live_url': _nullIfEmpty(_liveUrl.text),
       'github_url': _nullIfEmpty(_githubUrl.text),
       'cover_image_url': _nullIfEmpty(_coverUrl.text),
@@ -143,12 +146,70 @@ class _ProjectDialogState extends State<_ProjectDialog> {
     });
   }
 
+  /// Pemilih skill berupa chip — pengguna tinggal tap, tidak perlu tahu
+  /// ID database. Daftar chip = [allSkills] + skill tertaut yang sudah
+  /// tidak ada di daftar (mis. skill dihapus) supaya tetap terlihat dan
+  /// bisa dilepas, bukan menghilang diam-diam saat dialog disimpan.
+  Widget _skillPicker(List<SkillModel> allSkills) {
+    final knownIds = {for (final s in allSkills) s.id};
+    final linked = widget.project?.skills ?? const <SkillModel>[];
+    final chips = [
+      ...allSkills,
+      ...linked.where((s) => !knownIds.contains(s.id)),
+    ]..sort(_chipOrder);
+
+    if (chips.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 12),
+        child: Text('Belum ada skill — buat dulu di menu Skill.'),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: _selectedSkillIds.isEmpty
+              ? 'Skill dipakai'
+              : 'Skill dipakai (${_selectedSkillIds.length})',
+        ),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final s in chips)
+              FilterChip(
+                label: Text(s.name),
+                selected: _selectedSkillIds.contains(s.id),
+                onSelected: (v) => setState(() {
+                  if (v) {
+                    _selectedSkillIds.add(s.id);
+                  } else {
+                    _selectedSkillIds.remove(s.id);
+                  }
+                }),
+                selectedColor: AppColors.indigoSoft,
+                checkmarkColor: AppColors.cyan,
+                tooltip: knownIds.contains(s.id)
+                    ? s.name
+                    : '${_linkedSkillNames[s.id] ?? s.name} '
+                        '(tidak ada di daftar skill)',
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Urut chip: per kategori (SKU konsisten dengan daftar skill), lalu nama.
+  int _chipOrder(SkillModel a, SkillModel b) {
+    final byCat = (a.category ?? 'Other').compareTo(b.category ?? 'Other');
+    if (byCat != 0) return byCat;
+    return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  }
+
   @override
   Widget build(BuildContext context) {
     final allSkills = widget.allSkills;
-    final skillHint = allSkills.isEmpty
-        ? 'Belum ada skill — kosongkan saja'
-        : 'ID tersedia: ${allSkills.map((s) => '${s.id}=${s.name}').join(', ')}';
     return AlertDialog(
       title: Text(widget.project == null ? 'Proyek baru' : 'Edit proyek'),
       content: SingleChildScrollView(
@@ -207,12 +268,7 @@ class _ProjectDialogState extends State<_ProjectDialog> {
                   hint: 'https://.../cover.png (hasil upload cover)',
                   keyboard: TextInputType.url,
                 ),
-              folioField(
-                _skillIds,
-                'Skill IDs (koma)',
-                hint: skillHint,
-                keyboard: TextInputType.text,
-              ),
+              _skillPicker(allSkills),
             ],
           ),
         ),

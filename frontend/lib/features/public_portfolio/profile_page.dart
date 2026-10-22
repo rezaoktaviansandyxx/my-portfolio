@@ -41,10 +41,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// Skills & Experience dipisah agar bottom nav punya empat tujuan nyata.
   static const _bottomAnchors = [0, 2, 3, 4];
 
-  /// Posisi item navbar desktop: Skills & Experience berbagi "Expertise".
+  /// Posisi item navbar desktop: Skills & Experience berbagi "Expertise",
+  /// section Contact tidak punya item navbar (diarahkan ke "Expertise").
   int get _desktopActive {
     if (_active <= 3) return _active;
-    return _active == 4 ? 3 : 4;
+    return 3;
   }
 
   /// Indeks item bottom nav untuk anchor yang sedang aktif.
@@ -174,7 +175,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       NavTarget(label: 'About', anchor: _anchors[1]),
       NavTarget(label: 'Projects', anchor: _anchors[2]),
       NavTarget(label: 'Expertise', anchor: _anchors[3]),
-      NavTarget(label: 'Contact', anchor: _anchors[5]),
     ];
 
     final body = CustomScrollView(

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/network/api_config.dart';
 import 'package:frontend/core/theme/app_colors.dart';
@@ -36,6 +37,17 @@ class AppNetworkImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        // Jangan render lewat elemen <img> bawaan browser (HtmlImage):
+        // pada Flutter 3.47.x engine web mendisposisi sumber <img> saat
+        // ImageCache melakukan eviction, sehingga Picture yang masih
+        // mereferensikan bitmap itu ter-rasterisasi HITAM setelah kembali
+        // dari halaman lain yang memuat banyak gambar (gejala: avatar di
+        // dashboard jadi hitam polos setelah dari galeri; F5 memulihkan).
+        // Ref: flutter/flutter#191800 (regresi 3.47.0, diperbaiki di
+        // master), dikonfirmasi juga Baseflow/flutter_cached_network_image#1034.
+        // HttpGet mem-fetch byte lewat http Dart lalu decode via pixels,
+        // sehingga bebas dari regresi engine ini.
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
         fadeInDuration: const Duration(milliseconds: 180),
         placeholder: (_, __) => _fallback(),
         errorWidget: (_, __, ___) => _fallback(),
