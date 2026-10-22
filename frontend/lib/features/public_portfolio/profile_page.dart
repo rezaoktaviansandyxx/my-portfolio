@@ -37,9 +37,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _anchors = List.generate(6, (_) => GlobalKey());
   int _active = 0;
 
+  /// Lebar panel menu samping (mobile).
+  static const _menuWidth = 300.0;
+
   /// Anchor 0..5: Home, About, Projects, Skills, Experience, Contact.
-  /// Skills & Experience dipisah agar bottom nav punya empat tujuan nyata.
-  static const _bottomAnchors = [0, 2, 3, 4];
+  /// Skills & Experience sudah digabung dalam satu section "Expertise",
+  /// jadi bottom nav cukup punya empat tujuan: Home, Projects,
+  /// Expertise, Contact.
+  static const _bottomAnchors = [0, 2, 3, 5];
 
   /// Posisi item navbar desktop: Skills & Experience berbagi "Expertise",
   /// section Contact tidak punya item navbar (diarahkan ke "Expertise").
@@ -195,8 +200,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               initials: initials,
               onAvatarTap: () =>
                   context.go(isAuth ? '/dashboard' : '/login'),
-              onGalleryTap: () => context.go('/gallery'),
-              onMenuTap: () => _showSheet(isAuth),
+              onMenuTap: () => _showSideMenu(isAuth),
             ),
           ),
         ),
@@ -353,38 +357,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  /// Menu mobile hanya berisi aksi akun & galeri — navigasi antar-section
-  /// sudah ditangani bottom navigation bar.
-  void _showSheet(bool isAuth) {
-    showModalBottomSheet<void>(
+  /// Menu mobile: panel kaca yang slide masuk dari sisi kanan (overlay),
+  /// menggantikan bottom sheet kaku. Isi: navigasi section + aksi akun.
+  void _showSideMenu(bool isAuth) {
+    showGeneralDialog(
       context: context,
-      backgroundColor: const Color(0xFF0C1226),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.dashboard_outlined),
-              title: Text(isAuth ? 'Dashboard' : 'Login pemilik'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go(isAuth ? '/dashboard' : '/login');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.grid_view_rounded),
-              title: const Text('Galeri'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/gallery');
-              },
-            ),
-          ],
-        ),
-      ),
+      barrierLabel: 'Menu navigasi',
+      barrierColor: Colors.black.withValues(alpha: 0.55),
+      transitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionBuilder: (context, anim, __, ___) {
+        final t = CurvedAnimation(
+          parent: anim,
+          curve: Curves.easeOutCubic,
+        ).value;
+        return Transform.translate(
+          offset: Offset((1 - t) * _menuWidth, 0),
+          child: _SideMenu(
+            isAuth: isAuth,
+            onSection: (index) {
+              Navigator.of(context).pop();
+              _goTo(index);
+            },
+            onGo: (route) {
+              Navigator.of(context).pop();
+              context.go(route);
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -412,14 +413,123 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         NavigationDestination(
           icon: Icon(Icons.auto_awesome_outlined),
           selectedIcon: Icon(Icons.auto_awesome_rounded),
-          label: 'Skills',
+          label: 'Expertise',
         ),
         NavigationDestination(
-          icon: Icon(Icons.timeline_outlined),
-          selectedIcon: Icon(Icons.timeline_rounded),
-          label: 'Experience',
+          icon: Icon(Icons.mail_outline_rounded),
+          selectedIcon: Icon(Icons.mail_rounded),
+          label: 'Contact',
         ),
       ],
+    );
+  }
+}
+
+/// Panel menu samping mobile: slide dari kanan, bergaya glass gelap.
+class _SideMenu extends StatelessWidget {
+  final bool isAuth;
+  final ValueChanged<int> onSection;
+  final ValueChanged<String> onGo;
+
+  const _SideMenu({
+    required this.isAuth,
+    required this.onSection,
+    required this.onGo,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const sections = [
+      (Icons.home_outlined, 'Home', 0),
+      (Icons.info_outline_rounded, 'About', 1),
+      (Icons.grid_view_outlined, 'Projects', 2),
+      (Icons.auto_awesome_outlined, 'Expertise', 3),
+      (Icons.mail_outline_rounded, 'Contact', 5),
+    ];
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        width: 300,
+        margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0C1226).withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.glassBorder),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 14, bottom: 10),
+              child: Text('Navigasi', style: AppText.eyebrow),
+            ),
+            for (final (icon, label, anchor) in sections)
+              _SideTile(
+                icon: icon,
+                label: label,
+                onTap: () => onSection(anchor),
+              ),
+            const Divider(
+              height: 22,
+              indent: 12,
+              endIndent: 12,
+              color: AppColors.glassBorder,
+            ),
+            _SideTile(
+              icon: Icons.dashboard_outlined,
+              label: isAuth ? 'Dashboard' : 'Login pemilik',
+              onTap: () => onGo(isAuth ? '/dashboard' : '/login'),
+            ),
+            _SideTile(
+              icon: Icons.grid_view_rounded,
+              label: 'Galeri',
+              onTap: () => onGo('/gallery'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Item menu panel samping dengan ripple & fokus keyboard.
+class _SideTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SideTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: ListTile(
+          dense: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          leading: Icon(icon, size: 20, color: AppColors.muted),
+          title: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

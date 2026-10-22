@@ -15,6 +15,7 @@ import 'package:frontend/features/dashboard_me/dashboard_dialogs.dart';
 import 'package:frontend/features/dashboard_me/message_utils.dart';
 import 'package:frontend/features/dashboard_me/project_media_utils.dart';
 import 'package:frontend/shared/widgets/errors.dart';
+import 'package:frontend/shared/widgets/folio_dropdown.dart';
 import 'package:frontend/shared/widgets/folio_widgets.dart';
 import 'package:frontend/shared/widgets/skeleton.dart';
 
@@ -897,22 +898,23 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         const SizedBox(height: 16),
         SectionCard(
           title: 'Filter kreator',
-          child: DropdownButtonFormField<int?>(
-            initialValue: _ownerFilter,
-            decoration: const InputDecoration(
-              labelText: 'Pemilik proyek',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+          child: FolioDropdown<int?>(
+            value: _ownerFilter,
+            label: 'Pemilik proyek',
+            hint: 'Semua kreator',
+            menuMaxHeight: 240,
+            searchable: true,
             items: [
-              const DropdownMenuItem<int?>(
+              const FolioDropdownOption(
                 value: null,
-                child: Text('Semua kreator'),
+                label: 'Semua kreator',
+                icon: Icons.groups_outlined,
               ),
               ...users.map(
-                (u) => DropdownMenuItem<int?>(
+                (u) => FolioDropdownOption(
                   value: u.id,
-                  child: Text(u.fullName ?? u.username),
+                  label: u.fullName ?? u.username,
+                  icon: Icons.person_outline,
                 ),
               ),
             ],
@@ -1068,22 +1070,23 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         SectionCard(
           title: 'Filter kreator',
           subtitle: 'Pilih kreator agar skill/pengalaman baru tercatat atas namanya.',
-          child: DropdownButtonFormField<int?>(
-            initialValue: _ownerFilter,
-            decoration: const InputDecoration(
-              labelText: 'Pemilik konten',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+          child: FolioDropdown<int?>(
+            value: _ownerFilter,
+            label: 'Pemilik konten',
+            hint: 'Semua kreator (konten baru milik saya)',
+            menuMaxHeight: 240,
+            searchable: true,
             items: [
-              const DropdownMenuItem<int?>(
+              const FolioDropdownOption(
                 value: null,
-                child: Text('Semua kreator (konten baru milik saya)'),
+                label: 'Semua kreator (konten baru milik saya)',
+                icon: Icons.groups_outlined,
               ),
               ...users.map(
-                (u) => DropdownMenuItem<int?>(
+                (u) => FolioDropdownOption(
                   value: u.id,
-                  child: Text(u.fullName ?? u.username),
+                  label: u.fullName ?? u.username,
+                  icon: Icons.person_outline,
                 ),
               ),
             ],

@@ -10,6 +10,7 @@ import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/network/app_providers.dart';
 import 'package:frontend/features/admin/admin_dashboard_page.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// ApiService palsu yang hanya mencatat payload `adminCreateProject`.
@@ -151,7 +152,7 @@ void main() {
       // Dengan filter kreator = Alice: payload HARUS membawa owner_id,
       // kalau tidak proyek tercipta diam-diam milik admin dan tidak muncul
       // di daftar yang sedang difilter.
-      await tester.tap(find.byType(DropdownButtonFormField<int?>));
+      await tester.tap(find.byType(DropdownButton2<int?>));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Alice').last);
       await tester.pumpAndSettle();

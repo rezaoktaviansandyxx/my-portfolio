@@ -6,12 +6,22 @@ import 'package:frontend/core/models/user_model.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/utils/validators.dart' as v;
 import 'package:frontend/shared/widgets/folio_date_field.dart';
+import 'package:frontend/shared/widgets/folio_dropdown.dart';
 import 'package:frontend/shared/widgets/folio_field.dart';
 import 'package:frontend/shared/widgets/upload_field.dart';
 
 const _skillCategories = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 
 const _projectStatuses = ['draft', 'published'];
+
+/// Ikon kecil per kategori skill supaya menu dropdown lebih mudah dipindai.
+const _skillCategoryIcons = {
+  'Frontend': Icons.web_outlined,
+  'Backend': Icons.dns_outlined,
+  'Database': Icons.storage_outlined,
+  'Tools': Icons.build_outlined,
+  'Other': Icons.category_outlined,
+};
 
 final _slugPattern = v.kSlugPattern;
 
@@ -226,18 +236,23 @@ class _ProjectDialogState extends State<_ProjectDialog> {
                 hint: 'Ceritakan proyek ini...',
                 maxLines: 3,
               ),
-              DropdownButtonFormField<String>(
-                initialValue: _projectStatuses.contains(_status)
+              FolioDropdown<String>(
+                value: _projectStatuses.contains(_status)
                     ? _status
                     : 'published',
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-                items: _projectStatuses
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
+                label: 'Status',
+                items: const [
+                  FolioDropdownOption(
+                    value: 'draft',
+                    label: 'draft',
+                    icon: Icons.edit_note_outlined,
+                  ),
+                  FolioDropdownOption(
+                    value: 'published',
+                    label: 'published',
+                    icon: Icons.public_outlined,
+                  ),
+                ],
                 onChanged: (v) => setState(() => _status = v ?? 'published'),
               ),
               const SizedBox(height: 10),
@@ -354,16 +369,17 @@ class _SkillDialogState extends State<_SkillDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             folioField(_name, 'Nama*', hint: 'misal: Flutter'),
-            DropdownButtonFormField<String>(
-              initialValue: _category,
-              decoration: const InputDecoration(
-                labelText: 'Kategori',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-              items: _skillCategories
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                  .toList(),
+            FolioDropdown<String>(
+              value: _category,
+              label: 'Kategori',
+              items: [
+                for (final c in _skillCategories)
+                  FolioDropdownOption(
+                    value: c,
+                    label: c,
+                    icon: _skillCategoryIcons[c],
+                  ),
+              ],
               onChanged: (v) => setState(() => _category = v ?? 'Other'),
             ),
             const SizedBox(height: 10),
@@ -608,18 +624,26 @@ class _ProjectMediaDialogState extends State<_ProjectMediaDialog> {
                 hint: 'https://... (hasil upload media)',
                 keyboard: TextInputType.url,
               ),
-            DropdownButtonFormField<String>(
-              initialValue: _type,
-              decoration: const InputDecoration(
-                labelText: 'Tipe',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
+            FolioDropdown<String>(
+              value: _type,
+              label: 'Tipe',
               items: const [
-                'image',
-                'video',
-                'link',
-              ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                FolioDropdownOption(
+                  value: 'image',
+                  label: 'image',
+                  icon: Icons.image_outlined,
+                ),
+                FolioDropdownOption(
+                  value: 'video',
+                  label: 'video',
+                  icon: Icons.videocam_outlined,
+                ),
+                FolioDropdownOption(
+                  value: 'link',
+                  label: 'link',
+                  icon: Icons.link_outlined,
+                ),
+              ],
               onChanged: (v) => setState(() => _type = v ?? 'image'),
             ),
             const SizedBox(height: 10),
@@ -812,16 +836,21 @@ class _AdminUserDialogState extends State<_AdminUserDialog> {
                   keyboard: TextInputType.url,
                 ),
               folioPasswordField(_password, 'Password* (min 8)'),
-              DropdownButtonFormField<String>(
-                initialValue: _role,
-                decoration: const InputDecoration(
-                  labelText: 'Role',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
-                items: const ['user', 'admin']
-                    .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                    .toList(),
+              FolioDropdown<String>(
+                value: _role,
+                label: 'Role',
+                items: const [
+                  FolioDropdownOption(
+                    value: 'user',
+                    label: 'user',
+                    icon: Icons.person_outline,
+                  ),
+                  FolioDropdownOption(
+                    value: 'admin',
+                    label: 'admin',
+                    icon: Icons.admin_panel_settings_outlined,
+                  ),
+                ],
                 onChanged: (v) => setState(() => _role = v ?? 'user'),
               ),
             ],
