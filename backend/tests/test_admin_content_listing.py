@@ -231,7 +231,7 @@ def test_admin_create_project_rejects_foreign_skill_ids():
   skill_id = skill.json()["id"]
 
   # Proyek milik admin (tanpa owner_id) tidak boleh attaches skill milik alice:
-  # diam-diam hilang hanya menghasilkan konten portofolio yang salah.
+  # diam-diam hilang hanya menghasilkan konten portfolio yang salah.
   admin = _login("admin", "admin123")
   r = c.post(
       "/api/v1/admin/projects",

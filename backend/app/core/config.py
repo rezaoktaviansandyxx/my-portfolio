@@ -15,7 +15,7 @@ MIN_SECRET_KEY_LENGTH = 32
 
 
 class Settings(BaseSettings):
-  PROJECT_NAME: str = "Portofolio API"
+  PROJECT_NAME: str = "Portfolio API"
   API_V1_STR: str = "/api/v1"
   SECRET_KEY: str = "temporary-secret-key"
   ALGORITHM: str = "HS256"
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
   # memilih user yang di-backfill jadi admin, bukan user pertama yang acak.
   ADMIN_USERNAME: str = "admin"
   DATABASE_URL: str = (
-      "postgresql+psycopg2://postgres:root@localhost:5432/portofolio_db"
+      "postgresql+psycopg2://postgres:root@localhost:5432/portfolio_db"
   )
   UPLOAD_DIR: str = "static/uploads"
   BACKEND_CORS_ORIGINS: list[str] = [

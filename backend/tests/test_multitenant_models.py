@@ -68,10 +68,10 @@ def test_project_slug_unique_per_owner_not_global(session):
     session.add(_user(session, "budi"))
     session.flush()
     session.add(
-        Project(owner_id=1, title="P", slug="portofolio-uin", summary="s")
+        Project(owner_id=1, title="P", slug="portfolio-uin", summary="s")
     )
     session.add(
-        Project(owner_id=2, title="Q", slug="portofolio-uin", summary="s")
+        Project(owner_id=2, title="Q", slug="portfolio-uin", summary="s")
     )
     session.commit()
 
@@ -80,10 +80,10 @@ def test_project_slug_duplicate_same_owner_rejected(session):
     session.add(_user(session, "andini"))
     session.flush()
     session.add(
-        Project(owner_id=1, title="P", slug="portofolio-uin", summary="s")
+        Project(owner_id=1, title="P", slug="portfolio-uin", summary="s")
     )
     session.add(
-        Project(owner_id=1, title="Q", slug="portofolio-uin", summary="s")
+        Project(owner_id=1, title="Q", slug="portfolio-uin", summary="s")
     )
     with pytest.raises(IntegrityError):
         session.commit()

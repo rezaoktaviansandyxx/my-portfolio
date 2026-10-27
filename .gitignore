@@ -2,6 +2,7 @@
 .env
 .DS_Store
 *.log
+docs
 
 #Superpowers
 .superpowers/

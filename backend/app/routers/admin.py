@@ -81,7 +81,7 @@ def create_project(
         detail="Slug sudah digunakan oleh proyek lain",
     )
 
-  # Skill milik owner lain yang diam-diam hilang = konten portofolio salah;
+  # Skill milik owner lain yang diam-diam hilang = konten portfolio salah;
   # pakai helper yang sama dengan jalur /me agar menolak (422), bukan membuang.
   skills = _resolve_owned_skills(db, payload.skill_ids or [], owner_id)
 
