@@ -23,7 +23,6 @@ frontend/.dart_tool/
 frontend/.flutter-plugins
 frontend/.flutter-plugins-dependencies
 frontend/.packages
-frontend/build/
 frontend/.pub/
 frontend/.pub-cache/
 
