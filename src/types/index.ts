@@ -1,0 +1,55 @@
+export type ProjectStatus = "Completed" | "In Development";
+
+export type ProjectCategory = "Mobile" | "Frontend" | "Fullstack" | "Personal Project";
+
+export interface Project {
+  slug: string;
+  title: string;
+  shortDescription: string;
+  technologies: string[];
+  role: string;
+  status: ProjectStatus;
+  category: ProjectCategory;
+  featured?: boolean;
+  overview?: string;
+  responsibilities?: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+}
+
+export interface WorkExperience {
+  company: string;
+  position: string;
+  period: string;
+  type: string;
+  description: string;
+  responsibilities?: string[];
+}
+
+export interface Education {
+  institution: string;
+  degree: string;
+  major: string;
+  graduationYear: string;
+}
+
+export interface SkillCategory {
+  category: string;
+  skills: string[];
+}
+
+export interface ContactInfo {
+  name: string;
+  title: string;
+  email: string;
+  whatsapp: string;
+  whatsappUrl: string;
+  linkedin: string;
+  github: string;
+  location?: string;
+}
+
+export interface NavItem {
+  label: string;
+  href: string;
+}
