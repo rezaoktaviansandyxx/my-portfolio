@@ -2,12 +2,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Code, ExternalLink } from "lucide-react";
 import { Project } from "@/types";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface ProjectCardProps {
   project: Project;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const { language } = useLanguage();
+  const isEn = language === "en";
+
+  const description = isEn && project.shortDescriptionEn ? project.shortDescriptionEn : project.shortDescription;
+  const role = isEn && project.roleEn ? project.roleEn : project.role;
+  const category = isEn && project.categoryEn ? project.categoryEn : project.category;
+
   return (
     <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-500">
       <div>
@@ -34,10 +42,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* Header Badges */}
           <div className="flex items-center justify-between gap-2">
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              {project.role}
+              {role}
             </span>
             <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-              {project.category}
+              {category}
             </span>
           </div>
 
@@ -48,7 +56,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
           {/* Description */}
           <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed dark:text-slate-400">
-            {project.shortDescription}
+            {description}
           </p>
 
           {/* Tech Stack */}
@@ -72,7 +80,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             href={`/projects/${project.slug}`}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
-            View Case Details
+            {isEn ? "View Details" : "Lihat Detail"}
             <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
