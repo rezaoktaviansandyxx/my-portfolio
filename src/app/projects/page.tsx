@@ -9,9 +9,9 @@ import { ProjectCategory } from "@/types";
 
 const categories: { label: string; value: ProjectCategory | "All" }[] = [
   { label: "Semua Proyek", value: "All" },
+  { label: "POS & Desktop", value: "POS & Desktop" },
   { label: "Mobile (Flutter)", value: "Mobile" },
   { label: "Frontend Web", value: "Frontend" },
-  { label: "Fullstack", value: "Fullstack" },
   { label: "Personal Project", value: "Personal Project" }
 ];
 

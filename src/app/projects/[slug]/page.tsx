@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, CheckCircle2, ChevronRight, Layers, User, Calendar, ExternalLink } from "lucide-react";
 import { GithubIcon } from "@/components/ui/Icons";
 import { projectsData } from "@/data/projects";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProjectCard } from "@/components/projects/ProjectCard";
+import { ProjectGallery } from "@/components/projects/ProjectGallery";
 
 interface ProjectDetailPageProps {
   params: Promise<{
@@ -19,6 +21,8 @@ export async function generateStaticParams() {
   }));
 }
 
+export const instant = false;
+
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = await params;
   const project = projectsData.find((p) => p.slug === slug);
@@ -27,7 +31,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     notFound();
   }
 
-  const isCompleted = project.status === "Completed";
   const relatedProjects = projectsData
     .filter((p) => p.slug !== project.slug && p.category === project.category)
     .slice(0, 2);
@@ -53,15 +56,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                 {project.category}
               </span>
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                  isCompleted
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40"
-                    : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40"
-                }`}
-              >
-                {project.status}
-              </span>
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -71,6 +65,31 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             <p className="mt-3 text-base text-slate-600 leading-relaxed dark:text-slate-300">
               {project.shortDescription}
             </p>
+
+            {/* Featured Image */}
+            {project.image && (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900 shadow-md">
+                <div
+                  className={`relative w-full ${
+                    project.category === "Mobile"
+                      ? "h-80 sm:h-96 md:h-[450px]"
+                      : "aspect-video"
+                  }`}
+                >
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    priority
+                    className={
+                      project.category === "Mobile"
+                        ? "object-contain p-4"
+                        : "object-cover"
+                    }
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Quick Meta Stats */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-850">
@@ -85,10 +104,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Status Proyek
+                  Kategori
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  {project.status}
+                  {project.category}
                 </p>
               </div>
 
@@ -155,6 +174,23 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Gallery Screenshots */}
+            {project.gallery && project.gallery.length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Tangkapan Layar & Galeri
+                </h2>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Dokumentasi antarmuka fitur dan modul aplikasi (klik untuk memperbesar)
+                </p>
+                <ProjectGallery
+                  title={project.title}
+                  gallery={project.gallery}
+                  isMobile={project.category === "Mobile"}
+                />
               </div>
             )}
           </div>

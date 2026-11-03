@@ -18,7 +18,7 @@ export function AboutSection() {
           {/* Main Story / Professional Background */}
           <div className="space-y-4 text-slate-600 lg:col-span-7 dark:text-slate-400 text-base leading-relaxed">
             <p>
-              Saya adalah seorang <strong className="text-slate-900 dark:text-slate-200">Flutter Developer</strong> dan <strong className="text-slate-900 dark:text-slate-200">Web Developer</strong> lulusan Sistem Informasi (D3) STMIK PPKIA Pradnya Paramita. Saya memiliki pengalaman kerja profesional selama satu tahun di <strong className="text-slate-900 dark:text-slate-200">Thunderlabs</strong> sebagai Frontend Developer melalui kontrak PKWT.
+              Saya adalah seorang <strong className="text-slate-900 dark:text-slate-200">Flutter Developer</strong> dan <strong className="text-slate-900 dark:text-slate-200">Web Developer</strong> lulusan Sistem Informasi (D3) STMIK PPKIA Pradnya Paramita. Saya memiliki pengalaman kerja profesional selama satu tahun di <strong className="text-slate-900 dark:text-slate-200">Thunderlabs</strong> sebagai Frontend Developer.
             </p>
             <p>
               Fokus utama saya terletak pada pembangunan aplikasi mobile dan antarmuka web yang terstruktur rapi, berkinerja tinggi, dan mudah dikelola. Dalam portofolio nyata, saya telah mengembangkan aplikasi Point of Sale (POS) mobile dan platform web yang terintegrasi langsung dengan ekosistem backend <strong className="text-slate-900 dark:text-slate-200">ERPNext</strong> melalui protokol RESTful API.

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Sun, Moon, ArrowDownToLine } from "lucide-react";
+import { Menu, X, Sun, Moon, ArrowDownToLine, Code2 } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { navigationItems, contactData } from "@/data/navigation";
 
@@ -16,10 +16,23 @@ export function Navbar() {
         {/* Brand / Logo */}
         <Link
           href="/"
-          className="text-lg font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 dark:text-slate-100 dark:hover:text-blue-400"
+          className="group flex items-center gap-2.5 transition-all focus:outline-none"
         >
-          {contactData.name}
-          <span className="text-blue-600 dark:text-blue-400 font-extrabold">.</span>
+          {/* Logo Badge */}
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 ring-2 ring-white transition-transform group-hover:scale-105 group-hover:shadow-blue-500/30 dark:ring-slate-900">
+            <span className="text-sm font-black tracking-wider">IO</span>
+          </div>
+
+          {/* Name & Role tag */}
+          <div className="flex flex-col text-left">
+            <span className="text-sm font-bold tracking-tight text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">
+              {contactData.name}
+              <span className="text-blue-600 dark:text-blue-400 font-extrabold">.</span>
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Portfolio
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -46,8 +59,8 @@ export function Navbar() {
           </button>
 
           <a
-            href="/cv/resume.pdf"
-            download
+            href="/cv/CV-Indra-Oki-Sandy.pdf"
+            download="CV-Indra-Oki-Sandy-Software-Developer.pdf"
             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
           >
             <ArrowDownToLine size={15} />
@@ -90,8 +103,8 @@ export function Navbar() {
             ))}
             <div className="pt-2 border-t border-slate-100 dark:border-slate-900">
               <a
-                href="/cv/resume.pdf"
-                download
+                href="/cv/CV-Indra-Oki-Sandy.pdf"
+                download="CV-Indra-Oki-Sandy-Software-Developer.pdf"
                 className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
               >
                 <ArrowDownToLine size={16} />

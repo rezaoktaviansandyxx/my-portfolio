@@ -1,6 +1,4 @@
-export type ProjectStatus = "Completed" | "In Development";
-
-export type ProjectCategory = "Mobile" | "Frontend" | "Fullstack" | "Personal Project";
+export type ProjectCategory = "POS & Desktop" | "Mobile" | "Frontend" | "Personal Project";
 
 export interface Project {
   slug: string;
@@ -8,20 +6,22 @@ export interface Project {
   shortDescription: string;
   technologies: string[];
   role: string;
-  status: ProjectStatus;
   category: ProjectCategory;
   featured?: boolean;
   overview?: string;
   responsibilities?: string[];
   githubUrl?: string;
   liveUrl?: string;
+  image?: string;
+  gallery?: string[];
 }
 
 export interface WorkExperience {
   company: string;
   position: string;
   period: string;
-  type: string;
+  location?: string;
+  type?: string;
   description: string;
   responsibilities?: string[];
 }

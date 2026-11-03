@@ -1,5 +1,5 @@
 import { experienceData } from "@/data/experience";
-import { Briefcase, Calendar, CheckCircle } from "lucide-react";
+import { Briefcase, Calendar, MapPin, CheckCircle } from "lucide-react";
 
 export function ExperienceSection() {
   return (
@@ -10,10 +10,10 @@ export function ExperienceSection() {
             Work Experience
           </h2>
           <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-            Pengalaman Kerja Profesional
+            Pengalaman Kerja & Profesional
           </p>
           <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-            Rekam jejak pengalaman kerja berbasis kontrak kerja profesional.
+            Rekam jejak pengalaman kerja, magang, dan pelatihan profesional di industri teknologi.
           </p>
         </div>
 
@@ -25,10 +25,12 @@ export function ExperienceSection() {
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-0.5 text-xs font-medium text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/50 dark:text-blue-300">
-                    <Briefcase size={12} />
-                    {exp.type}
-                  </div>
+                  {exp.type && (
+                    <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-0.5 text-xs font-medium text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/50 dark:text-blue-300">
+                      <Briefcase size={12} />
+                      {exp.type}
+                    </div>
+                  )}
                   <h3 className="mt-3 text-xl font-bold text-slate-900 dark:text-white">
                     {exp.position}
                   </h3>
@@ -37,9 +39,17 @@ export function ExperienceSection() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 sm:text-right dark:text-slate-400">
-                  <Calendar size={14} />
-                  <span>{exp.period}</span>
+                <div className="flex flex-col sm:items-end gap-1.5 text-xs font-medium text-slate-500 sm:text-right dark:text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar size={14} />
+                    <span>{exp.period}</span>
+                  </div>
+                  {exp.location && (
+                    <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                      <MapPin size={13} />
+                      <span>{exp.location}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
