@@ -2,8 +2,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Generate website statis ke folder /out
-  output: "export",
 
   // URL halaman menggunakan trailing slash
   trailingSlash: true,
