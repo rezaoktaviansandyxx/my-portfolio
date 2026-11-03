@@ -4,12 +4,17 @@ export interface Project {
   slug: string;
   title: string;
   shortDescription: string;
+  shortDescriptionEn?: string;
   technologies: string[];
   role: string;
+  roleEn?: string;
   category: ProjectCategory;
+  categoryEn?: string;
   featured?: boolean;
   overview?: string;
+  overviewEn?: string;
   responsibilities?: string[];
+  responsibilitiesEn?: string[];
   githubUrl?: string;
   liveUrl?: string;
   image?: string;
@@ -29,7 +34,9 @@ export interface WorkExperience {
 export interface Education {
   institution: string;
   degree: string;
+  degreeEn?: string;
   major: string;
+  majorEn?: string;
   graduationYear: string;
 }
 
