@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Developer Portfolio - Indra Oki Sandy
 
-## Getting Started
+Website personal portfolio profesional yang dibangun menggunakan Next.js (App Router), TypeScript, dan Tailwind CSS. Dirancang untuk kebutuhan melamar pekerjaan sebagai **Flutter Developer** & **Web Developer** serta menawarkan jasa freelance profesional.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js (App Router, Turbopack, React 19)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS (Corporate Minimalist Design System)
+- **Icons:** Lucide React & Vector SVG Brand Icons
+- **Theme:** Dual Theme Mode (Clean Light Mode sebagai default + Dark Mode switchable)
+- **Deployment Platform:** Vercel
+
+---
+
+## 📁 Struktur Arsitektur Folder
+
+```text
+src/
+├── app/
+│   ├── layout.tsx                # Root layout, metadata, SEO & ThemeProvider
+│   ├── page.tsx                  # Homepage utama (Hero, About, Skills, Featured Projects, Exp, Edu, Contact)
+│   ├── globals.css               # Design system token & theme variables
+│   ├── projects/
+│   │   ├── page.tsx              # Halaman katalog seluruh proyek dengan filter kategori
+│   │   └── [slug]/
+│   │       └── page.tsx          # Dynamic route detail proyek & SSR/Static generation
+│   └── contact/
+│       └── page.tsx              # Halaman kontak profesional terpisah
+│
+├── components/
+│   ├── layout/                   # Navbar (sticky & responsive drawer), Footer
+│   ├── providers/                # ThemeProvider (Dark / Light mode state)
+│   ├── sections/                 # HeroSection, AboutSection, SkillsSection, ExperienceSection, etc.
+│   ├── projects/                 # ProjectCard
+│   └── ui/                       # Icons (GithubIcon, LinkedinIcon, dll)
+│
+├── data/
+│   ├── projects.ts               # Data 7 proyek faktual
+│   ├── skills.ts                 # Kategori keahlian teknis nyata
+│   ├── experience.ts             # Data pengalaman kerja & pendidikan
+│   └── navigation.ts             # Navigasi & kontak terverifikasi
+│
+├── types/
+│   └── index.ts                  # TypeScript interfaces (Project, Experience, Contact, dll)
+│
+└── lib/
+    └── utils.ts                  # Utility helper (cn / clsx & twMerge)
+
+public/
+├── cv/
+│   └── resume.pdf                # Lokasi file CV / Resume untuk tombol unduh
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Cara Menjalankan Project Secara Lokal
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Clone repository (jika belum berada di repositori):**
+   ```bash
+   git clone https://github.com/rezaoktaviansandyxx/my-portfolio.git
+   cd my-portfolio
+   ```
 
-## Learn More
+2. **Install dependensi:**
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Jalankan development server:**
+   ```bash
+   npm run dev
+   ```
+   Buka browser di [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Menjalankan test build produksi:**
+   ```bash
+   npm run build
+   npm run start
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📄 Menambahkan File CV Anda
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Untuk mengaktifkan fungsi tombol **Download CV**:
+- Simpan file resume Anda dengan nama file: `resume.pdf`
+- Letakkan di dalam direktori: `public/cv/resume.pdf`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🌐 Panduan Deployment ke Vercel
+
+1. Push seluruh source code ke repository GitHub Anda (`github.com/rezaoktaviansandyxx/my-portfolio`).
+2. Masuk ke [Vercel](https://vercel.com/) menggunakan akun GitHub Anda.
+3. Klik tombol **Add New...** > **Project**.
+4. Pilih repository `my-portfolio` dan klik **Import**.
+5. Vercel secara otomatis mendeteksi konfigurasi:
+   - **Framework Preset:** Next.js
+   - **Build Command:** `next build`
+   - **Output Directory:** `.next`
+6. Klik tombol **Deploy**. Dalam hitungan detik website portfolio Anda sudah live di URL `*.vercel.app` atau domain kustom Anda.
