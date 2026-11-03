@@ -1,20 +1,30 @@
+"use client";
+
 import { educationData } from "@/data/experience";
-import { GraduationCap, Calendar, Award } from "lucide-react";
+import { GraduationCap, Calendar } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export function EducationSection() {
+  const { t, language } = useLanguage();
+
   if (!educationData || educationData.length === 0) {
     return null;
   }
+
+  const isEn = language === "en";
 
   return (
     <section id="education" className="py-20 border-t border-slate-200/80 bg-slate-50/50 dark:border-slate-800/80 dark:bg-slate-950/40">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl">
           <h2 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-            Education
+            {t.education.tag}
           </h2>
           <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-            Latar Belakang Pendidikan
+            {t.education.title}
+          </p>
+          <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+            {t.education.desc}
           </p>
         </div>
 
@@ -31,17 +41,17 @@ export function EducationSection() {
                   </div>
                   <div>
                     <span className="inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                      {edu.degree}
+                      {isEn && edu.degreeEn ? edu.degreeEn : edu.degree}
                     </span>
                     <h3 className="mt-1 text-base font-bold text-slate-900 dark:text-white">
-                      {edu.major}
+                      {isEn && edu.majorEn ? edu.majorEn : edu.major}
                     </h3>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                   <Calendar size={13} />
-                  <span>Lulus {edu.graduationYear}</span>
+                  <span>{edu.graduationYear}</span>
                 </div>
               </div>
 

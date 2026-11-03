@@ -1,10 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDownToLine, ArrowRight, Mail, CheckCircle2 } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
 import { contactData } from "@/data/navigation";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export function HeroSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="relative overflow-hidden py-16 md:py-24 lg:py-28">
       {/* Background soft ambient grid */}
@@ -20,12 +25,12 @@ export function HeroSection() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              Available for Full-time Roles & Freelance Projects
+              {t.hero.badge}
             </div>
 
             {/* Name & Title */}
             <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
-              Hi, saya <span className="text-blue-600 dark:text-blue-400">{contactData.name}</span>
+              {t.hero.greeting} <span className="text-blue-600 dark:text-blue-400">{contactData.name}</span>
             </h1>
 
             <p className="mt-3 text-xl font-semibold tracking-tight text-slate-700 sm:text-2xl dark:text-slate-200">
@@ -34,22 +39,22 @@ export function HeroSection() {
 
             {/* Short Professional Description */}
             <p className="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
-              Software Developer dengan pengalaman membangun aplikasi mobile multiplatform menggunakan Flutter serta antarmuka web modern dengan React.js. Berpengalaman dalam integrasi RESTful API, arsitektur state management yang bersih, dan sistem ERP terpadu.
+              {t.hero.description}
             </p>
 
             {/* Key Value Highlights */}
             <div className="mt-6 flex flex-wrap gap-y-2 gap-x-4 text-xs font-medium text-slate-600 dark:text-slate-300">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-blue-600 dark:text-blue-400" />
-                1 Tahun Pengalaman Kerja
+                {t.hero.expHighlight}
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-blue-600 dark:text-blue-400" />
-                Produksi POS (Desktop/iMin) & Web ERP
+                {t.hero.productionHighlight}
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-blue-600 dark:text-blue-400" />
-                Clean Code & Scalable Architecture
+                {t.hero.codeHighlight}
               </span>
             </div>
 
@@ -61,14 +66,14 @@ export function HeroSection() {
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
               >
                 <ArrowDownToLine size={17} />
-                Download CV
+                {t.hero.downloadCvBtn}
               </a>
 
               <Link
                 href="/contact"
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
-                Contact Me
+                {t.hero.contactBtn}
                 <ArrowRight size={16} />
               </Link>
 

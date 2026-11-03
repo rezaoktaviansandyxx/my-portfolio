@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Mail, MessageSquare, MapPin } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
-import { contactData, navigationItems } from "@/data/navigation";
+import { CopyButton } from "@/components/ui/CopyButton";
+import { contactData } from "@/data/navigation";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export function Footer() {
   const [currentYear, setCurrentYear] = useState<number | string>(2026);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -29,7 +32,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
-              {contactData.title}. Fokus membangun aplikasi mobile & web yang modern, cepat, dan terintegrasi dengan baik.
+              {contactData.title}. {t.footer.bio}
             </p>
             <div className="flex items-center gap-3 pt-2">
               <a
@@ -53,72 +56,80 @@ export function Footer() {
               <a
                 href={`mailto:${contactData.email}`}
                 aria-label="Email"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-red-600 hover:border-red-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-red-500 hover:border-red-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
               >
                 <Mail size={17} />
-              </a>
-              <a
-                href={contactData.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-emerald-600 hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors"
-              >
-                <MessageSquare size={17} />
               </a>
             </div>
           </div>
 
-          {/* Kolom 2: Navigasi Halaman (Vertikal) */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-              Navigasi
+          {/* Kolom 2: Navigasi Cepat */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
+              {t.footer.navTitle}
             </h3>
-            <ul className="mt-4 space-y-2.5">
-              {navigationItems.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+            <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <li>
+                <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {t.nav.home}
+                </Link>
+              </li>
+              <li>
+                <Link href="/#about" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {t.nav.about}
+                </Link>
+              </li>
+              <li>
+                <Link href="/#skills" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {t.nav.skills}
+                </Link>
+              </li>
+              <li>
+                <Link href="/projects" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {t.nav.projects}
+                </Link>
+              </li>
+              <li>
+                <Link href="/#experience" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {t.nav.experience}
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {t.nav.contact}
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Kolom 3: Kontak Cepat */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-              Kontak
+          {/* Kolom 3: Kontak & Lokasi */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
+              {t.footer.contactTitle}
             </h3>
-            <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400">
-              <div className="flex items-start gap-2.5">
-                <MapPin size={16} className="mt-0.5 text-blue-600 dark:text-blue-400 shrink-0" />
+            <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <MapPin size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
                 <span>{contactData.location}</span>
               </div>
-              <div className="flex items-start gap-2.5">
-                <Mail size={16} className="mt-0.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                <a href={`mailto:${contactData.email}`} className="hover:underline break-all">
-                  {contactData.email}
-                </a>
+              <div className="flex items-center gap-2">
+                <Mail size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                <span className="truncate">{contactData.email}</span>
               </div>
-              <div className="pt-2">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  Kirim Pesan &rarr;
-                </Link>
+              <div className="flex items-center gap-2">
+                <MessageSquare size={15} className="text-emerald-500 shrink-0" />
+                <span>{contactData.whatsapp}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar / Hak Cipta */}
-        <div className="border-t border-slate-200/80 pt-6 dark:border-slate-800/80 text-center text-xs text-slate-500 dark:text-slate-400">
-          <p>© {currentYear} {contactData.name}. All rights reserved.</p>
+        {/* Baris Bawah: Hak Cipta & Info Teknologi */}
+        <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <p>© {currentYear} {contactData.name}. {t.footer.copyright}</p>
+          <p className="flex items-center gap-1.5">
+            <span>{t.footer.builtWith}</span>
+          </p>
         </div>
       </div>
     </footer>
