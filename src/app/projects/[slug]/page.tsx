@@ -21,8 +21,6 @@ export async function generateStaticParams() {
   }));
 }
 
-export const instant = false;
-
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = await params;
   const project = projectsData.find((p) => p.slug === slug);
@@ -72,7 +70,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 <div
                   className={`relative w-full ${
                     project.category === "Mobile"
-                      ? "h-80 sm:h-96 md:h-[450px]"
+                      ? "h-80 sm:h-96 md:h-112.5"
                       : "aspect-video"
                   }`}
                 >
