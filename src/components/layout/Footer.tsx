@@ -124,12 +124,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Baris Bawah: Hak Cipta & Info Teknologi */}
-        <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+        {/* Baris Bawah: Hak Cipta */}
+        <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400 text-center">
           <p>© {currentYear} {contactData.name}. {t.footer.copyright}</p>
-          <p className="flex items-center gap-1.5">
-            <span>{t.footer.builtWith}</span>
-          </p>
         </div>
       </div>
     </footer>
