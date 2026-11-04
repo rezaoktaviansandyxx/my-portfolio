@@ -120,6 +120,13 @@ export const projectsData: Project[] = [
       "Developed scalable RESTful API backend architecture using Laravel (PHP).",
       "Built interactive user interfaces with React.js for product cataloguing and stock actions.",
       "Implemented reliable data validation workflows and efficient client-server interactions."
+    ],
+    image: "/images/projects/product-management-system/pms-landing.jpg",
+    gallery: [
+      "/images/projects/product-management-system/pms-landing.jpg",
+      "/images/projects/product-management-system/pms-dashboard.jpg",
+      "/images/projects/product-management-system/pms-products.jpg",
+      "/images/projects/product-management-system/pms-add-product.jpg"
     ]
   },
   {
