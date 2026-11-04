@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://indraokisandy.my.id";
+const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://indraokisandy-dev.vercel.app").replace(/\/$/, "");
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
