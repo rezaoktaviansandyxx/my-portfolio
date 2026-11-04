@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
@@ -32,6 +32,20 @@ export function CommandMenu() {
   const { language, setLanguage, t } = useLanguage();
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, setOpen]);
+
   const runCommand = (command: () => void) => {
     command();
     setOpen(false);
@@ -62,6 +76,12 @@ export function CommandMenu() {
         <Command
           label="Global Command Menu"
           className="w-full flex flex-col focus:outline-none"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.preventDefault();
+              setOpen(false);
+            }
+          }}
         >
           {/* Search Header Input */}
           <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 dark:border-slate-800/80">
@@ -71,9 +91,14 @@ export function CommandMenu() {
               autoFocus
               className="w-full bg-transparent text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-white"
             />
-            <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="hidden sm:inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors"
+              title="Esc"
+            >
               ESC
-            </kbd>
+            </button>
           </div>
 
           {/* Items List */}

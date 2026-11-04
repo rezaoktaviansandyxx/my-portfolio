@@ -25,6 +25,8 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((prev) => !prev);
+      } else if (e.key === "Escape") {
+        setOpen(false);
       }
     };
 
