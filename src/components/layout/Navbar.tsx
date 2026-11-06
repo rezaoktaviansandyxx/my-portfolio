@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, Sun, Moon, ArrowDownToLine, Search } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -9,6 +9,7 @@ import { useCommandMenu } from "@/components/providers/CommandMenuProvider";
 import { contactData } from "@/data/navigation";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { scrollToSection, ROUTE_SECTIONS, SECTION_ROUTES } from "@/lib/scroll";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,12 +17,57 @@ export function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // 1. If loaded with an old hash URL (e.g. localhost:3000/#about), convert it to clean route /about
+    if (window.location.hash) {
+      const targetId = window.location.hash.replace("#", "");
+      const targetPath = SECTION_ROUTES[targetId] || "/";
+      const element = document.getElementById(targetId);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 80);
+      }
+      window.history.replaceState(null, "", targetPath);
+    } else {
+      // 2. If loaded directly at a section route (e.g. /about, /skills, /projects, etc.)
+      const section = ROUTE_SECTIONS[window.location.pathname];
+      if (section && section !== "home") {
+        const element = document.getElementById(section);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: "smooth" });
+          }, 80);
+        }
+      }
+    }
+
+    // 3. Handle browser Back / Forward buttons
+    const handlePopState = () => {
+      const section = ROUTE_SECTIONS[window.location.pathname];
+      if (section === "home") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (section) {
+        const element = document.getElementById(section);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-colors dark:border-slate-800/80 dark:bg-slate-950/80">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16 gap-3">
         {/* Brand / Logo */}
         <Link
           href="/"
+          onClick={(e) => scrollToSection("home", e)}
           className="group flex items-center gap-2.5 transition-all focus:outline-none shrink-0"
         >
           {/* Logo Badge */}
@@ -44,42 +90,49 @@ export function Navbar() {
         <nav className="hidden xl:flex items-center gap-5">
           <Link
             href="/"
+            onClick={(e) => scrollToSection("home", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.home}
           </Link>
           <Link
-            href="/#about"
+            href="/about"
+            onClick={(e) => scrollToSection("about", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.about}
           </Link>
           <Link
-            href="/#skills"
+            href="/skills"
+            onClick={(e) => scrollToSection("skills", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.skills}
           </Link>
           <Link
-            href="/#projects"
+            href="/projects"
+            onClick={(e) => scrollToSection("projects", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.projects}
           </Link>
           <Link
-            href="/#experience"
+            href="/experience"
+            onClick={(e) => scrollToSection("experience", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.experience}
           </Link>
           <Link
-            href="/#education"
+            href="/education"
+            onClick={(e) => scrollToSection("education", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.education}
           </Link>
           <Link
-            href="/#contact"
+            href="/contact"
+            onClick={(e) => scrollToSection("contact", e)}
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.contact}
@@ -176,49 +229,70 @@ export function Navbar() {
           <nav className="flex flex-col gap-3">
             <Link
               href="/"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("home", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.home}
             </Link>
             <Link
-              href="/#about"
-              onClick={() => setMobileMenuOpen(false)}
+              href="/about"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("about", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.about}
             </Link>
             <Link
-              href="/#skills"
-              onClick={() => setMobileMenuOpen(false)}
+              href="/skills"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("skills", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.skills}
             </Link>
             <Link
-              href="/#projects"
-              onClick={() => setMobileMenuOpen(false)}
+              href="/projects"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("projects", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.projects}
             </Link>
             <Link
-              href="/#experience"
-              onClick={() => setMobileMenuOpen(false)}
+              href="/experience"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("experience", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.experience}
             </Link>
             <Link
-              href="/#education"
-              onClick={() => setMobileMenuOpen(false)}
+              href="/education"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("education", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.education}
             </Link>
             <Link
-              href="/#contact"
-              onClick={() => setMobileMenuOpen(false)}
+              href="/contact"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                scrollToSection("contact", e);
+              }}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
               {t.nav.contact}
@@ -240,4 +314,3 @@ export function Navbar() {
     </header>
   );
 }
-
