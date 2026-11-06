@@ -7,12 +7,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ).replace(/\/$/, "");
 
   // Ubah tanggal ini hanya saat konten benar-benar berubah
-  const lastUpdated = new Date("2026-11-05");
+  const lastUpdated = new Date("2026-11-06");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, lastModified: lastUpdated, priority: 1.0 },
-    { url: `${baseUrl}/project/list/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/about/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/skills/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/projects/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/experience/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/education/`, lastModified: lastUpdated, priority: 0.8 },
     { url: `${baseUrl}/contact/`, lastModified: lastUpdated, priority: 0.8 },
+    { url: `${baseUrl}/project/list/`, lastModified: lastUpdated, priority: 0.9 },
   ];
 
   const projectRoutes: MetadataRoute.Sitemap = projectsData.map((project) => ({

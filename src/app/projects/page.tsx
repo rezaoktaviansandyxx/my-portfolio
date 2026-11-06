@@ -1,5 +1,8 @@
-import { redirect } from "next/navigation";
+import HomePage from "../page";
 
-export default function ProjectsRedirect() {
-  redirect("/project/list");
-}
+export const metadata = {
+  title: "Projects | Indra Oki Sandy",
+  description: "Portofolio & Proyek Pilihan - Indra Oki Sandy.",
+};
+
+export default HomePage;
