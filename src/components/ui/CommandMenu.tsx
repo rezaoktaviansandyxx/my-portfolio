@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
   Home,
@@ -24,10 +23,10 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useCommandMenu } from "@/components/providers/CommandMenuProvider";
 import { contactData } from "@/data/navigation";
+import { scrollToSection } from "@/lib/scroll";
 
 export function CommandMenu() {
   const { open, setOpen, isMac } = useCommandMenu();
-  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const [copiedText, setCopiedText] = useState<string | null>(null);
@@ -113,7 +112,7 @@ export function CommandMenu() {
               className="px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider [&_[cmdk-group-heading]]:py-1.5"
             >
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/"))}
+                onSelect={() => runCommand(() => scrollToSection("home"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <Home className="h-4 w-4 text-blue-500" />
@@ -121,7 +120,7 @@ export function CommandMenu() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/#about"))}
+                onSelect={() => runCommand(() => scrollToSection("about"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <User className="h-4 w-4 text-blue-500" />
@@ -129,7 +128,7 @@ export function CommandMenu() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/#skills"))}
+                onSelect={() => runCommand(() => scrollToSection("skills"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <Cpu className="h-4 w-4 text-blue-500" />
@@ -137,7 +136,7 @@ export function CommandMenu() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/#projects"))}
+                onSelect={() => runCommand(() => scrollToSection("projects"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <FolderGit2 className="h-4 w-4 text-blue-500" />
@@ -145,7 +144,7 @@ export function CommandMenu() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/#experience"))}
+                onSelect={() => runCommand(() => scrollToSection("experience"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <Briefcase className="h-4 w-4 text-blue-500" />
@@ -153,7 +152,7 @@ export function CommandMenu() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/#education"))}
+                onSelect={() => runCommand(() => scrollToSection("education"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <GraduationCap className="h-4 w-4 text-blue-500" />
@@ -161,7 +160,7 @@ export function CommandMenu() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => runCommand(() => router.push("/#contact"))}
+                onSelect={() => runCommand(() => scrollToSection("contact"))}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <Mail className="h-4 w-4 text-blue-500" />
@@ -326,4 +325,3 @@ export function CommandMenu() {
     </div>
   );
 }
-
