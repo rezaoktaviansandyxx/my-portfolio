@@ -13,10 +13,10 @@ export const contactData: ContactInfo = {
 
 export const navigationItems: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/#about" },
-  { label: "Skills", href: "/#skills" },
-  { label: "Projects", href: "/#projects" },
-  { label: "Experience", href: "/#experience" },
-  { label: "Education", href: "/#education" },
-  { label: "Contact", href: "/#contact" }
+  { label: "About", href: "/about" },
+  { label: "Skills", href: "/skills" },
+  { label: "Projects", href: "/projects" },
+  { label: "Experience", href: "/experience" },
+  { label: "Education", href: "/education" },
+  { label: "Contact", href: "/contact" }
 ];
