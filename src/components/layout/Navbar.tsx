@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X, Sun, Moon, ArrowDownToLine, Search } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -11,14 +12,27 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { scrollToSection, ROUTE_SECTIONS, SECTION_ROUTES } from "@/lib/scroll";
 
+const SECTION_IDS = ["home", "about", "skills", "projects", "experience", "education", "contact"];
+
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("home");
+  const isUserClickingRef = useRef(false);
   const { toggleOpen, isMac } = useCommandMenu();
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
+  const pathname = usePathname();
 
+  const isSectionPage = Boolean(pathname && pathname in ROUTE_SECTIONS);
+
+  // Track initial route & handle back/forward
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    if (!isSectionPage) {
+      setActiveSection("");
+      return;
+    }
 
     // 1. If loaded with an old hash URL (e.g. localhost:3000/#about), convert it to clean route /about
     if (window.location.hash) {
@@ -31,16 +45,20 @@ export function Navbar() {
         }, 80);
       }
       window.history.replaceState(null, "", targetPath);
+      setActiveSection(targetId);
     } else {
       // 2. If loaded directly at a section route (e.g. /about, /skills, /projects, etc.)
       const section = ROUTE_SECTIONS[window.location.pathname];
       if (section && section !== "home") {
+        setActiveSection(section);
         const element = document.getElementById(section);
         if (element) {
           setTimeout(() => {
             element.scrollIntoView({ behavior: "smooth" });
           }, 80);
         }
+      } else if (section === "home") {
+        setActiveSection("home");
       }
     }
 
@@ -48,8 +66,10 @@ export function Navbar() {
     const handlePopState = () => {
       const section = ROUTE_SECTIONS[window.location.pathname];
       if (section === "home") {
+        setActiveSection("home");
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (section) {
+        setActiveSection(section);
         const element = document.getElementById(section);
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
@@ -59,7 +79,87 @@ export function Navbar() {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [isSectionPage]);
+
+  // Active scroll spy & URL updater
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Only enable scroll spy if on the main single-page sections
+    if (!isSectionPage) return;
+
+    const handleScroll = () => {
+      // If user navigated away from section pages, don't update URL
+      if (!ROUTE_SECTIONS[window.location.pathname]) return;
+
+      // If scroll was triggered by a direct click, let the click handler control state temporarily
+      if (isUserClickingRef.current) return;
+
+      const scrollPosition = window.scrollY + 140; // offset below fixed navbar
+
+      // If at the very top of the page
+      if (window.scrollY < 80) {
+        if (activeSection !== "home") {
+          setActiveSection("home");
+          if (window.location.pathname !== "/") {
+            window.history.replaceState(null, "", "/");
+          }
+        }
+        return;
+      }
+
+      // Check each section position
+      let currentActive = "home";
+      for (const id of SECTION_IDS) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPosition >= top) {
+            currentActive = id;
+          }
+        }
+      }
+
+      // Check if user reached bottom of page -> activate contact
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50) {
+        currentActive = "contact";
+      }
+
+      if (currentActive !== activeSection) {
+        setActiveSection(currentActive);
+        const targetPath = SECTION_ROUTES[currentActive] || "/";
+        if (window.location.pathname !== targetPath) {
+          window.history.replaceState(null, "", targetPath);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Run once on mount
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname, isSectionPage, activeSection]);
+
+  const handleNavClick = (sectionId: string, e: React.MouseEvent) => {
+    isUserClickingRef.current = true;
+    setActiveSection(sectionId);
+    scrollToSection(sectionId, e);
+
+    setTimeout(() => {
+      isUserClickingRef.current = false;
+    }, 800);
+  };
+
+  const navLinks = [
+    { id: "home", href: "/", label: t.nav.home },
+    { id: "about", href: "/about", label: t.nav.about },
+    { id: "skills", href: "/skills", label: t.nav.skills },
+    { id: "projects", href: "/projects", label: t.nav.projects },
+    { id: "experience", href: "/experience", label: t.nav.experience },
+    { id: "education", href: "/education", label: t.nav.education },
+    { id: "contact", href: "/contact", label: t.nav.contact },
+  ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-colors dark:border-slate-800/80 dark:bg-slate-950/80">
@@ -67,7 +167,7 @@ export function Navbar() {
         {/* Brand / Logo */}
         <Link
           href="/"
-          onClick={(e) => scrollToSection("home", e)}
+          onClick={(e) => handleNavClick("home", e)}
           className="group flex items-center gap-2.5 transition-all focus:outline-none shrink-0"
         >
           {/* Logo Badge */}
@@ -87,56 +187,27 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden xl:flex items-center gap-5">
-          <Link
-            href="/"
-            onClick={(e) => scrollToSection("home", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.home}
-          </Link>
-          <Link
-            href="/about"
-            onClick={(e) => scrollToSection("about", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.about}
-          </Link>
-          <Link
-            href="/skills"
-            onClick={(e) => scrollToSection("skills", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.skills}
-          </Link>
-          <Link
-            href="/projects"
-            onClick={(e) => scrollToSection("projects", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.projects}
-          </Link>
-          <Link
-            href="/experience"
-            onClick={(e) => scrollToSection("experience", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.experience}
-          </Link>
-          <Link
-            href="/education"
-            onClick={(e) => scrollToSection("education", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.education}
-          </Link>
-          <Link
-            href="/contact"
-            onClick={(e) => scrollToSection("contact", e)}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-          >
-            {t.nav.contact}
-          </Link>
+        <nav className="hidden xl:flex items-center gap-1">
+          {navLinks.map((item) => {
+            const isActive = activeSection === item.id;
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={(e) => handleNavClick(item.id, e)}
+                className={`relative px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                  isActive
+                    ? "text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/80 dark:bg-blue-950/50"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60"
+                }`}
+              >
+                {item.label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Action Buttons: Cmd+K Search, Language Switch, Copy Email, Theme Toggle & CV */}
@@ -226,79 +297,32 @@ export function Navbar() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="border-b border-slate-200 bg-white px-4 py-4 md:hidden dark:border-slate-800 dark:bg-slate-950">
-          <nav className="flex flex-col gap-3">
-            <Link
-              href="/"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("home", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.home}
-            </Link>
-            <Link
-              href="/about"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("about", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.about}
-            </Link>
-            <Link
-              href="/skills"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("skills", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.skills}
-            </Link>
-            <Link
-              href="/projects"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("projects", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.projects}
-            </Link>
-            <Link
-              href="/experience"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("experience", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.experience}
-            </Link>
-            <Link
-              href="/education"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("education", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.education}
-            </Link>
-            <Link
-              href="/contact"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToSection("contact", e);
-              }}
-              className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
-            >
-              {t.nav.contact}
-            </Link>
+          <nav className="flex flex-col gap-1.5">
+            {navLinks.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    handleNavClick(item.id, e);
+                  }}
+                  className={`text-sm font-medium px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-semibold"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-blue-400"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  {isActive && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                  )}
+                </Link>
+              );
+            })}
 
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+            <div className="mt-2 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
               <a
                 href="/cv/CV-Indra-Oki-Sandy.pdf"
                 download="CV-Indra-Oki-Sandy-Software-Developer.pdf"
