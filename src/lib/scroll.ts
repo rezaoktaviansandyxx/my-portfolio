@@ -61,7 +61,7 @@ export function scrollToSection(sectionId: string, e?: React.MouseEvent) {
       window.history.pushState({ sectionId }, "", targetPath);
     }
   } else {
-    // If navigating from an external route (e.g. /project/list), perform full navigation
+    // If navigating from an external route (e.g. /projects/list), perform full navigation
     window.location.href = targetPath;
   }
 }

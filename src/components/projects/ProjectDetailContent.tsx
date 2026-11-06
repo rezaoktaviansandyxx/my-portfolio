@@ -32,7 +32,7 @@ export function ProjectDetailContent({ project, relatedProjects }: ProjectDetail
           {t.nav.home}
         </Link>
         <ChevronRight size={14} />
-        <Link href="/project/list" className="hover:text-blue-600 dark:hover:text-blue-400">
+        <Link href="/projects/list" className="hover:text-blue-600 dark:hover:text-blue-400">
           {t.nav.projects}
         </Link>
         <ChevronRight size={14} />
@@ -201,7 +201,7 @@ export function ProjectDetailContent({ project, relatedProjects }: ProjectDetail
       {/* Back link */}
       <div className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800">
         <Link
-          href="/project/list"
+          href="/projects/list"
           className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
         >
           <ArrowLeft size={16} />

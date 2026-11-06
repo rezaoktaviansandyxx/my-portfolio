@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/experience/`, lastModified: lastUpdated, priority: 0.9 },
     { url: `${baseUrl}/education/`, lastModified: lastUpdated, priority: 0.8 },
     { url: `${baseUrl}/contact/`, lastModified: lastUpdated, priority: 0.8 },
-    { url: `${baseUrl}/project/list/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/projects/list/`, lastModified: lastUpdated, priority: 0.9 },
   ];
 
   const projectRoutes: MetadataRoute.Sitemap = projectsData.map((project) => ({

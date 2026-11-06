@@ -29,7 +29,7 @@ export function FeaturedProjectsSection() {
             </div>
 
             <Link
-              href="/project/list"
+              href="/projects/list"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               {t.projects.viewAll} ({projectsData.length})
