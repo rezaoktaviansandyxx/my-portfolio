@@ -6,6 +6,7 @@ import { ArrowDownToLine, ArrowRight, Mail, CheckCircle2 } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
 import { contactData } from "@/data/navigation";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { scrollToSection } from "@/lib/scroll";
 
 export function HeroSection() {
   const { t } = useLanguage();
@@ -70,7 +71,8 @@ export function HeroSection() {
               </a>
 
               <Link
-                href="/#contact"
+                href="/contact"
+                onClick={(e) => scrollToSection("contact", e)}
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 {t.hero.contactBtn}
@@ -134,4 +136,3 @@ export function HeroSection() {
     </section>
   );
 }
-
