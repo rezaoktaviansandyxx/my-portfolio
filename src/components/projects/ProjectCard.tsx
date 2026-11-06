@@ -6,9 +6,10 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface ProjectCardProps {
   project: Project;
+  priority?: boolean;
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, priority = false }: ProjectCardProps) {
   const { language } = useLanguage();
   const isEn = language === "en";
 
@@ -29,6 +30,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               src={project.image}
               alt={project.title}
               fill
+              priority={priority}
               className={`transition duration-300 group-hover:scale-105 ${
                 project.category === "Mobile"
                   ? "object-contain p-2"

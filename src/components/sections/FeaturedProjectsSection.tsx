@@ -39,9 +39,9 @@ export function FeaturedProjectsSection() {
         </FadeIn>
 
         <StaggerContainer className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6" staggerDelay={0.12}>
-          {featured.map((project) => (
+          {featured.map((project, index) => (
             <StaggerItem key={project.slug}>
-              <ProjectCard project={project} />
+              <ProjectCard project={project} priority={index < 2} />
             </StaggerItem>
           ))}
         </StaggerContainer>

@@ -115,7 +115,7 @@ export default function ProjectsListPage() {
             className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             <AnimatePresence mode="popLayout">
-              {filteredProjects.map((project) => (
+              {filteredProjects.map((project, index) => (
                 <motion.div
                   key={project.slug}
                   layout
@@ -124,7 +124,7 @@ export default function ProjectsListPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                  <ProjectCard project={project} />
+                  <ProjectCard project={project} priority={index < 2} />
                 </motion.div>
               ))}
             </AnimatePresence>
