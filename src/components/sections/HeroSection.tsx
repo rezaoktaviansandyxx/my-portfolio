@@ -70,7 +70,7 @@ export function HeroSection() {
               </a>
 
               <Link
-                href="/contact"
+                href="/#contact"
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 {t.hero.contactBtn}
@@ -134,3 +134,4 @@ export function HeroSection() {
     </section>
   );
 }
+

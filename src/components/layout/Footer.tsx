@@ -85,7 +85,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/projects" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link href="/#projects" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   {t.nav.projects}
                 </Link>
               </li>
@@ -95,7 +95,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link href="/#contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   {t.nav.contact}
                 </Link>
               </li>
@@ -132,3 +132,4 @@ export function Footer() {
     </footer>
   );
 }
+

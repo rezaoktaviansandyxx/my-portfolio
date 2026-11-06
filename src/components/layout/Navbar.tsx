@@ -61,7 +61,7 @@ export function Navbar() {
             {t.nav.skills}
           </Link>
           <Link
-            href="/projects"
+            href="/#projects"
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.projects}
@@ -79,7 +79,7 @@ export function Navbar() {
             {t.nav.education}
           </Link>
           <Link
-            href="/contact"
+            href="/#contact"
             className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
           >
             {t.nav.contact}
@@ -196,7 +196,7 @@ export function Navbar() {
               {t.nav.skills}
             </Link>
             <Link
-              href="/projects"
+              href="/#projects"
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
@@ -217,7 +217,7 @@ export function Navbar() {
               {t.nav.education}
             </Link>
             <Link
-              href="/contact"
+              href="/#contact"
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-medium text-slate-700 py-1.5 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
             >
@@ -240,3 +240,4 @@ export function Navbar() {
     </header>
   );
 }
+
