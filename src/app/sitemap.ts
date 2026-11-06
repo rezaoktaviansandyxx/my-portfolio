@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, lastModified: lastUpdated, priority: 1.0 },
-    { url: `${baseUrl}/projects/`, lastModified: lastUpdated, priority: 0.9 },
+    { url: `${baseUrl}/project/list/`, lastModified: lastUpdated, priority: 0.9 },
     { url: `${baseUrl}/contact/`, lastModified: lastUpdated, priority: 0.8 },
   ];
 
