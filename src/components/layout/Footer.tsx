@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Mail, MessageSquare, MapPin } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
-import { CopyButton } from "@/components/ui/CopyButton";
 import { contactData } from "@/data/navigation";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { scrollToSection } from "@/lib/scroll";
 
 export function Footer() {
   const [currentYear, setCurrentYear] = useState<number | string>(2026);
@@ -22,7 +22,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
           {/* Kolom 1: Profil Singkat & Sosmed */}
           <div className="md:col-span-2 space-y-4">
-            <Link href="/" className="inline-flex items-center gap-2 group">
+            <Link
+              href="/"
+              onClick={(e) => scrollToSection("home", e)}
+              className="inline-flex items-center gap-2 group"
+            >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-sm">
                 IO
               </div>
@@ -70,32 +74,56 @@ export function Footer() {
             </h3>
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
               <li>
-                <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link
+                  href="/"
+                  onClick={(e) => scrollToSection("home", e)}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
                   {t.nav.home}
                 </Link>
               </li>
               <li>
-                <Link href="/#about" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link
+                  href="/about"
+                  onClick={(e) => scrollToSection("about", e)}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
                   {t.nav.about}
                 </Link>
               </li>
               <li>
-                <Link href="/#skills" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link
+                  href="/skills"
+                  onClick={(e) => scrollToSection("skills", e)}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
                   {t.nav.skills}
                 </Link>
               </li>
               <li>
-                <Link href="/#projects" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link
+                  href="/projects"
+                  onClick={(e) => scrollToSection("projects", e)}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
                   {t.nav.projects}
                 </Link>
               </li>
               <li>
-                <Link href="/#experience" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link
+                  href="/experience"
+                  onClick={(e) => scrollToSection("experience", e)}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
                   {t.nav.experience}
                 </Link>
               </li>
               <li>
-                <Link href="/#contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Link
+                  href="/contact"
+                  onClick={(e) => scrollToSection("contact", e)}
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
                   {t.nav.contact}
                 </Link>
               </li>
@@ -132,4 +160,3 @@ export function Footer() {
     </footer>
   );
 }
-
