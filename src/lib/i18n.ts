@@ -4,19 +4,19 @@ export const translations = {
   id: {
     // Navigation
     nav: {
-      home: "Home",
-      about: "About",
-      skills: "Skills",
-      projects: "Projects",
-      experience: "Experience",
-      education: "Education",
-      contact: "Contact",
-      downloadCv: "Download CV",
+      home: "Beranda",
+      about: "Tentang",
+      skills: "Keahlian",
+      projects: "Proyek",
+      experience: "Pengalaman",
+      education: "Pendidikan",
+      contact: "Kontak",
+      downloadCv: "Unduh CV",
       copyEmail: "Salin Email",
       searchPlaceholder: "Cari halaman, aksi cepat...",
-      commandMenu: "Command Menu",
+      commandMenu: "Menu Perintah",
       toggleTheme: "Ganti Tema",
-      switchLanguage: "Switch Bahasa",
+      switchLanguage: "Ganti Bahasa",
     },
     // Hero
     hero: {
@@ -27,7 +27,7 @@ export const translations = {
       expHighlight: "1 Tahun Pengalaman Kerja",
       productionHighlight: "Produksi POS (Desktop/iMin) & Web ERP",
       codeHighlight: "Clean Code & Scalable Architecture",
-      downloadCvBtn: "Download CV",
+      downloadCvBtn: "Unduh CV",
       contactBtn: "Hubungi Saya",
       exploreProjects: "Lihat Portfolio Proyek",
     },
