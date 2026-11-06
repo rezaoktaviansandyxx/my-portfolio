@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // URL halaman menggunakan trailing slash
-  trailingSlash: true,
-
   // Redirects
   async redirects() {
     return [
