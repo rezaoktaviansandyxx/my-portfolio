@@ -6,6 +6,7 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { ContactForm } from "@/components/sections/ContactForm";
 import { contactData } from "@/data/navigation";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { trackEvent } from "@/lib/analytics";
 
 export function ContactSection() {
   const { t } = useLanguage();
@@ -32,6 +33,7 @@ export function ContactSection() {
             <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-blue-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
               <a
                 href={`mailto:${contactData.email}`}
+                onClick={() => trackEvent("email_click", { link_location: "contact_section" })}
                 className="group flex items-center gap-4 min-w-0 flex-1 mr-2"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
@@ -56,6 +58,7 @@ export function ContactSection() {
             {/* WhatsApp Card */}
             <a
               href={contactData.whatsappUrl}
+              onClick={() => trackEvent("whatsapp_click", { link_location: "contact_section" })}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-emerald-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
@@ -80,6 +83,7 @@ export function ContactSection() {
             <div className="grid grid-cols-2 gap-4 pt-2">
               <a
                 href={contactData.linkedin}
+                onClick={() => trackEvent("linkedin_click", { link_location: "contact_section" })}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition hover:border-blue-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
@@ -95,6 +99,7 @@ export function ContactSection() {
 
               <a
                 href={contactData.github}
+                onClick={() => trackEvent("github_click", { link_location: "contact_section" })}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs transition hover:border-slate-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"

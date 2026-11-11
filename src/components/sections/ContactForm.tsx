@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Send, Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { trackEvent } from "@/lib/analytics";
 
 interface FormState {
   name: string;
@@ -88,6 +89,7 @@ export function ContactForm() {
       const data = await response.json();
 
       if (data.success) {
+        trackEvent("contact_form_submit", { form_name: "portfolio_contact" });
         setStatus("success");
         setFeedbackMessage(t.contact.formSuccess);
         setFormData({
