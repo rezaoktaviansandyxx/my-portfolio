@@ -60,8 +60,8 @@ export const translations = {
     // Skills
     skills: {
       tag: "Keahlian Teknis",
-      title: "Teknologi & Alat yang Dikuasai",
-      desc: "Kumpulan teknologi utama, bahasa pemrograman, framework, dan tools yang saya gunakan dalam membangun solusi perangkat lunak skala produksi.",
+      title: "Keahlian Berdasarkan Pengalaman",
+      desc: "Teknologi dikelompokkan berdasarkan fokus utama, pengalaman dalam pekerjaan dan proyek, serta teknologi tambahan yang pernah digunakan.",
     },
     // Projects
     projects: {
@@ -225,8 +225,8 @@ export const translations = {
     // Skills
     skills: {
       tag: "Technical Skills",
-      title: "Technologies & Tools Mastered",
-      desc: "Core technologies, programming languages, frameworks, and developer tools used to build production-scale software solutions.",
+      title: "Skills by Experience",
+      desc: "Technologies grouped by core focus, experience across work and projects, and additional tools and frameworks I have used.",
     },
     // Projects
     projects: {

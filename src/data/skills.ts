@@ -2,23 +2,15 @@ import { SkillCategory } from "@/types";
 
 export const skillCategoriesData: SkillCategory[] = [
   {
-    category: "Mobile Development",
-    skills: ["Flutter", "Dart", "Provider", "GoRouter", "Flutter Web"]
+    category: "Primary Skills",
+    skills: ["Flutter", "Dart", "React.js"]
   },
   {
-    category: "Frontend Development",
-    skills: ["React.js", "Angular", "Next.js", "TypeScript", "Tailwind CSS", "HTML5 & CSS3"]
+    category: "Working Experience",
+    skills: ["Provider", "REST API", "ERPNext", "Laravel (PHP)"]
   },
   {
-    category: "Backend Development",
-    skills: ["Laravel (PHP)", "FastAPI (Python)", "REST API", "ERPNext"]
-  },
-  {
-    category: "Database",
-    skills: ["PostgreSQL", "MySQL / Relational DB"]
-  },
-  {
-    category: "Tools & Technologies",
-    skills: ["Git", "GitHub", "Postman", "VS Code", "Vercel"]
+    category: "Additional Skills",
+    skills: ["Next.js", "Angular", "FastAPI (Python)", "PostgreSQL", "TypeScript", "Tailwind CSS", "GoRouter", "Flutter Web", "HTML5 & CSS3", "MySQL / Relational DB", "Git", "GitHub", "Postman", "VS Code", "Vercel"]
   }
 ];
