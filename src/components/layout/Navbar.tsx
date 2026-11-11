@@ -20,7 +20,9 @@ export function Navbar() {
   const isUserClickingRef = useRef(false);
   const { toggleOpen, isMac } = useCommandMenu();
   const { theme, toggleTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const cvFile = language === "en" ? "/cv/CV_Indra_Oki_Sandy_EN.pdf" : "/cv/CV_Indra_Oki_Sandy_ID.pdf";
+  const cvDownloadName = language === "en" ? "CV_Indra_Oki_Sandy_EN.pdf" : "CV_Indra_Oki_Sandy_ID.pdf";
   const pathname = usePathname();
 
   const isSectionPage = Boolean(pathname && pathname in ROUTE_SECTIONS);
@@ -250,8 +252,8 @@ export function Navbar() {
 
           {/* Download CV */}
           <a
-            href="/cv/CV-Indra-Oki-Sandy.pdf"
-            download="CV-Indra-Oki-Sandy-Software-Developer.pdf"
+            href={cvFile}
+            download={cvDownloadName}
             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
           >
             <ArrowDownToLine size={14} />
@@ -324,8 +326,8 @@ export function Navbar() {
 
             <div className="mt-2 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
               <a
-                href="/cv/CV-Indra-Oki-Sandy.pdf"
-                download="CV-Indra-Oki-Sandy-Software-Developer.pdf"
+                href={cvFile}
+                download={cvDownloadName}
                 className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700"
               >
                 <ArrowDownToLine size={15} />

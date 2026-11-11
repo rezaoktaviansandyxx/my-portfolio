@@ -9,7 +9,9 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 import { scrollToSection } from "@/lib/scroll";
 
 export function HeroSection() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const cvFile = language === "en" ? "/cv/CV_Indra_Oki_Sandy_EN.pdf" : "/cv/CV_Indra_Oki_Sandy_ID.pdf";
+  const cvDownloadName = language === "en" ? "CV_Indra_Oki_Sandy_EN.pdf" : "CV_Indra_Oki_Sandy_ID.pdf";
 
   return (
     <section id="home" className="relative overflow-hidden py-16 md:py-24 lg:py-28">
@@ -73,8 +75,8 @@ export function HeroSection() {
             {/* Call to Actions */}
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <a
-                href="/cv/CV-Indra-Oki-Sandy.pdf"
-                download="CV-Indra-Oki-Sandy-Software-Developer.pdf"
+                href={cvFile}
+                download={cvDownloadName}
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
               >
                 <ArrowDownToLine size={17} />

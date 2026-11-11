@@ -176,8 +176,8 @@ export function CommandMenu() {
               <Command.Item
                 onSelect={() => {
                   const link = document.createElement("a");
-                  link.href = "/cv/CV-Indra-Oki-Sandy.pdf";
-                  link.download = "CV-Indra-Oki-Sandy-Software-Developer.pdf";
+                  link.href = language === "en" ? "/cv/CV_Indra_Oki_Sandy_EN.pdf" : "/cv/CV_Indra_Oki_Sandy_ID.pdf";
+                  link.download = language === "en" ? "CV_Indra_Oki_Sandy_EN.pdf" : "CV_Indra_Oki_Sandy_ID.pdf";
                   link.click();
                   setOpen(false);
                 }}
