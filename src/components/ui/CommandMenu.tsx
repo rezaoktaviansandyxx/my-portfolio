@@ -101,7 +101,7 @@ export function CommandMenu() {
           </div>
 
           {/* Items List */}
-          <Command.List className="max-h-[350px] overflow-y-auto p-2 scrollbar-thin">
+          <Command.List className="max-h-87.5 overflow-y-auto p-2 scrollbar-thin">
             <Command.Empty className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
               {t.cmdk.noResults}
             </Command.Empty>
@@ -109,7 +109,7 @@ export function CommandMenu() {
             {/* Group: Navigation */}
             <Command.Group
               heading={t.cmdk.navigationGroup}
-              className="px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider [&_[cmdk-group-heading]]:py-1.5"
+              className="px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider **:[[cmdk-group-heading]]:py-1.5"
             >
               <Command.Item
                 onSelect={() => runCommand(() => scrollToSection("home"))}
@@ -171,7 +171,7 @@ export function CommandMenu() {
             {/* Group: Actions */}
             <Command.Group
               heading={t.cmdk.actionsGroup}
-              className="mt-2 px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider [&_[cmdk-group-heading]]:py-1.5"
+              className="mt-2 px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider **:[[cmdk-group-heading]]:py-1.5"
             >
               <Command.Item
                 onSelect={() => {
@@ -266,7 +266,7 @@ export function CommandMenu() {
             {/* Group: Preferences */}
             <Command.Group
               heading={t.cmdk.preferencesGroup}
-              className="mt-2 px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider [&_[cmdk-group-heading]]:py-1.5"
+              className="mt-2 px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider **:[[cmdk-group-heading]]:py-1.5"
             >
               <Command.Item
                 onSelect={() => runCommand(() => toggleTheme())}
