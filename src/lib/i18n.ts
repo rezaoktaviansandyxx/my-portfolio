@@ -22,8 +22,10 @@ export const translations = {
     hero: {
       badge: "Tersedia untuk Posisi Full-time & Proyek Freelance",
       greeting: "Hi, saya",
+      servicesLabel: "Layanan freelance",
+      services: ["Website Company Profile", "Landing Page", "Katalog Produk", "Website UMKM"],
       description:
-        "Software Developer dengan pengalaman membangun aplikasi mobile multiplatform menggunakan Flutter serta antarmuka web modern dengan React.js. Berpengalaman dalam integrasi RESTful API, arsitektur state management yang bersih, dan sistem ERP terpadu.",
+        "Membantu bisnis membangun website responsif dan aplikasi mobile fungsional. Berpengalaman mengembangkan aplikasi Flutter multiplatform dan antarmuka web modern dengan React.js, termasuk integrasi REST API dan sistem ERP.",
       expHighlight: "1 Tahun Pengalaman Kerja",
       productionHighlight: "Produksi POS (Desktop/iMin) & Web ERP",
       codeHighlight: "Clean Code & Scalable Architecture",
@@ -182,8 +184,10 @@ export const translations = {
     hero: {
       badge: "Available for Full-time Roles & Freelance Projects",
       greeting: "Hi, I'm",
+      servicesLabel: "Freelance services",
+      services: ["Company Profile Websites", "Landing Pages", "Product Catalogs", "SME Business Websites"],
       description:
-        "Software Developer experienced in building multiplatform mobile applications using Flutter and modern web interfaces with React.js. Proficient in RESTful API integration, clean state management architecture, and integrated ERP systems.",
+        "Helping businesses build responsive websites and functional mobile applications. Experienced in developing multiplatform Flutter apps and modern web interfaces with React.js, including REST API and ERP integrations.",
       expHighlight: "1 Year Professional Experience",
       productionHighlight: "Production POS (Desktop/iMin) & Web ERP",
       codeHighlight: "Clean Code & Scalable Architecture",
