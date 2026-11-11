@@ -20,6 +20,9 @@ export function ProjectDetailContent({ project, relatedProjects }: ProjectDetail
 
   const description = isEn && project.shortDescriptionEn ? project.shortDescriptionEn : project.shortDescription;
   const overview = isEn && project.overviewEn ? project.overviewEn : project.overview;
+  const challenge = isEn && project.challengeEn ? project.challengeEn : project.challenge;
+  const solution = isEn && project.solutionEn ? project.solutionEn : project.solution;
+  const outcome = isEn && project.outcomeEn ? project.outcomeEn : project.outcome;
   const responsibilities = isEn && project.responsibilitiesEn ? project.responsibilitiesEn : project.responsibilities;
   const role = isEn && project.roleEn ? project.roleEn : project.role;
   const category = isEn && project.categoryEn ? project.categoryEn : project.category;
@@ -132,6 +135,20 @@ export function ProjectDetailContent({ project, relatedProjects }: ProjectDetail
           </div>
         )}
 
+        {challenge && (
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t.projects.challengeTitle}</h2>
+            <p className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">{challenge}</p>
+          </div>
+        )}
+
+        {solution && (
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t.projects.solutionTitle}</h2>
+            <p className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">{solution}</p>
+          </div>
+        )}
+
         {/* Tech Stack */}
         <div>
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -163,6 +180,13 @@ export function ProjectDetailContent({ project, relatedProjects }: ProjectDetail
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {outcome && (
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t.projects.outcomeTitle}</h2>
+            <p className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">{outcome}</p>
           </div>
         )}
 

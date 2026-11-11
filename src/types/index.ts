@@ -13,6 +13,12 @@ export interface Project {
   featured?: boolean;
   overview?: string;
   overviewEn?: string;
+  challenge?: string;
+  challengeEn?: string;
+  solution?: string;
+  solutionEn?: string;
+  outcome?: string;
+  outcomeEn?: string;
   responsibilities?: string[];
   responsibilitiesEn?: string[];
   githubUrl?: string;
