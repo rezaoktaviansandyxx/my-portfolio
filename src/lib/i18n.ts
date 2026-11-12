@@ -58,8 +58,8 @@ export const translations = {
     // Skills
     skills: {
       tag: "Keahlian Teknis",
-      title: "Keahlian Berdasarkan Pengalaman",
-      desc: "Teknologi dikelompokkan berdasarkan fokus utama, pengalaman dalam pekerjaan dan proyek, serta teknologi tambahan yang pernah digunakan.",
+      title: "Teknologi yang Digunakan",
+      desc: "Teknologi dikelompokkan berdasarkan perannya dan dicantumkan jika tercatat dalam proyek atau pengalaman kerja.",
     },
     // Projects
     projects: {
@@ -221,8 +221,8 @@ export const translations = {
     // Skills
     skills: {
       tag: "Technical Skills",
-      title: "Skills by Experience",
-      desc: "Technologies grouped by core focus, experience across work and projects, and additional tools and frameworks I have used.",
+      title: "Technologies Used",
+      desc: "Technologies are grouped by role and listed when documented in projects or work experience.",
     },
     // Projects
     projects: {
