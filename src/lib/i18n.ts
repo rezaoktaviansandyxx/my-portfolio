@@ -20,12 +20,10 @@ export const translations = {
     },
     // Hero
     hero: {
-      badge: "Tersedia untuk Posisi Full-time & Proyek Freelance",
+      badge: "Terbuka untuk Kesempatan Full-time",
       greeting: "Hi, saya",
-      servicesLabel: "Layanan freelance",
-      services: ["Website Company Profile", "Landing Page", "Katalog Produk", "Website UMKM"],
       description:
-        "Membantu bisnis membangun website responsif dan aplikasi mobile fungsional. Berpengalaman mengembangkan aplikasi Flutter multiplatform dan antarmuka web modern dengan React.js, termasuk integrasi REST API dan sistem ERP.",
+        "Saya adalah Flutter Developer dan Web Developer dengan pengalaman profesional dalam mengembangkan aplikasi mobile, sistem Point of Sale (POS), dan aplikasi web. Berpengalaman menggunakan Flutter, Dart, React.js, Next.js, REST API, dan ERPNext untuk membangun solusi perangkat lunak yang terstruktur dan mudah dikembangkan.",
       expHighlight: "1 Tahun Pengalaman Kerja",
       productionHighlight: "Produksi POS (Desktop/iMin) & Web ERP",
       codeHighlight: "Clean Code & Scalable Architecture",
@@ -185,12 +183,10 @@ export const translations = {
     },
     // Hero
     hero: {
-      badge: "Available for Full-time Roles & Freelance Projects",
+      badge: "Open to Full-time Opportunities",
       greeting: "Hi, I'm",
-      servicesLabel: "Freelance services",
-      services: ["Company Profile Websites", "Landing Pages", "Product Catalogs", "SME Business Websites"],
       description:
-        "Helping businesses build responsive websites and functional mobile applications. Experienced in developing multiplatform Flutter apps and modern web interfaces with React.js, including REST API and ERP integrations.",
+        "I am a Flutter Developer and Web Developer with professional experience building mobile applications, Point of Sale (POS) systems, and web applications. Experienced with Flutter, Dart, React.js, Next.js, REST APIs, and ERPNext to build well-structured, maintainable software solutions.",
       expHighlight: "1 Year Professional Experience",
       productionHighlight: "Production POS (Desktop/iMin) & Web ERP",
       codeHighlight: "Clean Code & Scalable Architecture",
