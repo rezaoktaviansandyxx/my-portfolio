@@ -1,16 +1,29 @@
 import { SkillCategory } from "@/types";
 
+// Skills listed here are supported by the documented work experience or projects.
 export const skillCategoriesData: SkillCategory[] = [
   {
-    category: "Primary Skills",
-    skills: ["Flutter", "Dart", "React.js"]
+    category: "Mobile Development",
+    skills: ["Flutter", "Dart"]
   },
   {
-    category: "Working Experience",
-    skills: ["Provider", "REST API", "ERPNext", "Laravel (PHP)"]
+    category: "Frontend Development",
+    skills: ["React.js", "Angular", "Flutter Web"]
   },
   {
-    category: "Additional Skills",
-    skills: ["Next.js", "Angular", "FastAPI (Python)", "PostgreSQL", "TypeScript", "Tailwind CSS", "GoRouter", "Flutter Web", "HTML5 & CSS3", "MySQL / Relational DB", "Git", "GitHub", "Postman", "VS Code", "Vercel"]
+    category: "Backend & API",
+    skills: ["FastAPI", "Laravel (PHP)", "REST API", "ERPNext"]
+  },
+  {
+    category: "Database",
+    skills: ["PostgreSQL"]
+  },
+  {
+    category: "State Management",
+    skills: ["Provider"]
+  },
+  {
+    category: "Tools & Navigation",
+    skills: ["Git", "GoRouter"]
   }
 ];
