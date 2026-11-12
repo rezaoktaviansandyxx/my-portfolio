@@ -44,10 +44,8 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Indra Oki Sandy", url: baseUrl }],
   creator: "Indra Oki Sandy",
-  icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
-  },\n  alternates: {
+  icons: { icon: "/favicon.svg" },
+  alternates: {
     canonical: "/",
   },
   robots: {

@@ -1,7 +1,7 @@
 import HomePage from "../page";
 
 export const metadata = {
-  title: "Education | Indra Oki Sandy",
+  title: "Pendidikan",
   description: "Latar Belakang Pendidikan & Sertifikasi - Indra Oki Sandy.",
 };
 

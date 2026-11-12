@@ -1,7 +1,7 @@
 import HomePage from "../page";
 
 export const metadata = {
-  title: "About | Indra Oki Sandy",
+  title: "Tentang Saya",
   description: "Dedikasi pada Rekayasa Antarmuka & Kualitas Perangkat Lunak - Indra Oki Sandy.",
 };
 

@@ -1,7 +1,7 @@
 import HomePage from "../page";
 
 export const metadata = {
-  title: "Skills | Indra Oki Sandy",
+  title: "Keahlian",
   description: "Keahlian & Penguasaan Teknologi - Indra Oki Sandy.",
 };
 

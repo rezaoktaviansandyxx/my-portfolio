@@ -8,6 +8,10 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://indraokisandy-dev.vercel.app"
+  ).replace(/\/$/, "");
+
   return new ImageResponse(
     (
       <div
@@ -67,7 +71,7 @@ export default async function Image() {
               color: "#64748b",
             }}
           >
-            indraokisandy.my.id
+              {new URL(siteUrl).host}
           </div>
         </div>
 

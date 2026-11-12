@@ -1,7 +1,7 @@
 import HomePage from "../page";
 
 export const metadata = {
-  title: "Projects | Indra Oki Sandy",
+  title: "Proyek",
   description: "Portofolio & Proyek Pilihan - Indra Oki Sandy.",
 };
 
