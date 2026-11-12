@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Indra Oki Sandy", url: baseUrl }],
   creator: "Indra Oki Sandy",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.ico" },
   alternates: {
     canonical: "/",
   },
