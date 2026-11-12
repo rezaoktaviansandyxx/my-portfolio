@@ -19,17 +19,17 @@ export const localizedExperienceData: LocalizedWorkExperience[] = [
     locationEn: "East Java, Indonesia",
     type: "Contract / Professional",
     typeEn: "Contract / Professional",
-    description: "Bekerja secara profesional dalam pengembangan antarmuka frontend aplikasi dan implementasi sistem digital yang responsif dan efisien.",
-    descriptionEn: "Worked professionally in frontend application development and implementation of responsive, scalable, and efficient digital systems.",
+    description: "Mengembangkan antarmuka frontend untuk produk dan sistem digital perusahaan.",
+    descriptionEn: "Built frontend interfaces for company products and digital systems.",
     responsibilities: [
-      "Mengembangkan dan mengoptimalkan antarmuka aplikasi dengan fokus pada performa, skalabilitas, dan clean code.",
-      "Mengintegrasikan layanan REST API antara antarmuka pengguna dan backend sistem.",
-      "Berkolaborasi dalam tim pengembang untuk memastikan pengalaman pengguna yang intuitif dan konsisten."
+      "Membangun dan merawat antarmuka aplikasi menggunakan teknologi frontend.",
+      "Menghubungkan antarmuka dengan layanan backend melalui REST API.",
+      "Menyempurnakan performa dan konsistensi antarmuka bersama tim pengembang."
     ],
     responsibilitiesEn: [
-      "Engineered and optimized application user interfaces with a strong focus on performance, scalability, and clean code.",
-      "Integrated RESTful API services bridging frontend interfaces with backend enterprise services.",
-      "Collaborated in engineering teams to deliver intuitive, seamless, and consistent user experiences."
+      "Built and maintained application interfaces using frontend technologies.",
+      "Connected user interfaces to backend services through REST APIs.",
+      "Improved interface performance and consistency with the engineering team."
     ]
   },
   {
@@ -41,17 +41,17 @@ export const localizedExperienceData: LocalizedWorkExperience[] = [
     locationEn: "Indonesia",
     type: "Contract / Project",
     typeEn: "Contract / Project",
-    description: "Mengembangkan aplikasi mobile berbasis Flutter yang terintegrasi dengan ekosistem enterprise resource planning (ERP).",
-    descriptionEn: "Engineered Flutter mobile applications integrated directly with enterprise resource planning (ERP) ecosystems.",
+    description: "Mengembangkan aplikasi mobile Flutter untuk kebutuhan sistem ERP.",
+    descriptionEn: "Developed Flutter mobile applications for ERP system workflows.",
     responsibilities: [
-      "Mengimplementasikan arsitektur aplikasi mobile Flutter dengan state management yang modular.",
-      "Menghubungkan modul aplikasi dengan backend ERP melalui protokol REST API.",
-      "Memastikan keandalan alur transaksi dan data antarmuka sistem secara real-time."
+      "Menyusun modul aplikasi Flutter dengan state management yang terstruktur.",
+      "Mengintegrasikan fitur mobile dengan backend ERP melalui REST API.",
+      "Menangani sinkronisasi data dan alur transaksi pada aplikasi."
     ],
     responsibilitiesEn: [
-      "Implemented modular mobile architecture in Flutter with scalable state management patterns.",
-      "Connected application client modules with ERP backends using REST API protocols.",
-      "Ensured high reliability of transactional workflows and real-time interface data sync."
+      "Structured Flutter application modules with maintainable state management.",
+      "Integrated mobile features with ERP backends through REST APIs.",
+      "Handled application data synchronization and transaction workflows."
     ]
   },
   {
@@ -63,17 +63,17 @@ export const localizedExperienceData: LocalizedWorkExperience[] = [
     locationEn: "Surabaya, East Java, Indonesia",
     type: "Contract / Professional",
     typeEn: "Contract / Professional",
-    description: "Terlibat dalam siklus hidup pengembangan perangkat lunak, perancangan modul aplikasi, dan pemeliharaan sistem.",
-    descriptionEn: "Participated in software development lifecycles, application module design, and continuous system maintenance.",
+    description: "Mengerjakan pengembangan fitur dan pemeliharaan aplikasi sesuai kebutuhan pengguna.",
+    descriptionEn: "Worked on application features and maintenance based on user needs.",
     responsibilities: [
-      "Merancang dan membangun fitur-fitur aplikasi sesuai dengan spesifikasi kebutuhan pengguna.",
-      "Melakukan debugging, pemeliharaan kode, serta optimalisasi alur kerja program.",
-      "Bekerja sama dalam tim teknis untuk mencapai target sprint dan penyelesaian fitur."
+      "Menerjemahkan spesifikasi kebutuhan menjadi fitur aplikasi.",
+      "Menelusuri bug dan memperbaiki kode serta alur program.",
+      "Mengikuti koordinasi tim teknis untuk menyelesaikan pekerjaan sprint."
     ],
     responsibilitiesEn: [
-      "Designed and built application features based on user requirements and technical specifications.",
-      "Conducted debugging, code maintenance, and program workflow optimizations.",
-      "Worked collaboratively in technical teams to hit sprint milestones and feature deadlines."
+      "Turned user requirements and specifications into application features.",
+      "Debugged issues and maintained code and program workflows.",
+      "Coordinated with the technical team to complete sprint work."
     ]
   },
   {
@@ -85,17 +85,17 @@ export const localizedExperienceData: LocalizedWorkExperience[] = [
     locationEn: "Bandung, West Java, Indonesia",
     type: "Internship / Associate",
     typeEn: "Internship / Associate",
-    description: "Bekerja dalam tim mobile developer dengan menerapkan framework Flutter dan metodologi agile daily sprint.",
-    descriptionEn: "Worked within the mobile engineering team utilizing Flutter and practicing agile daily sprint methodologies.",
+    description: "Mendukung pengembangan aplikasi mobile Flutter sebagai bagian dari tim mobile.",
+    descriptionEn: "Supported Flutter mobile application development as part of the mobile team.",
     responsibilities: [
-      "Mempelajari dan mendalami framework Flutter untuk kebutuhan pengembangan aplikasi mobile lintas platform.",
-      "Bekerja dalam tim pengembang dengan mengikuti daily sprint dan proses agile harian.",
-      "Mengimplementasikan komponen antarmuka pengguna serta menyelesaikan task sesuai arahan tim senior."
+      "Membangun komponen antarmuka mobile menggunakan Flutter.",
+      "Menyelesaikan task pengembangan dengan arahan engineer senior.",
+      "Berpartisipasi dalam daily stand-up dan sprint tim Agile."
     ],
     responsibilitiesEn: [
-      "Deep-dived into Flutter framework for cross-platform mobile application development.",
-      "Participated actively in daily standups, sprints, and agile team workflows.",
-      "Implemented user interface components and delivered technical tasks under senior engineer guidance."
+      "Built mobile interface components with Flutter.",
+      "Completed development tasks under guidance from senior engineers.",
+      "Participated in daily stand-ups and Agile team sprints."
     ]
   },
   {
@@ -107,17 +107,17 @@ export const localizedExperienceData: LocalizedWorkExperience[] = [
     locationEn: "Bantul, D.I. Yogyakarta, Indonesia",
     type: "Internship",
     typeEn: "Internship",
-    description: "Magang pemrograman (BS CI) berfokus pada pengembangan aplikasi web menggunakan framework Laravel bersama tim pengembang.",
-    descriptionEn: "Programming internship (BS CI) focusing on web application development with the Laravel framework alongside the engineering team.",
+    description: "Magang pemrograman dengan fokus pada pengembangan web menggunakan Laravel.",
+    descriptionEn: "Programming internship focused on web development with Laravel.",
     responsibilities: [
-      "Mempelajari dan mengimplementasikan fitur backend dan web berbasis framework Laravel (PHP).",
-      "Berkolaborasi dalam tim proyek, pembagian tugas (task sharing), dan version control.",
-      "Menyelesaikan implementasi modul program sesuai spesifikasi tugas yang diberikan."
+      "Mengimplementasikan fitur web dan backend menggunakan Laravel dan PHP.",
+      "Mengerjakan modul sesuai spesifikasi dan pembagian tugas proyek.",
+      "Menggunakan Git untuk mengelola perubahan kode bersama tim."
     ],
     responsibilitiesEn: [
-      "Learned and implemented backend and web features utilizing the Laravel (PHP) framework.",
-      "Collaborated in project teams, code reviews, and Git version control workflows.",
-      "Completed program module implementations according to provided task specifications."
+      "Implemented web and backend features with Laravel and PHP.",
+      "Delivered modules based on project specifications and assigned tasks.",
+      "Used Git to manage code changes with the team."
     ]
   }
 ];
