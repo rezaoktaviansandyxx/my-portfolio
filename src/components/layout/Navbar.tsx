@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X, Sun, Moon, ArrowDownToLine, Search } from "lucide-react";
@@ -172,10 +173,15 @@ export function Navbar() {
           onClick={(e) => handleNavClick("home", e)}
           className="group flex items-center gap-2.5 transition-all focus:outline-none shrink-0"
         >
-          {/* Logo Badge */}
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 ring-2 ring-white transition-transform group-hover:scale-105 group-hover:shadow-blue-500/30 dark:ring-slate-900">
-            <span className="text-sm font-black tracking-wider">IO</span>
-          </div>
+          {/* Brand logo */}
+          <Image
+            src="/images/logo-neon.png"
+            alt="Indra Oki Sandy"
+            width={40}
+            height={40}
+            priority
+            className="h-10 w-10 rounded-xl object-cover shadow-md shadow-cyan-500/20 transition-transform group-hover:scale-105"
+          />
 
           {/* Name & Role tag */}
           <div className="hidden sm:flex flex-col text-left">
