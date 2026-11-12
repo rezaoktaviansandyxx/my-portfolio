@@ -37,24 +37,13 @@ export function HeroSection() {
             </h1>
 
             <p className="mt-3 text-xl font-semibold tracking-tight text-slate-700 sm:text-2xl dark:text-slate-200">
-              Flutter Developer <span className="text-slate-400 dark:text-slate-500">&amp;</span> Frontend / Web Developer
+              Flutter Developer <span className="text-slate-400 dark:text-slate-500">&amp;</span> Web Developer
             </p>
 
             {/* Short Professional Description */}
             <p className="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
               {t.hero.description}
             </p>
-
-            <div className="mt-5">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{t.hero.servicesLabel}</p>
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {t.hero.services.map((service: string) => (
-                  <li key={service} className="rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
-                    {service}
-                  </li>
-                ))}
-              </ul>
-            </div>
 
             {/* Key Value Highlights */}
             <div className="mt-6 flex flex-wrap gap-y-2 gap-x-4 text-xs font-medium text-slate-600 dark:text-slate-300">
