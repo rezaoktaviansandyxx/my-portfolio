@@ -20,7 +20,7 @@ export const translations = {
     },
     // Hero
     hero: {
-      badge: "Terbuka untuk Kesempatan Full-time",
+      badge: "Terbuka untuk Freelance & Full-time",
       greeting: "Hi, saya",
       description:
         "Saya adalah Flutter Developer dan Web Developer dengan pengalaman profesional dalam mengembangkan aplikasi mobile, sistem Point of Sale (POS), dan aplikasi web. Berpengalaman menggunakan Flutter, Dart, React.js, Next.js, REST API, dan ERPNext untuk membangun solusi perangkat lunak yang terstruktur dan mudah dikembangkan.",
